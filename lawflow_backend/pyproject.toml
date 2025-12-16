@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=65.5", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lawflow-backend"
+version = "0.1.0"
+description = "LawFlow backend (FastAPI) – Costa del Sol real-estate transactions"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "sqlalchemy>=2.0",
+  "pydantic>=2.6",
+  "pydantic-settings>=2.2",
+  "python-multipart>=0.0.9",
+]
+
+[tool.setuptools.packages.find]
+include = ["app"]
