@@ -131,6 +131,7 @@ export function App() {
 
   const [q, setQ] = useState("");
   const [municipality, setMunicipality] = useState<string>("Marbella");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
 const pinnedProjects = useMemo(() => {
   const set = new Set(pinnedIds);
@@ -216,6 +217,7 @@ useEffect(() => {
 
   return (
     <div className="shell" style={{ background: (activeProject?.bg_color ?? defaultBg) }}>
+      {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
       <aside className="sidebar">
         <div className="brand">
           <div className="brandMark">◆</div>
@@ -337,6 +339,13 @@ useEffect(() => {
             </div>
           </div>
           <div className="actions">
+            <button
+              className="hamburger"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              title="Toggle sidebar"
+            >
+              ☰
+            </button>
 
             <input className="search" value={q} onChange={(e)=>setQ(e.target.value)} placeholder={t("searchPlaceholder")} />
             <div className="langToggle" title="Language / Idioma">
@@ -349,141 +358,143 @@ useEffect(() => {
         </header>
 
         <div className="content">
-          {(() => {
-            const key = "lawflow.callout.dismissed.v1";
-            let dismissed = false;
-            try { dismissed = localStorage.getItem(key) === "1"; } catch {}
-            if (dismissed) return null;
-            return (
-              <Callout
-                title={t("demoTitle")}
-                body={t("demoBody")}
-                onDismiss={() => { try { localStorage.setItem(key, "1"); } catch {} }}
-              />
-            );
-          })()}
+          <div className="contentGrid">
+            <div className="leftColumn">
+              {(() => {
+                const key = "lawflow.callout.dismissed.v1";
+                let dismissed = false;
+                try { dismissed = localStorage.getItem(key) === "1"; } catch {}
+                if (dismissed) return null;
+                return (
+                  <Callout
+                    title={t("demoTitle")}
+                    body={t("demoBody")}
+                    onDismiss={() => { try { localStorage.setItem(key, "1"); } catch {} }}
+                  />
+                );
+              })()}
 
-{kpis.overdue > 0 || kpis.dueSoon > 0 ? (
-  <div className="deadlineBanner">
-    <div style={{ fontWeight: 950 }}>
-      Deadline alerts: {kpis.overdue > 0 ? `${kpis.overdue} overdue` : "0 overdue"} · {kpis.dueSoon > 0 ? `${kpis.dueSoon} due soon` : "0 due soon"}
-    </div>
-    <button className="btn" onClick={() => setView("Calendar")}>Review</button>
-  </div>
-) : null}
+              {kpis.overdue > 0 || kpis.dueSoon > 0 ? (
+                <div className="deadlineBanner">
+                  <div style={{ fontWeight: 950 }}>
+                    Deadline alerts: {kpis.overdue > 0 ? `${kpis.overdue} overdue` : "0 overdue"} · {kpis.dueSoon > 0 ? `${kpis.dueSoon} due soon` : "0 due soon"}
+                  </div>
+                  <button className="btn" onClick={() => setView("Calendar")}>Review</button>
+                </div>
+              ) : null}
 
-          <div className="grid4">
-            <div className="card cardPad">
-              <div className="kpiTop">
-                <div className="kpiLabel">{t("openTasks")}</div>
-                <span className="pill">{kpis.open}</span>
-              </div>
-              <div className="kpiValue">{kpis.open}</div>
-              <div className="small">Across board columns</div>
-            </div>
-            <div className="card cardPad">
-              <div className="kpiTop">
-                <div className="kpiLabel">{t("dueIn7")}</div>
-                <span className="pill warn">{kpis.dueSoon}</span>
-              </div>
-              <div className="kpiValue">{kpis.dueSoon}</div>
-              <div className="small">Deadlines to watch</div>
-            </div>
-            <div className="card cardPad">
-              <div className="kpiTop">
-                <div className="kpiLabel">{t("overdue")}</div>
-                <span className="pill bad">{kpis.overdue}</span>
-              </div>
-              <div className="kpiValue">{kpis.overdue}</div>
-              <div className="small">Escalate blockers</div>
-            </div>
-            <div className="card cardPad">
-              <div className="kpiTop">
-                <div className="kpiLabel">{t("completed")}</div>
-                <span className="pill ok">{kpis.done}</span>
-              </div>
-              <div className="kpiValue">{kpis.done}</div>
-              <div className="small">Done tasks</div>
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="card cardPad">
-              <div className="sectionTitle">
-                <h2>{t("work")}</h2>
-                <div className="tabs">
-                  {(["Board","Table","Timeline"] as const).map((t) => (
-                    <button key={t} className={"tab" + (view===t ? " active" : "")} onClick={()=>setView(t)}>{t}</button>
-                  ))}
+              <div className="grid4">
+                <div className="card cardPad">
+                  <div className="kpiTop">
+                    <div className="kpiLabel">{t("openTasks")}</div>
+                    <span className="pill">{kpis.open}</span>
+                  </div>
+                  <div className="kpiValue">{kpis.open}</div>
+                  <div className="small">Across board columns</div>
+                </div>
+                <div className="card cardPad">
+                  <div className="kpiTop">
+                    <div className="kpiLabel">{t("dueIn7")}</div>
+                    <span className="pill warn">{kpis.dueSoon}</span>
+                  </div>
+                  <div className="kpiValue">{kpis.dueSoon}</div>
+                  <div className="small">Deadlines to watch</div>
+                </div>
+                <div className="card cardPad">
+                  <div className="kpiTop">
+                    <div className="kpiLabel">{t("overdue")}</div>
+                    <span className="pill bad">{kpis.overdue}</span>
+                  </div>
+                  <div className="kpiValue">{kpis.overdue}</div>
+                  <div className="small">Escalate blockers</div>
+                </div>
+                <div className="card cardPad">
+                  <div className="kpiTop">
+                    <div className="kpiLabel">{t("completed")}</div>
+                    <span className="pill ok">{kpis.done}</span>
+                  </div>
+                  <div className="kpiValue">{kpis.done}</div>
+                  <div className="small">Done tasks</div>
                 </div>
               </div>
 
-              {activeProjectId && view === "Board" && (
-                <Board
-                  tasks={filteredTasks}
-                  onMove={async (taskId, nextStatus) => {
-                    await api.updateTask(taskId, { status: nextStatus });
-                    await refreshAll(activeProjectId);
-                  }}
-                />
-              )}
+              <div className="card cardPad" style={{ marginTop: 12 }}>
+                <div className="sectionTitle">
+                  <h2>{t("work")}</h2>
+                  <div className="tabs">
+                    {(["Board","Table","Timeline"] as const).map((t) => (
+                      <button key={t} className={"tab" + (view===t ? " active" : "")} onClick={()=>setView(t)}>{t}</button>
+                    ))}
+                  </div>
+                </div>
 
-              {activeProjectId && view === "Table" && (
-                <TasksTable
-                  tasks={filteredTasks}
-                  onEdit={async (taskId, patch) => {
-                    await api.updateTask(taskId, patch);
-                    await refreshAll(activeProjectId);
-                  }}
-                />
-              )}
+                {activeProjectId && view === "Board" && (
+                  <Board
+                    tasks={filteredTasks}
+                    onMove={async (taskId, nextStatus) => {
+                      await api.updateTask(taskId, { status: nextStatus });
+                      await refreshAll(activeProjectId);
+                    }}
+                  />
+                )}
 
-              {activeProjectId && view === "Timeline" && (
-                <Timeline items={timeline} />
-              )}
-{activeProjectId && view === "Calendar" && (
-  <CalendarView projectId={activeProjectId} tasks={filteredTasks} />
-)}
+                {activeProjectId && view === "Table" && (
+                  <TasksTable
+                    tasks={filteredTasks}
+                    onEdit={async (taskId, patch) => {
+                      await api.updateTask(taskId, patch);
+                      await refreshAll(activeProjectId);
+                    }}
+                  />
+                )}
 
-{activeProjectId && view === "Files" && (
-  <FilesRoom projectId={activeProjectId} />
-)}
+                {activeProjectId && view === "Timeline" && (
+                  <Timeline items={timeline} />
+                )}
+  {activeProjectId && view === "Calendar" && (
+    <CalendarView projectId={activeProjectId} tasks={filteredTasks} />
+  )}
 
-{activeProjectId && view === "Templates" && (
-  <div style={{ display: "grid", gap: 12 }}>
-    <div className="card cardPad" style={{ padding: 12 }}>
-      <div className="sectionTitle" style={{ marginBottom: 0 }}>
-        <h2>Municipality</h2>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <select className="select" style={{ width: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
-            {MUNICIPALITIES_LIST.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-          <span className="pill">{activeProject?.transaction_type ?? "—"}</span>
+  {activeProjectId && view === "Files" && (
+    <FilesRoom projectId={activeProjectId} />
+  )}
+
+  {activeProjectId && view === "Templates" && (
+    <div style={{ display: "grid", gap: 12 }}>
+      <div className="card cardPad" style={{ padding: 12 }}>
+        <div className="sectionTitle" style={{ marginBottom: 0 }}>
+          <h2>Municipality</h2>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <select className="select" style={{ width: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
+              {MUNICIPALITIES_LIST.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+            <span className="pill">{activeProject?.transaction_type ?? "—"}</span>
+          </div>
         </div>
       </div>
+      <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
     </div>
-    <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
-  </div>
-)}
+  )}
 
-{view === "Settings" && (
-  <SettingsView
-    projects={projects}
-    onProjectUpdated={(p) => {
-      setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
-    }}
-  />
-)}
+  {view === "Settings" && (
+    <SettingsView
+      projects={projects}
+      onProjectUpdated={(p) => {
+        setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
+      }}
+    />
+  )}
 
-{activeProjectId && view === "Closing Pack" && (
-  <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
-)}
+  {activeProjectId && view === "Closing Pack" && (
+    <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
+  )}
 
+              </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="rightColumn">
               <div className="card cardPad">
                 <div className="sectionTitle">
                   <h2>{t("spanishChecklist")}</h2>

@@ -54,7 +54,7 @@ export type Activity = {
   detail?: string | null;
 };
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? "http://localhost:8000";
+const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? "/api";
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

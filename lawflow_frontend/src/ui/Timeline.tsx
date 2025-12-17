@@ -38,7 +38,7 @@ export function Timeline({ items }: { items: TimelineItem[] }) {
             const cssStart = startOffset + 1;
             const cssEnd = Math.max(cssStart + 1, endOffset + 1);
             return (
-              <div key={r.id} className="barRow" style={{ gridTemplateColumns: `repeat(${Math.min(30, totalDays)}, 22px)` }}>
+              <div key={r.id} className="barRow" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(8px, 1fr))` }}>
                 <div className="bar" style={{ ["--start" as any]: cssStart, ["--end" as any]: cssEnd }} />
               </div>
             );
