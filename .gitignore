@@ -37,3 +37,4 @@ Thumbs.db
 
 # Ignore screenshots
 Screenshot_*.jpg
+temp/
