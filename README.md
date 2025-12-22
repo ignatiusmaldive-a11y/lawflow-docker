@@ -94,6 +94,45 @@ Restart `./run.sh up`.
 
 ---
 
+## Production Deployment
+
+This repository includes a production-ready setup using Docker (optional), Nginx, and systemd services.
+
+### Deployment Script
+
+A `deployment-script.sh` is provided to automate the setup and update process on a VPS (e.g., Ubuntu).
+
+```bash
+# 1. Setup (run once)
+./deployment-script.sh setup
+
+# 2. Start services
+./deployment-script.sh start
+
+# 3. Update application (pulls git and restarts)
+./deployment-script.sh update
+```
+
+### Database Support
+
+LawFlow supports both **SQLite** (default) and **PostgreSQL**.
+
+- **SQLite**: Zero-config, data stored in `lawflow_backend/lawflow.db`.
+- **PostgreSQL**: Recommended for production. Configure via environment variables:
+  ```bash
+  export DATABASE_URL="postgresql://user:pass@host:5432/dbname"
+  ```
+
+See `config/database/README.md` for detailed database configuration.
+
+### Services
+
+- **Backend**: Runs as a systemd service (`lawflow-backend.service`) or via Docker.
+- **Frontend**: Served via Nginx (reverse proxy) or as a service (`lawflow-frontend.service`).
+- **Nginx**: Handles routing (`/` -> Frontend, `/api` -> Backend).
+
+---
+
 ## Quick tour (how to demo in 2 minutes)
 
 1. **Switch matters** using “Active matter” (sidebar).
@@ -177,7 +216,7 @@ Key UX patterns included:
 ---
 
 ## Implementation notes (intentional demo tradeoffs)
-- SQLite is used for simplicity (single-file DB).
+- **Database**: SQLite is used by default for simplicity (single-file DB), but the app is fully compatible with **PostgreSQL** for production.
 - File uploads store content in `uploads/` and metadata in DB.
 - Some seeded files are “metadata-only” (no real content) to demo UI.
 - The i18n system is intentionally minimal (key-based dictionary).
