@@ -16,6 +16,7 @@ import { GlobalSearchModal } from "./GlobalSearchModal";
 import { NewProjectModal } from "./NewProjectModal";
 import { QuickAddModal } from "./QuickAddModal";
 import { SettingsView } from "./SettingsView";
+import { OverviewView } from "./OverviewView";
 import { Callout } from "./components/Callout";
 
 type View = "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack" | "Settings";
@@ -417,6 +418,8 @@ useEffect(() => {
                   <div className="small">Done tasks</div>
                 </div>
               </div>
+
+
 
               <div className="card cardPad" style={{ marginTop: 12 }}>
                 <div className="sectionTitle">
