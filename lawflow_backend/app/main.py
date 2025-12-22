@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+from sqlalchemy import text
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .db import engine, SessionLocal
@@ -20,15 +22,19 @@ app.add_middleware(
 
 def ensure_bg_color_column():
     # Add the bg_color column on existing SQLite DBs without recreating tables.
-    with engine.connect() as conn:
-        cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(projects);")]
-        if "bg_color" not in cols:
-            conn.exec_driver_sql("ALTER TABLE projects ADD COLUMN bg_color VARCHAR(20) DEFAULT '#0b1220'")
+    try:
+        with engine.connect() as conn:
+            cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(projects);")]
+            if "bg_color" not in cols:
+                conn.exec_driver_sql("ALTER TABLE projects ADD COLUMN bg_color VARCHAR(20) DEFAULT '#0b1220'")
+    except Exception:
+        # Table doesn't exist yet, which is fine - it will be created by create_all
+        pass
 
 @app.on_event("startup")
 def on_startup():
-    ensure_bg_color_column()
     Base.metadata.create_all(bind=engine)
+    ensure_bg_color_column()
     db = SessionLocal()
     try:
         seed_if_empty(db)
@@ -47,4 +53,29 @@ app.include_router(closing_pack.router)
 
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {
+        "ok": True,
+        "timestamp": datetime.now().isoformat(),
+        "version": "0.1.0",
+        "database": "ok"
+    }
+
+@app.get("/health/detailed")
+def detailed_health():
+    # Check database connection
+    db_status = "ok"
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    return {
+        "ok": db_status == "ok",
+        "timestamp": datetime.now().isoformat(),
+        "version": "0.1.0",
+        "components": {
+            "database": db_status,
+            "api": "ok"
+        }
+    }

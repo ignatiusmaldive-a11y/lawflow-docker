@@ -16,8 +16,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: lawflow_backend/Dockerfile
+      context: ./lawflow_backend
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       db:

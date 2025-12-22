@@ -1,0 +1,15 @@
+[Unit]
+Description=LawFlow Backend Service
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/admin-non-root/apps/lawflow-docker/lawflow_backend
+Environment="DATABASE_URL=sqlite:///./lawflow.db"
+Environment="ALLOWED_ORIGINS=*"
+ExecStart=/home/admin-non-root/apps/lawflow-docker/lawflow_backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

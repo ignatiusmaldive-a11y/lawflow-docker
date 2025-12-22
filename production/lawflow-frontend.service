@@ -1,0 +1,13 @@
+[Unit]
+Description=LawFlow Frontend Service
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/admin-non-root/apps/lawflow-docker/lawflow_frontend
+ExecStart=/usr/bin/npm run preview -- --port 8080 --host
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
