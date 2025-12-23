@@ -16,10 +16,10 @@ import { GlobalSearchModal } from "./GlobalSearchModal";
 import { NewProjectModal } from "./NewProjectModal";
 import { QuickAddModal } from "./QuickAddModal";
 import { SettingsView } from "./SettingsView";
-import { OverviewView } from "./OverviewView";
+import { GeneralOverviewView } from "./GeneralOverviewView";
 import { Callout } from "./components/Callout";
 
-type View = "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack" | "Settings";
+type View = "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack" | "Settings" | "General Overview";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -166,13 +166,32 @@ const activeProject = useMemo(
     setFiles(f as any);
   }
 
+  // Load projects and handle initial URL route
   useEffect(() => {
     (async () => {
       const ps = await api.projects();
       setProjects(ps);
-      setActiveProjectId(ps[0]?.id ?? null);
+      
+      // Check URL for /overview
+      if (window.location.pathname === "/overview") {
+        setView("General Overview");
+        // We still set a default active project so the sidebar doesn't crash if they switch back
+        setActiveProjectId(ps[0]?.id ?? null);
+      } else {
+        setActiveProjectId(ps[0]?.id ?? null);
+      }
     })().catch(console.error);
   }, []);
+
+  // Update URL on view change
+  useEffect(() => {
+    if (view === "General Overview") {
+      window.history.pushState(null, "", "/overview");
+    } else {
+      window.history.pushState(null, "", "/");
+    }
+  }, [view]);
+
 useEffect(() => {
   function onKey(e: KeyboardEvent) {
     const k = e.key.toLowerCase();
@@ -228,12 +247,21 @@ useEffect(() => {
           </div>
         </div>
 
+        <nav className="nav">
+          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>Overview</a>
+        </nav>
+
+        <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
+
         <div className="card cardPad">
           <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
           <select
             className="select"
             value={activeProjectId ?? undefined}
-            onChange={(e) => setActiveProjectId(Number(e.target.value))}
+            onChange={(e) => {
+               setActiveProjectId(Number(e.target.value));
+               if (view === "General Overview") setView("Board"); 
+            }}
           >
             {projects.map((p) => (
               <option value={p.id} key={p.id}>
@@ -269,7 +297,7 @@ useEffect(() => {
         <button
           key={p.id}
           className="chipRow"
-          onClick={() => setActiveProjectId(p.id)}
+          onClick={() => { setActiveProjectId(p.id); setView("Board"); }}
           title={p.title}
         >
           <span className="chipDot" />
@@ -288,7 +316,7 @@ useEffect(() => {
         <button
           key={p.id}
           className="chipRow"
-          onClick={() => setActiveProjectId(p.id)}
+          onClick={() => { setActiveProjectId(p.id); setView("Board"); }}
           title={p.title}
         >
           <span className="chipDot muted" />
@@ -299,15 +327,6 @@ useEffect(() => {
   </div>
 )}
 </div>
-
-        <nav className="nav">
-          <a className="active" href="#" onClick={(e)=>{e.preventDefault(); setView("Board");}}>{t("workspace")}</a>
-          <a href="#" onClick={(e)=>{e.preventDefault(); setView("Timeline");}}>{t("timeline")}</a>
-          <a href="#" onClick={(e)=>{e.preventDefault(); setView("Table");}}>{t("taskTable")}</a>
-          <a href="#" onClick={(e)=>{e.preventDefault(); setView("Calendar");}}>{t("calendar")}</a>
-          <a href="#" onClick={(e)=>{e.preventDefault(); setView("Files");}}>{t("files")}</a>
-          <a href="#" onClick={(e)=>{e.preventDefault(); setView("Templates");}}>{t("templates")}</a>
-        </nav>
 
         <div className="sidebarFooter">
           <div className="userchip">
@@ -324,20 +343,37 @@ useEffect(() => {
       <main className="main">
         <header className="topbar">
           <div className="titleRow">
-            <p className="h1">{activeProject?.title ?? "Loading…"}</p>
+            <p className="h1">{activeProject?.title ?? "LawFlow"}</p>
             <p className="subtitle">
               <span className="crumbs">
-  {breadcrumbParts(activeProject).map((c, idx) => (
-    <span key={idx} className="crumb">{c}</span>
-  ))}
+  {view === "General Overview" ? (
+     <span className="crumb">Portfolio Overview</span>
+  ) : (
+     breadcrumbParts(activeProject).map((c, idx) => (
+       <span key={idx} className="crumb">{c}</span>
+     ))
+  )}
 </span>
             </p>
+            {activeProjectId && view !== "General Overview" && (
+               <div className="tabs" style={{ marginTop: 8 }}>
+                  <button className={"tab" + (view==="Board"?" active":"")} onClick={()=>setView("Board")}>{t("workspace")}</button>
+                  <button className={"tab" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
+                  <button className={"tab" + (view==="Table"?" active":"")} onClick={()=>setView("Table")}>{t("taskTable")}</button>
+                  <button className={"tab" + (view==="Calendar"?" active":"")} onClick={()=>setView("Calendar")}>{t("calendar")}</button>
+                  <button className={"tab" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
+                  <button className={"tab" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
+                  <button className={"tab" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
+               </div>
+             )}
+            {view !== "General Overview" && (
             <div className="statusStrip">
               <span className="pill">{activeProject?.transaction_type ?? "—"}</span>
               <span className="pill">{activeProject?.location ?? "—"}</span>
               <span className="pill">Target: {fmtDateShort(activeProject?.target_close_date ?? null)}</span>
               <span className="pill">Start: {fmtDateShort(activeProject?.start_date ?? null)}</span>
             </div>
+            )}
           </div>
           <div className="actions">
             <button
@@ -359,6 +395,12 @@ useEffect(() => {
         </header>
 
         <div className="content">
+          {view === "General Overview" ? (
+             <GeneralOverviewView 
+               projects={projects} 
+               onProjectSelect={(id) => { setActiveProjectId(id); setView("Board"); }} 
+             />
+          ) : (
           <div className="contentGrid">
             <div className="leftColumn">
               {(() => {
@@ -424,11 +466,6 @@ useEffect(() => {
               <div className="card cardPad" style={{ marginTop: 12 }}>
                 <div className="sectionTitle">
                   <h2>{t("work")}</h2>
-                  <div className="tabs">
-                    {(["Board","Table","Timeline"] as const).map((t) => (
-                      <button key={t} className={"tab" + (view===t ? " active" : "")} onClick={()=>setView(t)}>{t}</button>
-                    ))}
-                  </div>
                 </div>
 
                 {activeProjectId && view === "Board" && (
@@ -523,6 +560,7 @@ useEffect(() => {
               </div>
             </div>
           </div>
+          )}
         </div>
               <NewProjectModal
   open={newProjectOpen}
