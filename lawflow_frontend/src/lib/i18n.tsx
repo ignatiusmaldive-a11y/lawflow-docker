@@ -15,7 +15,7 @@ const EN: Dict = {
   files: "Files",
   templates: "Templates",
   closingPack: "Closing pack",
-  settings: "Settings",
+  settings: "Settings", // This key is still needed for useI18n
   quickAdd: "Quick add",
   newProject: "New project",
   searchPlaceholder: "Search tasks, files, checklist… (Ctrl+K)",
@@ -63,12 +63,35 @@ const EN: Dict = {
   allStatuses: "All Statuses",
   matterTableCol: "Matter",
   locationTableCol: "Location",
-  statusTableCol: "Status",
+  statusTableCol: "Status", // Keep this for General Overview
   riskTableCol: "Risk",
   deadlineTableCol: "Deadline",
   clientTableCol: "Client",
   noProjectsMatch: "No matters found matching your filters.",
   showingProjects: "Showing {count} projects",
+
+  // Matter Settings page
+  noActiveMatter: "No active matter selected. Select a matter from the sidebar to edit its settings.",
+  matterSettings: "Matter Settings",
+  backgroundColor: "Background Color",
+  changeProjectBg: "Change the background color for this project.",
+  riskLevel: "Risk Level",
+  riskNormal: "Normal",
+  riskAtRisk: "At Risk",
+  riskCritical: "Critical",
+  cancel: "Cancel",
+  saveChanges: "Save Changes",
+
+  // Calendar View page
+  deadlineAlerts: "Deadline alerts",
+  overdueCount: "{count} overdue",
+  noOverdue: "No overdue",
+  taskTableCol: "Task",
+  assigneeTableCol: "Assignee",
+  dueTableCol: "Due",
+  // statusTableCol: "Status", // Removed duplicate
+  noUpcomingDeadlines: "No upcoming deadlines.",
+  calendarSubtitle: "Subscribe this matter in Google Calendar / Outlook using the ICS file. (Demo: exports task due dates + milestones.)",
 };
 
 const ES: Dict = {
@@ -81,7 +104,7 @@ const ES: Dict = {
   files: "Archivos",
   templates: "Plantillas",
   closingPack: "Paquete de cierre",
-  settings: "Ajustes",
+  settings: "Ajustes", // This key is still needed for useI18n
   quickAdd: "Añadir rápido",
   newProject: "Nuevo asunto",
   searchPlaceholder: "Buscar tareas, archivos, checklist… (Ctrl+K)",
@@ -129,35 +152,55 @@ const ES: Dict = {
   allStatuses: "Todos los estados",
   matterTableCol: "Asunto",
   locationTableCol: "Ubicación",
-  statusTableCol: "Estado",
+  statusTableCol: "Estado", // Keep this for General Overview
   riskTableCol: "Riesgo",
   deadlineTableCol: "Fecha límite",
   clientTableCol: "Cliente",
   noProjectsMatch: "No se encontraron asuntos que coincidan con tus filtros.",
   showingProjects: "Mostrando {count} asuntos",
+
+  // Matter Settings page
+  noActiveMatter: "No hay asunto activo seleccionado. Selecciona un asunto de la barra lateral para editar su configuración.",
+  matterSettings: "Configuración del asunto",
+  backgroundColor: "Color de fondo",
+  changeProjectBg: "Cambia el color de fondo para este asunto.",
+  riskLevel: "Nivel de riesgo",
+  riskNormal: "Normal",
+  riskAtRisk: "En riesgo",
+  riskCritical: "Crítico",
+  cancel: "Cancelar",
+  saveChanges: "Guardar cambios",
+
+  // Calendar View page
+  deadlineAlerts: "Alertas de plazos",
+  overdueCount: "{count} atrasados",
+  noOverdue: "Sin atrasos",
+  taskTableCol: "Tarea",
+  assigneeTableCol: "Responsable",
+  dueTableCol: "Vencimiento",
+  // statusTableCol: "Estado", // Removed duplicate
+  noUpcomingDeadlines: "No hay plazos próximos.",
+  calendarSubtitle: "Suscribe este asunto en Google Calendar / Outlook usando el archivo ICS. (Demo: exporta fechas de vencimiento de tareas + hitos.)",
 };
 
-const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof EN) => string } | null>(null);
+const Ctx = createContext<{ lang: Lang; t: (k: keyof typeof EN) => string } | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>("es");
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_LANG);
-      if (raw === "en" || raw === "es") setLangState(raw);
+      // If no language is stored, or it's not 'en'/'es', default to 'es'
+      if (raw === "en") setLangState("en");
+      else setLangState("es"); // Default to Spanish
     } catch {}
   }, []);
 
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    try { localStorage.setItem(LS_LANG, l); } catch {}
-  };
+  // setLang is no longer needed as there's no UI to change language
+  const t = (k: keyof typeof EN) => (lang === "es" ? ES : EN)[k] ?? String(k);
 
-  const dict = useMemo(() => (lang === "es" ? ES : EN), [lang]);
-  const t = (k: keyof typeof EN) => dict[k] ?? String(k);
-
-  return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ lang, t }}>{children}</Ctx.Provider>;
 }
 
 export function useI18n() {

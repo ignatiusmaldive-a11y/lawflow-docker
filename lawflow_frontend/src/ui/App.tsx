@@ -15,11 +15,11 @@ import { ClosingPackWizard } from "./ClosingPackWizard";
 import { GlobalSearchModal } from "./GlobalSearchModal";
 import { NewProjectModal } from "./NewProjectModal";
 import { QuickAddModal } from "./QuickAddModal";
-import { SettingsView } from "./SettingsView";
+import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { Callout } from "./components/Callout";
 
-type View = "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack" | "Settings" | "General Overview";
+type View = "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -111,7 +111,7 @@ function daysUntil(dateStr?: string | null) {
 }
 
 export function App() {
-  const { lang, setLang, t } = useI18n();
+  const { lang, t } = useI18n();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
@@ -267,7 +267,6 @@ useEffect(() => {
 
         <nav className="nav">
           <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>{t("overviewLink")}</a>
-          <a className={view === "Settings" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("Settings");}}>{t("settings")}</a>
         </nav>
 
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
@@ -355,7 +354,8 @@ useEffect(() => {
               <div className="small">Legal Ops</div>
             </div>
           </div>
-
+          <button className="btn ghost" title="Settings" onClick={() => setView("Matter Settings")}>⚙</button>
+        </div>
       </aside>
 
       <main className="main">
@@ -407,10 +407,6 @@ useEffect(() => {
             </button>
 
             <input className="search" value={q} onChange={(e)=>setQ(e.target.value)} placeholder={t("searchPlaceholder")} />
-            <div className="langToggle" title="Language / Idioma">
-              <button className={"tab" + (lang==="en" ? " active" : "")} onClick={()=>setLang("en")}>{t("langEn")}</button>
-              <button className={"tab" + (lang==="es" ? " active" : "")} onClick={()=>setLang("es")}>{t("langEs")}</button>
-            </div>
             <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
             {view === "General Overview" && (
               <button className="btn primary" onClick={() => setNewProjectOpen(true)}>{t("newProject")}</button>
@@ -542,12 +538,13 @@ useEffect(() => {
     </div>
   )}
 
-  {view === "Settings" && (
-    <SettingsView
-      projects={projects}
+  {view === "Matter Settings" && activeProjectId && (
+    <MatterSettingsView
+      activeProject={activeProject}
       onProjectUpdated={(p) => {
         setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
       }}
+      onClose={() => setView("Board")} // Go back to Board view after closing settings
     />
   )}
 
