@@ -78,7 +78,7 @@ button, input, select { font: inherit; }
   padding: 16px 18px;
   display:flex; align-items:center; justify-content:space-between; gap: 14px;
   border-bottom: 1px solid var(--line);
-  background: #0f1522;
+  background: transparent;
 }
 .titleRow{ display:flex; flex-direction:column; gap: 2px; }
 .h1{ font-size: 18px; font-weight: 900; margin:0; }
@@ -556,4 +556,39 @@ select.select::-ms-expand { display: none; }
     align-items: flex-start;
     gap: 8px;
   }
+}
+
+/* Top Navigation (Classic Menu) */
+.topNav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+.topNav::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+
+.topNavItem {
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.topNavItem:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px 6px 0 0;
+}
+
+.topNavItem.active {
+  color: var(--text);
+  border-bottom-color: var(--brand);
 }

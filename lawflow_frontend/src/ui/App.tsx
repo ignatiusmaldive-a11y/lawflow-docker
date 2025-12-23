@@ -5,9 +5,10 @@ import { api2, api3 } from "../lib/api";
 import { Board } from "./Board";
 import { TasksTable } from "./TasksTable";
 import { Timeline } from "./Timeline";
+import { Cronograma } from "./Cronograma";
 import { Checklist } from "./Checklist";
 import { ActivityFeed } from "./ActivityFeed";
-import { CalendarView } from "./CalendarView";
+
 import { FilesRoom } from "./FilesRoom";
 import { TemplatesView, MUNICIPALITIES_LIST } from "./TemplatesView";
 import { ClosingPackView } from "./ClosingPackView";
@@ -19,7 +20,7 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { Callout } from "./components/Callout";
 
-type View = "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
+type View = "Board" | "Table" | "Cronograma" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -40,9 +41,35 @@ function loadPlatformDefaultBg() {
 function loadIds(key: string): number[] {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return [];
+    if (!raw) {
+      // Initialize with demo data for first-time users
+      const demoData: Record<string, number[]> = {
+        "lawflow.pins.v1": [1, 3], // Pin two interesting projects
+        "lawflow.recents.v1": [15, 12, 9, 6, 3] // Recently opened 5 diverse projects
+      };
+      if (demoData[key]) {
+        localStorage.setItem(key, JSON.stringify(demoData[key]));
+        return demoData[key];
+      }
+      return [];
+    }
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
+    // If we have existing data but it's very short (likely from demo), reinitialize
+    const demoLength: Record<string, number> = {
+      "lawflow.pins.v1": 2,
+      "lawflow.recents.v1": 5
+    };
+    if (parsed.length < (demoLength[key] || 0)) {
+      const demoData: Record<string, number[]> = {
+        "lawflow.pins.v1": [1, 3],
+        "lawflow.recents.v1": [15, 12, 9, 6, 3]
+      };
+      if (demoData[key]) {
+        localStorage.setItem(key, JSON.stringify(demoData[key]));
+        return demoData[key];
+      }
+    }
     return parsed.map((x) => Number(x)).filter((n) => Number.isFinite(n));
   } catch {
     return [];
@@ -379,9 +406,8 @@ useEffect(() => {
               {activeProjectId && view !== "General Overview" && (
                 <>
                   <button className={"topNavItem" + (view==="Board"?" active":"")} onClick={()=>setView("Board")}>{t("workspace")}</button>
-                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
                   <button className={"topNavItem" + (view==="Table"?" active":"")} onClick={()=>setView("Table")}>{t("taskTable")}</button>
-                  <button className={"topNavItem" + (view==="Calendar"?" active":"")} onClick={()=>setView("Calendar")}>{t("calendar")}</button>
+                  <button className={"topNavItem" + (view==="Cronograma"?" active":"")} onClick={()=>setView("Cronograma")}>{t("cronograma")}</button>
                   <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
                   <button className={"topNavItem" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
                   <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
@@ -442,7 +468,7 @@ useEffect(() => {
                   <div style={{ fontWeight: 950 }}>
                     Deadline alerts: {kpis.overdue > 0 ? `${kpis.overdue} overdue` : "0 overdue"} · {kpis.dueSoon > 0 ? `${kpis.dueSoon} due soon` : "0 due soon"}
                   </div>
-                  <button className="btn" onClick={() => setView("Calendar")}>Review</button>
+                  <button className="btn" onClick={() => setView("Cronograma")}>Review</button>
                 </div>
               ) : null}
 
@@ -508,12 +534,9 @@ useEffect(() => {
                   />
                 )}
 
-                {activeProjectId && view === "Timeline" && (
-                  <Timeline items={timeline} />
+                {activeProjectId && view === "Cronograma" && (
+                  <Cronograma projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
                 )}
-  {activeProjectId && view === "Calendar" && (
-    <CalendarView projectId={activeProjectId} tasks={filteredTasks} />
-  )}
 
   {activeProjectId && view === "Files" && (
     <FilesRoom projectId={activeProjectId} />

@@ -3,6 +3,8 @@ import { Modal } from "./components/Modal";
 import { Task, TaskCreate } from "../lib/api";
 import { api3 } from "../lib/api";
 
+import { useI18n } from "../lib/i18n";
+
 export function QuickAddModal({
   open,
   onClose,
@@ -14,6 +16,7 @@ export function QuickAddModal({
   projectId: number | null;
   onCreated: (t: Task) => void;
 }) {
+  const { t } = useI18n();
   const [title, setTitle] = useState("Chase notary agenda confirmation");
   const [assignee, setAssignee] = useState("Ana López");
   const [due, setDue] = useState<string>("");
@@ -35,7 +38,7 @@ export function QuickAddModal({
   }, [projectId, title, assignee, due, priority, tags]);
 
   return (
-    <Modal open={open} onClose={onClose} title="Quick add task">
+    <Modal open={open} onClose={onClose} title={t("quickAdd")}>
       {!projectId ? (
         <div className="small">Select an active matter first.</div>
       ) : (
