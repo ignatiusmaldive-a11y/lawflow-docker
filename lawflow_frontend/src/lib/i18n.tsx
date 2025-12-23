@@ -51,12 +51,30 @@ const EN: Dict = {
   demoBody: "Try: switch matters, open Files for drag-drop + preview, Templates for municipality rules, Closing pack wizard, and Ctrl+K global search.",
   langEn: "EN",
   langEs: "ES",
+
+  // General Overview page
+  overviewLink: "Overview",
+  portfolioOverviewTitle: "Portfolio Overview",
+  totalMatters: "Total Matters",
+  activeProjects: "Active",
+  closedProjects: "Closed",
+  highRiskProjects: "Risk",
+  searchProjectsPlaceholder: "Search matters, locations, clients...",
+  allStatuses: "All Statuses",
+  matterTableCol: "Matter",
+  locationTableCol: "Location",
+  statusTableCol: "Status",
+  riskTableCol: "Risk",
+  deadlineTableCol: "Deadline",
+  clientTableCol: "Client",
+  noProjectsMatch: "No matters found matching your filters.",
+  showingProjects: "Showing {count} projects",
 };
 
 const ES: Dict = {
   tagline: "Costa del Sol · Transacciones inmobiliarias",
   activeMatter: "Asunto activo",
-  workspace: "Espacio",
+  workspace: "Espacio de trabajo",
   timeline: "Cronograma",
   taskTable: "Tabla de tareas",
   calendar: "Calendario",
@@ -99,6 +117,24 @@ const ES: Dict = {
   demoBody: "Prueba: cambiar de asunto, abrir Archivos para arrastrar/soltar + vista previa, Plantillas por municipio, asistente de paquete de cierre y Ctrl+K para búsqueda global.",
   langEn: "EN",
   langEs: "ES",
+
+  // General Overview page
+  overviewLink: "Resumen",
+  portfolioOverviewTitle: "Vista general de cartera",
+  totalMatters: "Total Asuntos",
+  activeProjects: "Activos",
+  closedProjects: "Cerrados",
+  highRiskProjects: "Riesgo",
+  searchProjectsPlaceholder: "Buscar asuntos, ubicaciones, clientes...",
+  allStatuses: "Todos los estados",
+  matterTableCol: "Asunto",
+  locationTableCol: "Ubicación",
+  statusTableCol: "Estado",
+  riskTableCol: "Riesgo",
+  deadlineTableCol: "Fecha límite",
+  clientTableCol: "Cliente",
+  noProjectsMatch: "No se encontraron asuntos que coincidan con tus filtros.",
+  showingProjects: "Mostrando {count} asuntos",
 };
 
 const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof EN) => string } | null>(null);

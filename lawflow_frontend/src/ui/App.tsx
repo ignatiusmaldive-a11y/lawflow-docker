@@ -183,12 +183,30 @@ const activeProject = useMemo(
     })().catch(console.error);
   }, []);
 
+  // Handle browser navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname === "/overview") {
+        setView("General Overview");
+      } else {
+        setView("Board");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   // Update URL on view change
   useEffect(() => {
     if (view === "General Overview") {
-      window.history.pushState(null, "", "/overview");
+      if (window.location.pathname !== "/overview") {
+        window.history.pushState(null, "", "/overview");
+      }
     } else {
-      window.history.pushState(null, "", "/");
+      if (window.location.pathname !== "/") {
+        window.history.pushState(null, "", "/");
+      }
     }
   }, [view]);
 
@@ -236,7 +254,7 @@ useEffect(() => {
   }, [tasks]);
 
   return (
-    <div className="shell" style={{ background: (activeProject?.bg_color ?? defaultBg) }}>
+    <div className="shell" style={{ background: view === "General Overview" ? defaultBg : (activeProject?.bg_color ?? defaultBg) }}>
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
       <aside className="sidebar">
         <div className="brand">
@@ -248,7 +266,8 @@ useEffect(() => {
         </div>
 
         <nav className="nav">
-          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>Overview</a>
+          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>{t("overviewLink")}</a>
+          <a className={view === "Settings" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("Settings");}}>{t("settings")}</a>
         </nav>
 
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
@@ -336,15 +355,16 @@ useEffect(() => {
               <div className="small">Legal Ops</div>
             </div>
           </div>
-          <button className="btn ghost" title="Settings">⚙</button>
-        </div>
+
       </aside>
 
       <main className="main">
         <header className="topbar">
           <div className="titleRow">
-            <p className="h1">{activeProject?.title ?? "LawFlow"}</p>
-            <p className="subtitle">
+            <p className="h1">
+              {view === "General Overview" ? "Portfolio Overview" : (activeProject?.title ?? "LawFlow")}
+            </p>
+            {/* <p className="subtitle">
               <span className="crumbs">
   {view === "General Overview" ? (
      <span className="crumb">Portfolio Overview</span>
@@ -354,26 +374,28 @@ useEffect(() => {
      ))
   )}
 </span>
-            </p>
-            {activeProjectId && view !== "General Overview" && (
-               <div className="tabs" style={{ marginTop: 8 }}>
-                  <button className={"tab" + (view==="Board"?" active":"")} onClick={()=>setView("Board")}>{t("workspace")}</button>
-                  <button className={"tab" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
-                  <button className={"tab" + (view==="Table"?" active":"")} onClick={()=>setView("Table")}>{t("taskTable")}</button>
-                  <button className={"tab" + (view==="Calendar"?" active":"")} onClick={()=>setView("Calendar")}>{t("calendar")}</button>
-                  <button className={"tab" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-                  <button className={"tab" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
-                  <button className={"tab" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
-               </div>
-             )}
-            {view !== "General Overview" && (
+            </p> */}
+            <div className="topNav" style={{ minHeight: 42 }}>
+              {activeProjectId && view !== "General Overview" && (
+                <>
+                  <button className={"topNavItem" + (view==="Board"?" active":"")} onClick={()=>setView("Board")}>{t("workspace")}</button>
+                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
+                  <button className={"topNavItem" + (view==="Table"?" active":"")} onClick={()=>setView("Table")}>{t("taskTable")}</button>
+                  <button className={"topNavItem" + (view==="Calendar"?" active":"")} onClick={()=>setView("Calendar")}>{t("calendar")}</button>
+                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
+                  <button className={"topNavItem" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
+                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
+                </>
+              )}
+            </div>
+            {/* {view !== "General Overview" && (
             <div className="statusStrip">
               <span className="pill">{activeProject?.transaction_type ?? "—"}</span>
               <span className="pill">{activeProject?.location ?? "—"}</span>
               <span className="pill">Target: {fmtDateShort(activeProject?.target_close_date ?? null)}</span>
               <span className="pill">Start: {fmtDateShort(activeProject?.start_date ?? null)}</span>
             </div>
-            )}
+            )} */}
           </div>
           <div className="actions">
             <button
@@ -390,7 +412,9 @@ useEffect(() => {
               <button className={"tab" + (lang==="es" ? " active" : "")} onClick={()=>setLang("es")}>{t("langEs")}</button>
             </div>
             <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
-            <button className="btn primary" onClick={() => setNewProjectOpen(true)}>{t("newProject")}</button>
+            {view === "General Overview" && (
+              <button className="btn primary" onClick={() => setNewProjectOpen(true)}>{t("newProject")}</button>
+            )}
           </div>
         </header>
 
