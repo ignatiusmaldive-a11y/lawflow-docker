@@ -8,11 +8,11 @@
     <style>
       :root{
         --bg: #0b1220;
-        --panel: rgba(255,255,255,.06);
-        --panel2: rgba(255,255,255,.09);
-        --text: rgba(255,255,255,.92);
-        --muted: rgba(255,255,255,.64);
-        --line: rgba(255,255,255,.12);
+        --panel: #1a202d;
+        --panel2: #212734;
+        --text: #f7fafc;
+        --muted: #a0aec0;
+        --line: #2d3748;
         --shadow: 0 18px 50px rgba(0,0,0,.45);
         --radius: 18px;
 
@@ -67,11 +67,11 @@
       }
 
       .error {
-        background: color-mix(in oklab, var(--danger) 20%, var(--panel));
+        background: var(--panel);
         color: var(--text);
         padding: 20px;
         border-radius: var(--radius);
-        border: 1px solid color-mix(in oklab, var(--danger) 40%, var(--line));
+        border: 1px solid var(--danger);
         margin: 20px 0;
         text-align: center;
       }
@@ -85,7 +85,7 @@
 
       .stat-card {
         border: 1px solid var(--line);
-        background: color-mix(in oklab, var(--panel2) 75%, transparent);
+        background: var(--panel2);
         border-radius: var(--radius);
         box-shadow: 0 14px 35px rgba(0,0,0,.18);
         padding: 24px;
@@ -137,7 +137,7 @@
 
       .projects-table {
         border: 1px solid var(--line);
-        background: color-mix(in oklab, var(--panel2) 75%, transparent);
+        background: var(--panel2);
         border-radius: var(--radius);
         box-shadow: 0 14px 35px rgba(0,0,0,.18);
         overflow: hidden;
@@ -149,7 +149,7 @@
       }
 
       .projects-table th {
-        background: color-mix(in oklab, #050814 70%, transparent);
+        background: var(--panel);
         color: var(--muted);
         padding: 14px;
         text-align: left;

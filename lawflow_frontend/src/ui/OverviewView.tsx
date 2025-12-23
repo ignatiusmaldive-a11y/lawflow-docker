@@ -96,9 +96,17 @@ export function OverviewView({
 
   const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <th
-      className="sortable"
       onClick={() => handleSort(field)}
-      style={{ cursor: "pointer", userSelect: "none" }}
+      style={{
+        cursor: "pointer",
+        userSelect: "none",
+        textAlign: "left",
+        padding: "12px 8px",
+        fontWeight: 600,
+        fontSize: "14px",
+        color: "var(--muted)",
+        borderBottom: "1px solid var(--line)"
+      }}
     >
       {children}
       {sortField === field && (
@@ -108,6 +116,15 @@ export function OverviewView({
       )}
     </th>
   );
+
+  const headerStyle = {
+    textAlign: "left" as const,
+    padding: "12px 8px",
+    fontWeight: 600,
+    fontSize: "14px",
+    color: "var(--muted)",
+    borderBottom: "1px solid var(--line)"
+  };
 
   return (
     <div className="overview-view">
@@ -119,13 +136,8 @@ export function OverviewView({
             placeholder="Search projects..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            style={{
-              padding: "6px 12px",
-              border: "1px solid #e1e5e9",
-              borderRadius: 4,
-              fontSize: 14,
-              width: 200
-            }}
+            className="search"
+            style={{ width: 200 }}
           />
         </div>
       </div>
@@ -168,15 +180,15 @@ export function OverviewView({
       <div className="card cardPad">
         <table className="project-table" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "2px solid #e1e5e9" }}>
+            <tr>
               <SortableHeader field="title">Project Title</SortableHeader>
               <SortableHeader field="location">Location</SortableHeader>
               <SortableHeader field="status">Status</SortableHeader>
               <SortableHeader field="risk">Risk</SortableHeader>
-              <th>Type</th>
+              <th style={headerStyle}>Type</th>
               <SortableHeader field="target_close_date">Target Close</SortableHeader>
-              <th>Client</th>
-              <th>Actions</th>
+              <th style={headerStyle}>Client</th>
+              <th style={headerStyle}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -190,17 +202,17 @@ export function OverviewView({
                   key={project.id}
                   className="project-row"
                   style={{
-                    borderBottom: "1px solid #f0f2f5",
+                    borderBottom: "1px solid var(--line)",
                     cursor: "pointer",
                     transition: "background-color 0.2s"
                   }}
                   onClick={() => onProjectSelect(project.id)}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f8f9fa"}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--panel)"}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                 >
                   <td style={{ padding: "12px 8px", maxWidth: 300 }}>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>{project.title}</div>
-                    <div style={{ fontSize: 12, color: "#666" }}>
+                    <div style={{ fontSize: 12, color: "var(--muted)" }}>
                       ID: {project.id} • Started: {fmtDateShort(project.start_date)}
                     </div>
                   </td>
@@ -220,7 +232,7 @@ export function OverviewView({
                   </td>
                   <td style={{ padding: "12px 8px" }}>
                     <div style={{
-                      color: isOverdue ? "#dc3545" : isDueSoon ? "#fd7e14" : "#6c757d",
+                      color: isOverdue ? "var(--danger)" : isDueSoon ? "var(--warn)" : "var(--muted)",
                       fontWeight: isOverdue || isDueSoon ? 600 : 400
                     }}>
                       {fmtDateShort(project.target_close_date)}
@@ -263,32 +275,13 @@ export function OverviewView({
           <div style={{
             textAlign: "center",
             padding: 40,
-            color: "#6c757d",
+            color: "var(--muted)",
             fontStyle: "italic"
           }}>
             No projects match your search criteria.
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .project-table th {
-          textAlign: left;
-          padding: 12px 8px;
-          fontWeight: 600;
-          fontSize: 14px;
-          color: #495057;
-          backgroundColor: #f8f9fa;
-        }
-
-        .project-row:hover {
-          backgroundColor: #f8f9fa !important;
-        }
-
-        .sortable:hover {
-          backgroundColor: #e9ecef;
-        }
-      `}</style>
     </div>
   );
 }
