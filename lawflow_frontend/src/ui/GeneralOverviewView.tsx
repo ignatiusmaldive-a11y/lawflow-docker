@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { Project } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+import { formatProjectLabel, PROJECT_ID_OFFSET } from "../lib/formatting";
 
-type SortField = "title" | "status" | "location" | "risk" | "target_close_date" | "client";
+type SortField = "title" | "project_number" | "status" | "location" | "risk" | "target_close_date" | "client";
 type SortDirection = "asc" | "desc";
 
 function riskPill(risk: Project["risk"]) {
@@ -62,15 +63,21 @@ export function GeneralOverviewView({
     });
 
     filtered.sort((a, b) => {
-      let aVal: any = a[sortField];
-      let bVal: any = b[sortField];
+      let aVal: any;
+      let bVal: any;
 
-      if (sortField === "client") {
+      if (sortField === "project_number") {
+        aVal = a.id + PROJECT_ID_OFFSET;
+        bVal = b.id + PROJECT_ID_OFFSET;
+      } else if (sortField === "client") {
         aVal = a.client?.name || "";
         bVal = b.client?.name || "";
       } else if (sortField === "target_close_date") {
-        aVal = aVal ? new Date(aVal).getTime() : Infinity;
-        bVal = bVal ? new Date(bVal).getTime() : Infinity;
+        aVal = a[sortField] ? new Date(a[sortField]!).getTime() : Infinity;
+        bVal = b[sortField] ? new Date(b[sortField]!).getTime() : Infinity;
+      } else {
+        aVal = a[sortField];
+        bVal = b[sortField];
       }
 
       if (typeof aVal === "string") {
@@ -104,16 +111,21 @@ export function GeneralOverviewView({
     return { total, active, completed, highRisk };
   }, [projects]);
 
-  const SortHeader = ({ field, label }: { field: SortField; label: string }) => (
+  const SortHeader = ({ field, label, width, className }: { field: SortField; label: string; width?: string; className?: string }) => (
     <th 
       onClick={() => handleSort(field)} 
-      style={{ cursor: "pointer", userSelect: "none" }}
-      className={sortField === field ? "active-sort" : ""}
+      style={{ cursor: "pointer", userSelect: "none", width: width }}
+      className={`${sortField === field ? "active-sort" : ""} ${className || ""}`}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
         {label}
         {sortField === field && (
-          <span style={{ fontSize: 10 }}>{sortDirection === "asc" ? "▲" : "▼"}</span>
+          <span style={{ fontSize: 10 }}>
+            {field === "project_number"
+              ? (sortDirection === "asc" ? "▼" : "▲")
+              : (sortDirection === "asc" ? "▲" : "▼")
+            }
+          </span>
         )}
       </div>
     </th>
@@ -187,13 +199,12 @@ export function GeneralOverviewView({
         <table className="table" style={{ width: "100%" }}>
           <thead>
             <tr>
-              <SortHeader field="title" label={t("matterTableCol")} />
-              <SortHeader field="location" label={t("locationTableCol")} />
+              <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
+              <SortHeader field="location" label={t("locationTableCol")} className="column-location" />
               <SortHeader field="status" label={t("statusTableCol")} />
               <SortHeader field="risk" label={t("riskTableCol")} />
               <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
               <SortHeader field="client" label={t("clientTableCol")} />
-              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -209,8 +220,7 @@ export function GeneralOverviewView({
                   style={{ cursor: "pointer" }}
                 >
                   <td>
-                    <div style={{ fontWeight: 800 }}>{p.title}</div>
-                    <div style={{ fontSize: 11, color: "var(--muted)" }}>#{p.id} · {p.transaction_type}</div>
+                    <div style={{ fontWeight: 800 }}>{formatProjectLabel(p)}</div>
                   </td>
                   <td>
                     <span className="pill neutral">{p.location}</span>
@@ -231,15 +241,12 @@ export function GeneralOverviewView({
                     )}
                   </td>
                   <td>{p.client?.name ?? "—"}</td>
-                  <td style={{ textAlign: "right" }}>
-                    <button className="btn ghost" style={{ padding: "6px 10px" }}>Open ›</button>
-                  </td>
                 </tr>
               );
             })}
             {sortedAndFilteredProjects.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
+                <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
                   {t("noProjectsMatch")}
                 </td>
               </tr>

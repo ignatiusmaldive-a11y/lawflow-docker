@@ -82,7 +82,7 @@ export function MatterSettingsView({ activeProject, onProjectUpdated, onClose }:
           <select
             className="select"
             value={risk}
-            onChange={(e) => setRisk(e.target.value)}
+            onChange={(e) => setRisk(e.target.value as any)}
           >
             <option value="Normal">{t("riskNormal")}</option>
             <option value="At Risk">{t("riskAtRisk")}</option>
@@ -93,7 +93,7 @@ export function MatterSettingsView({ activeProject, onProjectUpdated, onClose }:
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 24 }}>
           <button className="btn ghost" onClick={onClose}>{t("cancel")}</button>
           <button className="btn primary" onClick={handleSave} disabled={loading}>
-            {loading ? <Spinner size="1em" /> : t("saveChanges")}
+            {loading ? <Spinner size="sm" /> : t("saveChanges")}
           </button>
         </div>
       </div>

@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useI18n } from "../lib/i18n";
 import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem } from "../lib/api";
 import { api2, api3 } from "../lib/api";
+import { formatProjectLabel, PROJECT_ID_OFFSET } from "../lib/formatting";
 import { Board } from "./Board";
 import { TasksTable } from "./TasksTable";
-import { Timeline } from "./Timeline";
 import { Cronograma } from "./Cronograma";
 import { Checklist } from "./Checklist";
 import { ActivityFeed } from "./ActivityFeed";
@@ -20,7 +20,7 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { Callout } from "./components/Callout";
 
-type View = "Board" | "Table" | "Cronograma" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
+type View = "Tasks" | "Cronograma" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -96,20 +96,33 @@ function togglePin(projectId: number) {
   return next;
 }
 
+function loadDismissedTips(projectId: number) {
+  try {
+    return localStorage.getItem(`lawflow.dismissed.tips.${projectId}`) === "1";
+  } catch { return false; }
+}
+
+function saveDismissedTips(projectId: number) {
+  try { localStorage.setItem(`lawflow.dismissed.tips.${projectId}`, "1"); } catch {}
+}
+
+function loadDismissedDeadlines(projectId: number) {
+  try {
+    const raw = localStorage.getItem(`lawflow.dismissed.deadlines.${projectId}`);
+    if (!raw) return { overdue: 0, dueSoon: 0 };
+    return JSON.parse(raw);
+  } catch { return { overdue: 0, dueSoon: 0 }; }
+}
+
+function saveDismissedDeadlines(projectId: number, stats: { overdue: number; dueSoon: number }) {
+  try { localStorage.setItem(`lawflow.dismissed.deadlines.${projectId}`, JSON.stringify(stats)); } catch {}
+}
+
 
 function riskPill(risk: Project["risk"]) {
   if (risk === "Critical") return <span className="pill bad">Critical</span>;
   if (risk === "At Risk") return <span className="pill warn">At risk</span>;
   return <span className="pill ok">Normal</span>;
-}
-
-function matterLabel(p: Project) {
-  const core = p.title.replace(/^Purchase – |^Sale – /, "");
-  const left = `${p.transaction_type} · ${p.location} — `;
-  const max = 44;
-  const remaining = Math.max(10, max - left.length);
-  const trimmed = core.length > remaining ? core.slice(0, Math.max(0, remaining - 1)).trimEnd() + "…" : core;
-  return left + trimmed;
 }
 
 function fmtDateShort(d?: string | null) {
@@ -153,13 +166,16 @@ export function App() {
   const [defaultBg, setDefaultBg] = useState<string>(() => (typeof window !== 'undefined' ? loadPlatformDefaultBg() : '#0b1220'));
 
 
-  const [view, setView] = useState<View>("Board");
+  const [view, setView] = useState<View>("Tasks");
+  const [taskView, setTaskView] = useState<"Board" | "Table">("Board");
   const [pinnedIds, setPinnedIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_PINS) : []));
   const [recentIds, setRecentIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_RECENTS) : []));
 
   const [q, setQ] = useState("");
   const [municipality, setMunicipality] = useState<string>("Marbella");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [deadlineDismissedStats, setDeadlineDismissedStats] = useState<{ overdue: number; dueSoon: number }>({ overdue: -1, dueSoon: -1 });
+  const [tipsDismissed, setTipsDismissed] = useState(false);
 
 const pinnedProjects = useMemo(() => {
   const set = new Set(pinnedIds);
@@ -167,9 +183,17 @@ const pinnedProjects = useMemo(() => {
 }, [projects, pinnedIds]);
 
 const recentProjects = useMemo(() => {
-  const order = recentIds;
   const map = new Map(projects.map((p) => [p.id, p] as const));
-  return order.map((id) => map.get(id)).filter(Boolean) as Project[];
+  const projectsFromRecentIds = recentIds.map((id) => map.get(id)).filter(Boolean) as Project[];
+  
+  // Sort by project number strictly
+  projectsFromRecentIds.sort((a, b) => {
+    const aProjectNumber = a.id + PROJECT_ID_OFFSET;
+    const bProjectNumber = b.id + PROJECT_ID_OFFSET;
+    return aProjectNumber - bProjectNumber;
+  });
+
+  return projectsFromRecentIds;
 }, [projects, recentIds]);
 
 const activeProject = useMemo(
@@ -216,7 +240,7 @@ const activeProject = useMemo(
       if (window.location.pathname === "/overview") {
         setView("General Overview");
       } else {
-        setView("Board");
+        setView("Tasks");
       }
     };
 
@@ -254,6 +278,14 @@ useEffect(() => {
   if (!activeProjectId) return;
   // keep 'recent matters' in localStorage
   setRecentIds(upsertRecent(activeProjectId));
+  
+  // Load persistent UI states
+  setTipsDismissed(loadDismissedTips(activeProjectId));
+  setDeadlineDismissedStats(loadDismissedDeadlines(activeProjectId));
+
+  // Clear tasks momentarily to avoid showing previous project's stats/banner
+  setTasks([]);
+
   refreshAll(activeProjectId).catch(console.error);
 }, [activeProjectId]);
 
@@ -294,6 +326,7 @@ useEffect(() => {
 
         <nav className="nav">
           <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>{t("overviewLink")}</a>
+          <a className={view === "Tasks" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("Tasks");}}>{t("tasks")}</a>
         </nav>
 
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
@@ -305,12 +338,12 @@ useEffect(() => {
             value={activeProjectId ?? undefined}
             onChange={(e) => {
                setActiveProjectId(Number(e.target.value));
-               if (view === "General Overview") setView("Board"); 
+               if (view === "General Overview") setView("Tasks"); 
             }}
           >
             {projects.map((p) => (
               <option value={p.id} key={p.id}>
-                {matterLabel(p)}
+                {formatProjectLabel(p)}
               </option>
             ))}
           </select>
@@ -342,11 +375,11 @@ useEffect(() => {
         <button
           key={p.id}
           className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Board"); }}
+          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); }}
           title={p.title}
         >
           <span className="chipDot" />
-          <span className="chipText">{matterLabel(p)}</span>
+          <span className="chipText">{formatProjectLabel(p)}</span>
         </button>
       ))}
     </div>
@@ -361,11 +394,11 @@ useEffect(() => {
         <button
           key={p.id}
           className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Board"); }}
+          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); }}
           title={p.title}
         >
           <span className="chipDot muted" />
-          <span className="chipText">{matterLabel(p)}</span>
+          <span className="chipText">{formatProjectLabel(p)}</span>
         </button>
       ))}
     </div>
@@ -389,7 +422,7 @@ useEffect(() => {
         <header className="topbar">
           <div className="titleRow">
             <p className="h1">
-              {view === "General Overview" ? "Portfolio Overview" : (activeProject?.title ?? "LawFlow")}
+              {view === "General Overview" ? "Portfolio Overview" : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
             </p>
             {/* <p className="subtitle">
               <span className="crumbs">
@@ -405,8 +438,7 @@ useEffect(() => {
             <div className="topNav" style={{ minHeight: 42 }}>
               {activeProjectId && view !== "General Overview" && (
                 <>
-                  <button className={"topNavItem" + (view==="Board"?" active":"")} onClick={()=>setView("Board")}>{t("workspace")}</button>
-                  <button className={"topNavItem" + (view==="Table"?" active":"")} onClick={()=>setView("Table")}>{t("taskTable")}</button>
+                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
                   <button className={"topNavItem" + (view==="Cronograma"?" active":"")} onClick={()=>setView("Cronograma")}>{t("cronograma")}</button>
                   <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
                   <button className={"topNavItem" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
@@ -433,7 +465,9 @@ useEffect(() => {
             </button>
 
             <input className="search" value={q} onChange={(e)=>setQ(e.target.value)} placeholder={t("searchPlaceholder")} />
-            <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
+            {view !== "General Overview" && (
+              <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
+            )}
             {view === "General Overview" && (
               <button className="btn primary" onClick={() => setNewProjectOpen(true)}>{t("newProject")}</button>
             )}
@@ -442,33 +476,38 @@ useEffect(() => {
 
         <div className="content">
           {view === "General Overview" ? (
-             <GeneralOverviewView 
-               projects={projects} 
-               onProjectSelect={(id) => { setActiveProjectId(id); setView("Board"); }} 
+             <GeneralOverviewView
+               projects={projects}
+               onProjectSelect={(id) => {
+                 setActiveProjectId(id);
+                 setView("Tasks");
+                 window.scrollTo(0, 0); // Reset scroll position to top when selecting project
+               }}
              />
           ) : (
           <div className="contentGrid">
             <div className="leftColumn">
-              {(() => {
-                const key = "lawflow.callout.dismissed.v1";
-                let dismissed = false;
-                try { dismissed = localStorage.getItem(key) === "1"; } catch {}
-                if (dismissed) return null;
-                return (
+              {!tipsDismissed ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
-                    onDismiss={() => { try { localStorage.setItem(key, "1"); } catch {} }}
+                    onDismiss={() => {
+                      if (activeProjectId) saveDismissedTips(activeProjectId);
+                      setTipsDismissed(true);
+                    }}
                   />
-                );
-              })()}
+              ) : null}
 
-              {kpis.overdue > 0 || kpis.dueSoon > 0 ? (
+              {(kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
                 <div className="deadlineBanner">
                   <div style={{ fontWeight: 950 }}>
                     Deadline alerts: {kpis.overdue > 0 ? `${kpis.overdue} overdue` : "0 overdue"} · {kpis.dueSoon > 0 ? `${kpis.dueSoon} due soon` : "0 due soon"}
                   </div>
-                  <button className="btn" onClick={() => setView("Cronograma")}>Review</button>
+                  <button className="btn" onClick={() => { 
+                    setView("Cronograma"); 
+                    if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
+                    setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
+                  }}>Review</button>
                 </div>
               ) : null}
 
@@ -512,9 +551,15 @@ useEffect(() => {
               <div className="card cardPad" style={{ marginTop: 12 }}>
                 <div className="sectionTitle">
                   <h2>{t("work")}</h2>
+                  {view === "Tasks" && (
+                    <div className="tabs">
+                      <button className={"tab" + (taskView === "Board" ? " active" : "")} onClick={() => setTaskView("Board")}>Board</button>
+                      <button className={"tab" + (taskView === "Table" ? " active" : "")} onClick={() => setTaskView("Table")}>Table</button>
+                    </div>
+                  )}
                 </div>
 
-                {activeProjectId && view === "Board" && (
+                {activeProjectId && view === "Tasks" && taskView === "Board" && (
                   <Board
                     tasks={filteredTasks}
                     onMove={async (taskId, nextStatus) => {
@@ -524,7 +569,7 @@ useEffect(() => {
                   />
                 )}
 
-                {activeProjectId && view === "Table" && (
+                {activeProjectId && view === "Tasks" && taskView === "Table" && (
                   <TasksTable
                     tasks={filteredTasks}
                     onEdit={async (taskId, patch) => {
@@ -567,7 +612,7 @@ useEffect(() => {
       onProjectUpdated={(p) => {
         setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
       }}
-      onClose={() => setView("Board")} // Go back to Board view after closing settings
+      onClose={() => setView("Tasks")} // Go back to Board view after closing settings
     />
   )}
 
@@ -617,7 +662,7 @@ useEffect(() => {
   onCreated={(p) => {
     setProjects((prev) => [p, ...prev]);
     setActiveProjectId(p.id);
-    setView("Board");
+    setView("Tasks");
   }}
 />
 

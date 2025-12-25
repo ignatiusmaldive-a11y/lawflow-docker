@@ -8,9 +8,7 @@ type Dict = Record<string, string>;
 const EN: Dict = {
   tagline: "Costa del Sol · Property Transactions",
   activeMatter: "Active matter",
-  workspace: "Workspace",
-
-  taskTable: "Task Table",
+  tasks: "Tasks",
   cronograma: "Timeline",
   files: "Files",
   templates: "Templates",
@@ -62,6 +60,7 @@ const EN: Dict = {
   searchProjectsPlaceholder: "Search matters, locations, clients...",
   allStatuses: "All Statuses",
   matterTableCol: "Matter",
+  projectNumberCol: "Number",
   locationTableCol: "Location",
   statusTableCol: "Status", // Keep this for General Overview
   riskTableCol: "Risk",
@@ -97,9 +96,7 @@ const EN: Dict = {
 const ES: Dict = {
   tagline: "Costa del Sol · Transacciones inmobiliarias",
   activeMatter: "Asunto activo",
-  workspace: "Espacio de trabajo",
-
-  taskTable: "Tabla de tareas",
+  tareas: "Tareas",
   cronograma: "Cronograma",
   files: "Archivos",
   templates: "Plantillas",
@@ -151,6 +148,7 @@ const ES: Dict = {
   searchProjectsPlaceholder: "Buscar asuntos, ubicaciones, clientes...",
   allStatuses: "Todos los estados",
   matterTableCol: "Asunto",
+  projectNumberCol: "Número",
   locationTableCol: "Ubicación",
   statusTableCol: "Estado", // Keep this for General Overview
   riskTableCol: "Riesgo",

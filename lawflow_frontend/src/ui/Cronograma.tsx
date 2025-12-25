@@ -19,15 +19,44 @@ function daysUntil(dateStr?: string | null) {
 export function Cronograma({ projectId, items, tasks }: { projectId: number; items: TimelineItem[]; tasks: Task[] }) {
   const { t } = useI18n();
 
-  const { start, end, rows } = useMemo(() => {
-    if (items.length === 0) return { start: new Date(), end: new Date(), rows: [] as TimelineItem[] };
-    const dates = items.flatMap((i) => [new Date(i.start_date + "T00:00:00"), new Date(i.end_date + "T00:00:00")]);
-    const min = new Date(Math.min(...dates.map((d) => d.getTime())));
-    const max = new Date(Math.max(...dates.map((d) => d.getTime())));
-    return { start: min, end: max, rows: items };
+  const { start, end, rows, todayOffset, dateHeaders } = useMemo(() => {
+    if (items.length === 0) return { start: new Date(), end: new Date(), rows: [] as TimelineItem[], todayOffset: 0, dateHeaders: [] };
+    
+    // Calculate start and end dates for the timeline
+    const allDates = items.flatMap((i) => [new Date(i.start_date + "T00:00:00"), new Date(i.end_date + "T00:00:00")]);
+    const minDate = new Date(Math.min(...allDates.map((d) => d.getTime())));
+    const maxDate = new Date(Math.max(...allDates.map((d) => d.getTime())));
+
+    // Add some buffer around the min/max dates
+    const startBuffer = new Date(minDate);
+    startBuffer.setDate(minDate.getDate() - 7); // 7 days before the first item
+    const endBuffer = new Date(maxDate);
+    endBuffer.setDate(maxDate.getDate() + 14); // 14 days after the last item
+
+    const start = startBuffer;
+    const end = endBuffer;
+
+    const now = new Date();
+    const todayOffset = daysBetween(start, now);
+
+    // Generate date headers (e.g., month names)
+    const headers = [];
+    let currentDate = new Date(start);
+    while (currentDate <= end) {
+      if (currentDate.getDate() === 1 || headers.length === 0) { // Start of month or first header
+        headers.push({
+          label: currentDate.toLocaleString('default', { month: 'short', year: 'numeric' }),
+          offset: daysBetween(start, currentDate),
+        });
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return { start, end, rows: items, todayOffset, dateHeaders: headers };
   }, [items]);
 
   const totalDays = Math.max(1, daysBetween(start, end) + 1);
+  const todayPosition = (todayOffset / totalDays) * 100;
 
   const upcoming = useMemo(() => {
     return [...tasks]
@@ -57,26 +86,73 @@ export function Cronograma({ projectId, items, tasks }: { projectId: number; ite
       {/* Timeline Section */}
       <div className="timelineWrap">
         <div className="timeline">
-          <div className="timelineLabels">
-            {rows.map((r) => (
-              <div key={r.id} className="card cardPad" style={{ padding: 10 }}>
-                <div style={{ fontWeight: 1000, fontSize: 13 }}>{r.label}</div>
-                <div className="small">{r.kind} · {r.start_date} → {r.end_date}</div>
+          {/* Timeline Headers */}
+          <div className="timelineLabels" style={{ visibility: "hidden" }}></div> {/* Placeholder for label column */}
+          <div className="timelineGrid dateHeaders" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(15px, 1fr))`, paddingLeft: 0, borderLeft: 'none' }}>
+            {dateHeaders.map((header, idx) => (
+              <div
+                key={idx}
+                style={{
+                  gridColumnStart: header.offset + 1,
+                  gridColumnEnd: `span ${idx + 1 < dateHeaders.length ? dateHeaders[idx + 1].offset - header.offset : totalDays - header.offset}`,
+                  textAlign: 'left',
+                  fontWeight: 900,
+                  fontSize: '12px',
+                  color: 'var(--muted)',
+                  borderBottom: '1px solid var(--line)',
+                  paddingBottom: '4px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {header.label}
               </div>
             ))}
           </div>
 
-          <div className="timelineGrid">
+          {/* Timeline Content */}
+          <div className="timelineLabels">
+            {rows.map((r) => (
+              <div
+                key={r.id}
+                className="card timelineLabelItem" // Use new class for consistent height and styling
+                style={{
+                  paddingLeft: r.kind === 'Milestone' ? 24 : 10,
+                  fontWeight: r.kind === 'Phase' ? 800 : 500,
+                  fontSize: '13px',
+                }}
+              >
+                {r.label}
+              </div>
+            ))}
+          </div>
+
+          <div className="timelineGrid" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(15px, 1fr))` }}>
+            {todayOffset >= 0 && todayOffset <= totalDays && (
+              <div className="todayLine" style={{ left: `${todayPosition}%` }}></div>
+            )}
             {rows.map((r) => {
               const s = new Date(r.start_date + "T00:00:00");
               const e = new Date(r.end_date + "T00:00:00");
               const startOffset = Math.max(0, daysBetween(start, s));
               const endOffset = Math.min(totalDays, daysBetween(start, e) + 1);
               const cssStart = startOffset + 1;
-              const cssEnd = Math.max(cssStart + 1, endOffset + 1);
+              const cssEnd = endOffset + 1;
+
               return (
-                <div key={r.id} className="barRow" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(8px, 1fr))` }}>
-                  <div className="bar" style={{ ["--start" as any]: cssStart, ["--end" as any]: cssEnd }} />
+                <div key={r.id} className="barRow" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(15px, 1fr))` }}>
+                  {r.kind === 'Milestone' ? (
+                    <div
+                      className="milestoneDiamond"
+                      style={{
+                        gridColumnStart: cssEnd -1, // Position at the end of the milestone day
+                        gridColumnEnd: cssEnd,
+                      }}
+                    />
+                  ) : (
+                    <div className="bar" style={{ ["--start" as any]: cssStart, ["--end" as any]: cssEnd }} />
+                  )}
                 </div>
               );
             })}

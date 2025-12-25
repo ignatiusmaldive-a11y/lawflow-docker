@@ -15,7 +15,7 @@ export function GlobalSearchModal({
   tasks: Task[];
   files: FileItem[];
   checklist: ChecklistItem[];
-  onNavigate: (view: "Board" | "Table" | "Timeline" | "Calendar" | "Files" | "Templates" | "Closing Pack") => void;
+  onNavigate: (view: "Tasks" | "Cronograma" | "Files" | "Templates" | "Closing Pack") => void;
 }) {
   const { t } = useI18n();
   const [q, setQ] = useState("");
@@ -33,7 +33,7 @@ export function GlobalSearchModal({
 
     for (const x of tasks) {
       const hay = (x.title + " " + (x.tags ?? "") + " " + x.assignee).toLowerCase();
-      if (hay.includes(qq)) out.push({ kind: "Task", label: x.title, sub: `${x.status} · ${x.assignee} · ${x.due_date ?? "—"}`, go: () => onNavigate("Table") });
+      if (hay.includes(qq)) out.push({ kind: "Task", label: x.title, sub: `${x.status} · ${x.assignee} · ${x.due_date ?? "—"}`, go: () => onNavigate("Tasks") });
     }
     for (const x of files) {
       const hay = (x.filename + " " + (x.mime_type ?? "") + " " + x.uploader).toLowerCase();
@@ -41,7 +41,7 @@ export function GlobalSearchModal({
     }
     for (const x of checklist) {
       const hay = (x.stage + " " + x.label).toLowerCase();
-      if (hay.includes(qq)) out.push({ kind: "Checklist", label: x.label, sub: `${x.stage} · ${x.is_done ? "Done" : "Open"}`, go: () => onNavigate("Board") });
+      if (hay.includes(qq)) out.push({ kind: "Checklist", label: x.label, sub: `${x.stage} · ${x.is_done ? "Done" : "Open"}`, go: () => onNavigate("Tasks") });
     }
     return out.slice(0, 24);
   }, [q, tasks, files, checklist, onNavigate]);
