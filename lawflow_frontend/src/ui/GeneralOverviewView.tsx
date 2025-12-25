@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Project } from "../lib/api";
 import { useI18n } from "../lib/i18n";
-import { formatProjectLabel, PROJECT_ID_OFFSET } from "../lib/formatting";
+import { formatProjectLabel, formatClientName, PROJECT_ID_OFFSET } from "../lib/formatting";
 
 type SortField = "title" | "project_number" | "status" | "location" | "risk" | "target_close_date" | "client";
 type SortDirection = "asc" | "desc";
@@ -52,9 +52,10 @@ export function GeneralOverviewView({
 
   const sortedAndFilteredProjects = useMemo(() => {
     let filtered = projects.filter(p => {
-      const matchesText = 
+      const matchesText =
         p.title.toLowerCase().includes(filter.toLowerCase()) ||
         p.location.toLowerCase().includes(filter.toLowerCase()) ||
+        (formatClientName(p.client?.name) || "").toLowerCase().includes(filter.toLowerCase()) ||
         (p.client?.name || "").toLowerCase().includes(filter.toLowerCase());
       
       const matchesStatus = statusFilter === "All" || p.status === statusFilter;
@@ -70,8 +71,8 @@ export function GeneralOverviewView({
         aVal = a.id + PROJECT_ID_OFFSET;
         bVal = b.id + PROJECT_ID_OFFSET;
       } else if (sortField === "client") {
-        aVal = a.client?.name || "";
-        bVal = b.client?.name || "";
+        aVal = formatClientName(a.client?.name) || "";
+        bVal = formatClientName(b.client?.name) || "";
       } else if (sortField === "target_close_date") {
         aVal = a[sortField] ? new Date(a[sortField]!).getTime() : Infinity;
         bVal = b[sortField] ? new Date(b[sortField]!).getTime() : Infinity;
@@ -240,7 +241,7 @@ export function GeneralOverviewView({
                       </div>
                     )}
                   </td>
-                  <td>{p.client?.name ?? "—"}</td>
+                  <td>{formatClientName(p.client?.name)}</td>
                 </tr>
               );
             })}

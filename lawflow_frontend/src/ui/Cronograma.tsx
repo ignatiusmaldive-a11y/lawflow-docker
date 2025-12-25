@@ -16,7 +16,7 @@ function daysUntil(dateStr?: string | null) {
   return Math.round(ms / (1000 * 60 * 60 * 24));
 }
 
-export function Cronograma({ projectId, items, tasks }: { projectId: number; items: TimelineItem[]; tasks: Task[] }) {
+export function Timeline({ projectId, items, tasks }: { projectId: number; items: TimelineItem[]; tasks: Task[] }) {
   const { t } = useI18n();
 
   const { start, end, rows, todayOffset, dateHeaders } = useMemo(() => {

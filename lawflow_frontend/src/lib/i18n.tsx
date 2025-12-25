@@ -9,8 +9,9 @@ const EN: Dict = {
   tagline: "Costa del Sol · Property Transactions",
   activeMatter: "Active matter",
   tasks: "Tasks",
-  cronograma: "Timeline",
+  timeline: "Timeline",
   files: "Files",
+
   templates: "Templates",
   closingPack: "Closing pack",
   settings: "Settings", // This key is still needed for useI18n
@@ -94,11 +95,12 @@ const EN: Dict = {
 };
 
 const ES: Dict = {
-  tagline: "Costa del Sol · Transacciones inmobiliarias",
+  tagline: "Transacciones inmobiliarias",
   activeMatter: "Asunto activo",
-  tareas: "Tareas",
-  cronograma: "Cronograma",
+  tasks: "Tareas",
+  timeline: "Cronograma",
   files: "Archivos",
+
   templates: "Plantillas",
   closingPack: "Paquete de cierre",
   settings: "Ajustes", // This key is still needed for useI18n

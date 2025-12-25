@@ -1,8 +1,26 @@
 import { Project } from "./api";
 
-// The user requested to start numbering at 732.
-// Assuming the database IDs start at 1, we add an offset of 731.
 export const PROJECT_ID_OFFSET = 731;
+
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toISOString().split("T")[0];
+}
+
+export function formatClientName(name: string | null | undefined): string {
+  if (!name) return "Unknown Client";
+
+  // Format: Surname, First Name
+  // Example: "Laura Pérez" becomes "Pérez, Laura"
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    const firstName = parts[0];
+    const surname = parts.slice(1).join(" ");
+    return `${surname}, ${firstName}`;
+  }
+  return name; // If only one part, return as is
+}
 
 export function formatProjectLabel(p: Project | null | undefined): string {
   if (!p) return "—";
@@ -14,8 +32,8 @@ export function formatProjectLabel(p: Project | null | undefined): string {
   // The user likely intends for a localized preposition.
 
   const id = p.id + PROJECT_ID_OFFSET;
-  const clientName = p.client?.name ?? "Unknown Client";
-  
+  const clientName = formatClientName(p.client?.name);
+
   let type: string = p.transaction_type;
   let separator = "@"; // Default separator
 

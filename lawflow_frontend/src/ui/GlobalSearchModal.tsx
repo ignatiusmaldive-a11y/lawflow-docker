@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ChecklistItem, FileItem, Task } from "../lib/api";
+import { ChecklistItem, FileItem, Task, TimelineItem } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+import { formatDate } from "../lib/formatting";
 
 export function GlobalSearchModal({
   open,
@@ -8,6 +9,7 @@ export function GlobalSearchModal({
   tasks,
   files,
   checklist,
+  timeline,
   onNavigate,
 }: {
   open: boolean;
@@ -15,7 +17,8 @@ export function GlobalSearchModal({
   tasks: Task[];
   files: FileItem[];
   checklist: ChecklistItem[];
-  onNavigate: (view: "Tasks" | "Cronograma" | "Files" | "Templates" | "Closing Pack") => void;
+  timeline: TimelineItem[];
+  onNavigate: (view: "Tasks" | "Timeline" | "Files" | "Templates" | "Closing Pack") => void;
 }) {
   const { t } = useI18n();
   const [q, setQ] = useState("");
@@ -43,8 +46,12 @@ export function GlobalSearchModal({
       const hay = (x.stage + " " + x.label).toLowerCase();
       if (hay.includes(qq)) out.push({ kind: "Checklist", label: x.label, sub: `${x.stage} · ${x.is_done ? "Done" : "Open"}`, go: () => onNavigate("Tasks") });
     }
+    for (const x of timeline) {
+      const hay = x.label.toLowerCase();
+      if (hay.includes(qq)) out.push({ kind: "Timeline", label: x.label, sub: `${formatDate(x.start_date)} - ${formatDate(x.end_date)}`, go: () => onNavigate("Timeline") });
+    }
     return out.slice(0, 24);
-  }, [q, tasks, files, checklist, onNavigate]);
+  }, [q, tasks, files, checklist, timeline, onNavigate]);
 
   if (!open) return null;
 

@@ -5,7 +5,7 @@ import { api2, api3 } from "../lib/api";
 import { formatProjectLabel, PROJECT_ID_OFFSET } from "../lib/formatting";
 import { Board } from "./Board";
 import { TasksTable } from "./TasksTable";
-import { Cronograma } from "./Cronograma";
+import { Timeline } from "./Cronograma";
 import { Checklist } from "./Checklist";
 import { ActivityFeed } from "./ActivityFeed";
 
@@ -20,7 +20,7 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { Callout } from "./components/Callout";
 
-type View = "Tasks" | "Cronograma" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
+type View = "Tasks" | "Timeline" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -167,7 +167,6 @@ export function App() {
 
 
   const [view, setView] = useState<View>("Tasks");
-  const [taskView, setTaskView] = useState<"Board" | "Table">("Board");
   const [pinnedIds, setPinnedIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_PINS) : []));
   const [recentIds, setRecentIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_RECENTS) : []));
 
@@ -319,7 +318,7 @@ useEffect(() => {
         <div className="brand">
           <div className="brandMark">◆</div>
           <div>
-            <div className="brandName">LawFlow</div>
+            <div className="brandName">AMA - CRM</div>
             <div className="small">{t("tagline")}</div>
           </div>
         </div>
@@ -439,7 +438,7 @@ useEffect(() => {
               {activeProjectId && view !== "General Overview" && (
                 <>
                   <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
-                  <button className={"topNavItem" + (view==="Cronograma"?" active":"")} onClick={()=>setView("Cronograma")}>{t("cronograma")}</button>
+                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
                   <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
                   <button className={"topNavItem" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
                   <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
@@ -504,83 +503,80 @@ useEffect(() => {
                     Deadline alerts: {kpis.overdue > 0 ? `${kpis.overdue} overdue` : "0 overdue"} · {kpis.dueSoon > 0 ? `${kpis.dueSoon} due soon` : "0 due soon"}
                   </div>
                   <button className="btn" onClick={() => { 
-                    setView("Cronograma"); 
+                    setView("Timeline"); 
                     if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
                     setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
                   }}>Review</button>
                 </div>
               ) : null}
 
-              <div className="grid4">
-                <div className="card cardPad">
-                  <div className="kpiTop">
-                    <div className="kpiLabel">{t("openTasks")}</div>
-                    <span className="pill">{kpis.open}</span>
+              {view === "Tasks" && (
+                <div className="grid4">
+                  <div className="card cardPad">
+                    <div className="kpiTop">
+                      <div className="kpiLabel">{t("openTasks")}</div>
+                      <span className="pill">{kpis.open}</span>
+                    </div>
+                    <div className="kpiValue">{kpis.open}</div>
+                    <div className="small">Across board columns</div>
                   </div>
-                  <div className="kpiValue">{kpis.open}</div>
-                  <div className="small">Across board columns</div>
-                </div>
-                <div className="card cardPad">
-                  <div className="kpiTop">
-                    <div className="kpiLabel">{t("dueIn7")}</div>
-                    <span className="pill warn">{kpis.dueSoon}</span>
+                  <div className="card cardPad">
+                    <div className="kpiTop">
+                      <div className="kpiLabel">{t("dueIn7")}</div>
+                      <span className="pill warn">{kpis.dueSoon}</span>
+                    </div>
+                    <div className="kpiValue">{kpis.dueSoon}</div>
+                    <div className="small">Deadlines to watch</div>
                   </div>
-                  <div className="kpiValue">{kpis.dueSoon}</div>
-                  <div className="small">Deadlines to watch</div>
-                </div>
-                <div className="card cardPad">
-                  <div className="kpiTop">
-                    <div className="kpiLabel">{t("overdue")}</div>
-                    <span className="pill bad">{kpis.overdue}</span>
+                  <div className="card cardPad">
+                    <div className="kpiTop">
+                      <div className="kpiLabel">{t("overdue")}</div>
+                      <span className="pill bad">{kpis.overdue}</span>
+                    </div>
+                    <div className="kpiValue">{kpis.overdue}</div>
+                    <div className="small">Escalate blockers</div>
                   </div>
-                  <div className="kpiValue">{kpis.overdue}</div>
-                  <div className="small">Escalate blockers</div>
-                </div>
-                <div className="card cardPad">
-                  <div className="kpiTop">
-                    <div className="kpiLabel">{t("completed")}</div>
-                    <span className="pill ok">{kpis.done}</span>
+                  <div className="card cardPad">
+                    <div className="kpiTop">
+                      <div className="kpiLabel">{t("completed")}</div>
+                      <span className="pill ok">{kpis.done}</span>
+                    </div>
+                    <div className="kpiValue">{kpis.done}</div>
+                    <div className="small">Done tasks</div>
                   </div>
-                  <div className="kpiValue">{kpis.done}</div>
-                  <div className="small">Done tasks</div>
                 </div>
-              </div>
+              )}
 
 
 
               <div className="card cardPad" style={{ marginTop: 12 }}>
                 <div className="sectionTitle">
                   <h2>{t("work")}</h2>
-                  {view === "Tasks" && (
-                    <div className="tabs">
-                      <button className={"tab" + (taskView === "Board" ? " active" : "")} onClick={() => setTaskView("Board")}>Board</button>
-                      <button className={"tab" + (taskView === "Table" ? " active" : "")} onClick={() => setTaskView("Table")}>Table</button>
-                    </div>
-                  )}
                 </div>
 
-                {activeProjectId && view === "Tasks" && taskView === "Board" && (
-                  <Board
-                    tasks={filteredTasks}
-                    onMove={async (taskId, nextStatus) => {
-                      await api.updateTask(taskId, { status: nextStatus });
-                      await refreshAll(activeProjectId);
-                    }}
-                  />
+                {activeProjectId && view === "Tasks" && (
+                  <>
+                    <h3 style={{ marginTop: 20, marginBottom: 10 }}>Table</h3>
+                    <TasksTable
+                      tasks={filteredTasks}
+                      onEdit={async (taskId, patch) => {
+                        await api.updateTask(taskId, patch);
+                        await refreshAll(activeProjectId);
+                      }}
+                    />
+                    <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
+                    <Board
+                      tasks={filteredTasks}
+                      onMove={async (taskId, nextStatus) => {
+                        await api.updateTask(taskId, { status: nextStatus });
+                        await refreshAll(activeProjectId);
+                      }}
+                    />
+                  </>
                 )}
 
-                {activeProjectId && view === "Tasks" && taskView === "Table" && (
-                  <TasksTable
-                    tasks={filteredTasks}
-                    onEdit={async (taskId, patch) => {
-                      await api.updateTask(taskId, patch);
-                      await refreshAll(activeProjectId);
-                    }}
-                  />
-                )}
-
-                {activeProjectId && view === "Cronograma" && (
-                  <Cronograma projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
+                {activeProjectId && view === "Timeline" && (
+                  <Timeline projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
                 )}
 
   {activeProjectId && view === "Files" && (
@@ -675,15 +671,15 @@ useEffect(() => {
   }}
 />
 
-<GlobalSearchModal
-          open={globalSearchOpen}
-          onClose={() => setGlobalSearchOpen(false)}
-          tasks={tasks}
-          files={files as any}
-          checklist={checklist}
-          onNavigate={(v) => setView(v)}
-        />
-      </main>
+          <GlobalSearchModal
+            open={globalSearchOpen}
+            onClose={() => setGlobalSearchOpen(false)}
+            tasks={tasks}
+            files={files as any}
+            checklist={checklist}
+            timeline={timeline}
+            onNavigate={(v) => setView(v)}
+          />      </main>
     </div>
   );
 }
