@@ -325,7 +325,6 @@ useEffect(() => {
 
         <nav className="nav">
           <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>{t("overviewLink")}</a>
-          <a className={view === "Tasks" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("Tasks");}}>{t("tasks")}</a>
         </nav>
 
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
