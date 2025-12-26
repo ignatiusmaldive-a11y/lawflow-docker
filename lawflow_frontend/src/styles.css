@@ -239,7 +239,7 @@ select.select::-ms-expand { display: none; }
   position: relative;
   overflow: visible; /* Allow today line to show */
 }
-.barRow{ display:grid; height: 100%; align-items:center; position: relative; }
+.barRow{ display:grid; height: 100%; align-items:center; position: relative; grid-column: 1 / -1; }
 .bar{
   grid-column: var(--start) / var(--end);
   height: 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
