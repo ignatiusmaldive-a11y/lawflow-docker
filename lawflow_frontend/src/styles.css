@@ -682,39 +682,24 @@ select.select::-ms-expand { display: none; }
   border-bottom-color: var(--brand);
 }
 
-/* Custom column widths for GeneralOverviewView */
-.column-matter {
-  width: auto; /* Allow Asunto to take needed space */
+.sidebar.hide-content > *:not(.card) {
+  visibility: hidden;
 }
-.column-location {
-  width: 15%; /* Default for smaller screens */
-}
-
-@media (min-width: 769px) { /* Medium screens and up */
-  .column-matter {
-    width: auto;
-  }
-  .column-location {
-    width: 15%; /* Keep location concise */
-  }
+.sidebar.hide-content .active-matter-group {
+  visibility: hidden;
 }
 
-@media (min-width: 1041px) { /* Larger screens */
-  .column-matter {
-    width: auto;
-  }
-  .column-location {
-    width: 15%; /* Keep location concise */
-  }
+.sidebar.hide-content .card.cardPad {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-/* Reduce spacing for specific columns */
-.table th:nth-child(2), /* Ubicación header */
-.table td:nth-child(2), /* Ubicación cells */
-.table th:nth-child(3), /* Estado header */
-.table td:nth-child(3), /* Estado cells */
-.table th:nth-child(4), /* Riesgo header */
-.table td:nth-child(4) { /* Riesgo cells */
-  padding-left: 6px;
-  padding-right: 6px;
+.sidebar.hide-content .pinned-recent-group {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 35px rgba(0,0,0,.18);
+  padding: 14px;
+  margin: 0 -14px -14px -14px;
 }

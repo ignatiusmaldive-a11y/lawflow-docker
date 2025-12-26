@@ -314,7 +314,7 @@ useEffect(() => {
   return (
     <div className="shell" style={{ background: view === "General Overview" ? defaultBg : (activeProject?.bg_color ?? defaultBg) }}>
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
-      <aside className="sidebar">
+      <aside className={`sidebar ${view === "General Overview" ? "hide-content" : ""}`}>
         <div className="brand">
           <div className="brandMark">◆</div>
           <div>
@@ -330,41 +330,44 @@ useEffect(() => {
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
 
         <div className="card cardPad">
-          <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
-          <select
-            className="select"
-            value={activeProjectId ?? undefined}
-            onChange={(e) => {
-               setActiveProjectId(Number(e.target.value));
-               if (view === "General Overview") setView("Tasks"); 
-            }}
-          >
-            {projects.map((p) => (
-              <option value={p.id} key={p.id}>
-                {formatProjectLabel(p)}
-              </option>
-            ))}
-          </select>
-<div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-  <div className="small" style={{ fontWeight: 900 }}>
-    <b>Status</b>: {activeProject?.status ?? "—"}
-  </div>
-  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-    {activeProject ? riskPill(activeProject.risk) : null}
-    <button
-      className="btn ghost"
-      onClick={(e) => {
-        e.preventDefault();
-        if (!activeProject) return;
-        setPinnedIds(togglePin(activeProject.id));
-      }}
-      title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
-    >
-      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-    </button>
-  </div>
-</div>
+          <div className="active-matter-group">
+            <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
+            <select
+              className="select"
+              value={activeProjectId ?? undefined}
+              onChange={(e) => {
+                setActiveProjectId(Number(e.target.value));
+                if (view === "General Overview") setView("Tasks"); 
+              }}
+            >
+              {projects.map((p) => (
+                <option value={p.id} key={p.id}>
+                  {formatProjectLabel(p)}
+                </option>
+              ))}
+            </select>
+            <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
+              <div className="small" style={{ fontWeight: 900 }}>
+                <b>Status</b>: {activeProject?.status ?? "—"}
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                {activeProject ? riskPill(activeProject.risk) : null}
+                <button
+                  className="btn ghost"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!activeProject) return;
+                    setPinnedIds(togglePin(activeProject.id));
+                  }}
+                  title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
+                >
+                  {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+                </button>
+              </div>
+            </div>
+          </div>
 
+<div className="pinned-recent-group">
 {pinnedProjects.length > 0 && (
   <div style={{ marginTop: 12 }}>
     <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Pinned</div>
@@ -403,6 +406,7 @@ useEffect(() => {
   </div>
 )}
 </div>
+</div>
 
         <div className="sidebarFooter">
           <div className="userchip">
@@ -421,7 +425,15 @@ useEffect(() => {
           <div className="titleRow">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <p className="h1">
-                {view === "General Overview" ? "Portfolio Overview" : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
+                {view === "General Overview" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="brandMark">◆</div>
+                    <div>
+                      <div className="brandName">AMA-CRM</div>
+                      <div className="small">Transacciones inmobiliarias</div>
+                    </div>
+                  </div>
+                ) : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
               </p>
               {view !== "General Overview" && activeProject && (
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
