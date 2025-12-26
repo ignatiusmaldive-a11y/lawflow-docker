@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import { Task } from "../lib/api";
+import { daysUntil } from "../lib/formatting";
 
-const STATUSES: Task["status"][] = ["Backlog", "In Progress", "Review", "Done"];
-const PRIORITIES: Task["priority"][] = ["Low", "Medium", "High"];
+const STATUSES: Task["status"][] = ["Pendiente", "En curso", "Revisión", "Hecho"];
+const PRIORITIES: Task["priority"][] = ["Baja", "Media", "Alta"];
 
 export function TasksTable({
   tasks,
@@ -17,12 +18,12 @@ export function TasksTable({
     <table className="table">
       <thead>
         <tr>
-          <th>Task</th>
-          <th>Status</th>
-          <th>Assignee</th>
-          <th>Due</th>
-          <th>Priority</th>
-          <th>Tags</th>
+          <th>Tarea</th>
+          <th>Estado</th>
+          <th>Asignado</th>
+          <th>Vencimiento</th>
+          <th>Prioridad</th>
+          <th>Etiquetas</th>
         </tr>
       </thead>
       <tbody>
@@ -40,12 +41,28 @@ export function TasksTable({
             </td>
             <td>{t.assignee}</td>
             <td>
-              <input
-                className="select"
-                type="date"
-                value={t.due_date ?? ""}
-                onChange={(e) => onEdit(t.id, { due_date: e.target.value || null })}
-              />
+              <div>
+                <input
+                  className={`select ${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
+                    daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
+                  }`}
+                  type="date"
+                  value={t.due_date ?? ""}
+                  onChange={(e) => onEdit(t.id, { due_date: e.target.value || null })}
+                />
+                {t.due_date && (
+                  <div
+                    style={{ fontSize: 10, marginTop: 2 }}
+                    className={`${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
+                      daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
+                    }`}
+                  >
+                    {daysUntil(t.due_date)! < 0
+                      ? `${Math.abs(daysUntil(t.due_date)!)} días atrasado`
+                      : `${daysUntil(t.due_date)!} días restantes`}
+                  </div>
+                )}
+              </div>
             </td>
             <td>
               <select className="select" value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>

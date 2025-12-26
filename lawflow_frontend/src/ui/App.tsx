@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useI18n } from "../lib/i18n";
 import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem } from "../lib/api";
 import { api2, api3 } from "../lib/api";
-import { formatProjectLabel, PROJECT_ID_OFFSET } from "../lib/formatting";
+import { formatProjectLabel, PROJECT_ID_OFFSET, daysUntil } from "../lib/formatting";
 import { Board } from "./Board";
 import { TasksTable } from "./TasksTable";
 import { Timeline } from "./Cronograma";
@@ -141,14 +141,7 @@ function QColorSafe(parts: string[]) {
   return parts.map((s) => String(s ?? "").trim()).filter(Boolean);
 }
 
-function daysUntil(dateStr?: string | null) {
 
-  if (!dateStr) return null;
-  const d = new Date(dateStr + "T00:00:00");
-  const now = new Date();
-  const ms = d.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  return Math.round(ms / (1000 * 60 * 60 * 24));
-}
 
 export function App() {
   const { lang, t } = useI18n();
@@ -369,9 +362,8 @@ useEffect(() => {
 
 <div className="pinned-recent-group">
 {pinnedProjects.length > 0 && (
-  <div style={{ marginTop: 12 }}>
-    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Pinned</div>
-    <div style={{ display: "grid", gap: 6 }}>
+      <div style={{ marginTop: 12 }}>
+        <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
       {pinnedProjects.slice(0, 4).map((p) => (
         <button
           key={p.id}
@@ -389,7 +381,7 @@ useEffect(() => {
 
 {recentProjects.length > 0 && (
   <div style={{ marginTop: 12 }}>
-    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recently opened</div>
+    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
     <div style={{ display: "grid", gap: 6 }}>
       {recentProjects.slice(0, 5).map((p) => (
         <button
@@ -422,7 +414,7 @@ useEffect(() => {
 
       <main className="main">
         <header className="topbar">
-          <div className="titleRow">
+          <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <p className="h1">
                 {view === "General Overview" ? (
@@ -466,7 +458,7 @@ useEffect(() => {
   )}
 </span>
             </p> */}
-            <div className="topNav" style={{ minHeight: 42 }}>
+            <div className="topNav" style={{ minHeight: 42, display: view === "General Overview" ? "none" : "block" }}>
               {activeProjectId && view !== "General Overview" && (
                 <>
                   <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
@@ -535,40 +527,55 @@ useEffect(() => {
               ) : null}
 
               {view === "Tasks" && (
-                <div className="grid4">
-                  <div className="card cardPad">
-                    <div className="kpiTop">
-                      <div className="kpiLabel">{t("openTasks")}</div>
-                      <span className="pill">{kpis.open}</span>
+                <>
+                  {/*
+                  <div className="card cardPad" style={{ marginBottom: 20 }}>
+                    <div className="grid4" style={{ display: "flex", justifyContent: "space-around", width: "100%", alignItems: "flex-start" }}>
+                      <div className="card cardPad" style={{ flex: 1, textAlign: "center", padding: "4px 0", border: "none", boxShadow: "none", background: "transparent" }}>
+                        <div className="kpiTop">
+                          <div className="kpiLabel">{t("openTasks")}</div>
+                        </div>
+                        <div className="kpiValue">{kpis.open}</div>
+                        <div className="small">{t("acrossBoardColumns")}</div>
+                      </div>
+                      <div className="card cardPad" style={{ flex: 1, textAlign: "center", padding: "4px 0", border: "none", boxShadow: "none", background: "transparent" }}>
+                        <div className="kpiTop">
+                          <div className="kpiLabel">{t("dueIn7")}</div>
+                        </div>
+                        <div className={`kpiValue ${kpis.dueSoon > 0 ? "warn" : ""}`}>{kpis.dueSoon}</div>
+                        <div className="small">Plazos a vigilar</div>
+                      </div>
+                      <div className="card cardPad" style={{ flex: 1, textAlign: "center", padding: "4px 0", border: "none", boxShadow: "none", background: "transparent" }}>
+                        <div className="kpiTop">
+                          <div className="kpiLabel">{t("overdue")}</div>
+                        </div>
+                        <div className={`kpiValue ${kpis.overdue > 0 ? "bad" : ""}`}>{kpis.overdue}</div>
+                        <div className="small">Bloqueos para escalar</div>
+                      </div>
+                      <div className="card cardPad" style={{ flex: 1, textAlign: "center", padding: "4px 0", border: "none", boxShadow: "none", background: "transparent" }}>
+                        <div className="kpiTop">
+                          <div className="kpiLabel">{t("completed")}</div>
+                        </div>
+                        <div className={`kpiValue ${kpis.done > 0 ? "ok" : ""}`}>{kpis.done}</div>
+                        <div className="small">{t("doneTasks")}</div>
+                      </div>
                     </div>
-                    <div className="kpiValue">{kpis.open}</div>
-                    <div className="small">{t("acrossBoardColumns")}</div>
                   </div>
-                  <div className="card cardPad">
-                    <div className="kpiTop">
-                      <div className="kpiLabel">{t("dueIn7")}</div>
-                      <span className="pill warn">{kpis.dueSoon}</span>
+                  */}
+
+                  {/*
+                  <div style={{ display: "flex", justifyContent: "flex-start", gap: 20, marginBottom: 20 }}>
+                    <div style={{ textAlign: "center" }}>
+                      <div className="small">{t("openTasks")}</div>
+                      <div className="kpiValue">{kpis.open}</div>
                     </div>
-                    <div className="kpiValue">{kpis.dueSoon}</div>
-                    <div className="small">Deadlines to watch</div>
-                  </div>
-                  <div className="card cardPad">
-                    <div className="kpiTop">
-                      <div className="kpiLabel">{t("overdue")}</div>
-                      <span className="pill bad">{kpis.overdue}</span>
+                    <div style={{ textAlign: "center" }}>
+                      <div className="small">{t("completed")}</div>
+                      <div className="kpiValue ok">{kpis.done}</div>
                     </div>
-                    <div className="kpiValue">{kpis.overdue}</div>
-                    <div className="small">Escalate blockers</div>
                   </div>
-                  <div className="card cardPad">
-                    <div className="kpiTop">
-                      <div className="kpiLabel">{t("completed")}</div>
-                      <span className="pill ok">{kpis.done}</span>
-                    </div>
-                    <div className="kpiValue">{kpis.done}</div>
-                    <div className="small">{t("doneTasks")}</div>
-                  </div>
-                </div>
+                  */}
+                </>
               )}
 
 

@@ -166,13 +166,14 @@ export function GeneralOverviewView({
           onChange={(e) => setFilter(e.target.value)}
           style={{ width: 300 }}
         />
-        
-                <select
-                  className="select"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  style={{ width: 220 }}
-                >          <option value="All">{t("allStatuses")}</option>
+
+        <select
+          className="select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{ width: 220 }}
+        >
+          <option value="All">{t("allStatuses")}</option>
           <option value="Due Diligence">Due Diligence</option>
           <option value="Contracts">Contracts</option>
           <option value="Notary">Notary</option>

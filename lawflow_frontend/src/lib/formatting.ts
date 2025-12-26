@@ -54,3 +54,11 @@ export function formatProjectLabel(p: Project | null | undefined): string {
 
   return `${id} - ${clientName} - ${type} ${separator} ${p.location}`;
 }
+
+export function daysUntil(dateStr?: string | null) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + "T00:00:00");
+  const now = new Date();
+  const ms = d.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return Math.round(ms / (1000 * 60 * 60 * 24));
+}
