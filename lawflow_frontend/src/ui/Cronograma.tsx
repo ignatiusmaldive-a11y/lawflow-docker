@@ -70,19 +70,6 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      {/* Calendar Section */}
-      <div className="card cardPad">
-        <div className="sectionTitle">
-          <h2>{t("calendar")}</h2>
-          <a className="btn" href={api2.calendarIcsUrl(projectId)}>
-            {t("downloadIcs")}
-          </a>
-        </div>
-        <div className="small">
-          {t("calendarSubtitle")}
-        </div>
-      </div>
-
       {/* Timeline Section */}
       <div className="timelineWrap">
         <div className="timeline">
@@ -195,6 +182,19 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Calendar Section */}
+      <div className="card cardPad">
+        <div className="sectionTitle">
+          <h2>{t("calendar")}</h2>
+          <a className="btn" href={api2.calendarIcsUrl(projectId)}>
+            {t("downloadIcs")}
+          </a>
+        </div>
+        <div className="small">
+          {t("calendarSubtitle")}
+        </div>
       </div>
     </div>
   );

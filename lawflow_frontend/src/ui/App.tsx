@@ -581,13 +581,8 @@ useEffect(() => {
 
 
               <div className="card cardPad" style={{ marginTop: 12 }}>
-                <div className="sectionTitle">
-                  <h2>{t("work")}</h2>
-                </div>
-
                 {activeProjectId && view === "Tasks" && (
                   <>
-                    <h3 style={{ marginTop: 20, marginBottom: 10 }}>Table</h3>
                     <TasksTable
                       tasks={filteredTasks}
                       onEdit={async (taskId, patch) => {

@@ -361,11 +361,11 @@ def seed_if_empty(db: Session):
     # Timeline: phases + milestone per project
     def add_timeline(p, close_in_days):
         phases = [
-            ("Intake", -8, -2),
-            ("Due Diligence", -2, 10),
-            ("Contracts", 6, 18),
-            ("Notary", 14, 22),
-            ("Registry", 20, 40),
+            ("Admisión", -8, -2),
+            ("Debida Diligencia", -2, 10),
+            ("Contratos", 6, 18),
+            ("Notaría", 14, 22),
+            ("Registro", 20, 40),
         ]
         for label, s, e in phases:
             db.add(
@@ -378,7 +378,7 @@ def seed_if_empty(db: Session):
                 )
             )
         close = today + timedelta(days=close_in_days)
-        db.add(TimelineItem(project_id=p.id, label="Target completion", start_date=close, end_date=close, kind="Milestone"))
+        db.add(TimelineItem(project_id=p.id, label="Finalización objetivo", start_date=close, end_date=close, kind="Milestone"))
 
     # Add timelines for all projects
     for p in projects:

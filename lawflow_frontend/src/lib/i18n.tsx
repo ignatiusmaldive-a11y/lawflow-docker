@@ -84,6 +84,7 @@ const EN: Dict = {
 
   // Calendar View page
   deadlineAlerts: "Deadline alerts",
+  calendar: "Calendar sync",
   overdueCount: "{count} overdue",
   noOverdue: "No overdue",
   taskTableCol: "Task",
@@ -173,6 +174,7 @@ const ES: Dict = {
 
   // Calendar View page
   deadlineAlerts: "Alertas de plazos",
+  calendar: "Sincronizar calendario",
   overdueCount: "{count} atrasados",
   noOverdue: "Sin atrasos",
   taskTableCol: "Tarea",

@@ -31,7 +31,7 @@ export function TasksTable({
           <tr key={t.id}>
             <td style={{ fontWeight: 950 }}>{t.title}</td>
             <td>
-              <select className="select" value={t.status} onChange={(e) => onEdit(t.id, { status: e.target.value as any })}>
+              <select className="select" style={{ width: '120px' }} value={t.status} onChange={(e) => onEdit(t.id, { status: e.target.value as any })}>
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {s}
@@ -41,15 +41,27 @@ export function TasksTable({
             </td>
             <td>{t.assignee}</td>
             <td>
+              <input
+                className={`select ${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
+                  daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
+                }`}
+                type="date"
+                value={t.due_date ?? ""}
+                onChange={(e) => onEdit(t.id, { due_date: e.target.value || null })}
+              />
+            </td>
+            <td>
+              <select className="select" style={{ width: '120px' }} value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>
+                {PRIORITIES.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td>
               <div>
-                <input
-                  className={`select ${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
-                    daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
-                  }`}
-                  type="date"
-                  value={t.due_date ?? ""}
-                  onChange={(e) => onEdit(t.id, { due_date: e.target.value || null })}
-                />
+                <div>{t.tags ?? ""}</div>
                 {t.due_date && (
                   <div
                     style={{ fontSize: 10, marginTop: 2 }}
@@ -64,16 +76,6 @@ export function TasksTable({
                 )}
               </div>
             </td>
-            <td>
-              <select className="select" value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </td>
-            <td>{t.tags ?? ""}</td>
           </tr>
         ))}
       </tbody>
