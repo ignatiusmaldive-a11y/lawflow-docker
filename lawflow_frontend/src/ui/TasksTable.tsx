@@ -31,7 +31,12 @@ export function TasksTable({
           <tr key={t.id}>
             <td style={{ fontWeight: 950 }}>{t.title}</td>
             <td>
-              <select className="select" style={{ width: '120px' }} value={t.status} onChange={(e) => onEdit(t.id, { status: e.target.value as any })}>
+              <select
+                className="select"
+                style={{ width: '120px' }}
+                value={t.status}
+                onChange={(e) => onEdit(t.id, { status: e.target.value as any })}
+              >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
                     {s}
@@ -64,7 +69,7 @@ export function TasksTable({
                 <div>{t.tags ?? ""}</div>
                 {t.status === "Hecho" ? (
                   <div
-                    style={{ fontSize: 10, marginTop: 2 }}
+                    style={{ fontSize: 10, marginTop: 2, color: "var(--brand2)" }}
                     className="ok"
                   >
                     Completado

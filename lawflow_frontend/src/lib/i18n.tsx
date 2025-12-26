@@ -80,6 +80,7 @@ const EN: Dict = {
   riskAtRisk: "At Risk",
   riskCritical: "Critical",
   cancel: "Cancel",
+  close: "Close",
   saveChanges: "Save Changes",
 
   // Calendar View page
@@ -93,6 +94,8 @@ const EN: Dict = {
   // statusTableCol: "Status", // Removed duplicate
   noUpcomingDeadlines: "No upcoming deadlines.",
   calendarSubtitle: "Subscribe this matter in Google Calendar / Outlook using the ICS file. (Demo: exports task due dates + milestones.)",
+  dueSoonCount: "{count} due soon",
+  reviewButton: "Review",
 };
 
 const ES: Dict = {
@@ -170,6 +173,7 @@ const ES: Dict = {
   riskAtRisk: "En riesgo",
   riskCritical: "Crítico",
   cancel: "Cancelar",
+  close: "Cerrar",
   saveChanges: "Guardar cambios",
 
   // Calendar View page
@@ -183,6 +187,8 @@ const ES: Dict = {
   // statusTableCol: "Estado", // Removed duplicate
   noUpcomingDeadlines: "No hay plazos próximos.",
   calendarSubtitle: "Suscribe este asunto en Google Calendar / Outlook usando el archivo ICS. (Demo: exporta fechas de vencimiento de tareas + hitos.)",
+  dueSoonCount: "{count} vencen pronto",
+  reviewButton: "Revisar",
 };
 
 const Ctx = createContext<{ lang: Lang; t: (k: keyof typeof EN) => string } | null>(null);

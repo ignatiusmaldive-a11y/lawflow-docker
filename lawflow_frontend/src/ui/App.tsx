@@ -168,6 +168,12 @@ export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [deadlineDismissedStats, setDeadlineDismissedStats] = useState<{ overdue: number; dueSoon: number }>({ overdue: -1, dueSoon: -1 });
   const [tipsDismissed, setTipsDismissed] = useState(false);
+  const [tipsTimerReady, setTipsTimerReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTipsTimerReady(true), 4 * 60 * 1000); // 4 minutes
+    return () => clearTimeout(timer);
+  }, []);
 
 const pinnedProjects = useMemo(() => {
   const set = new Set(pinnedIds);
@@ -317,7 +323,7 @@ useEffect(() => {
         </div>
 
         <nav className="nav">
-          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview");}}>{t("overviewLink")}</a>
+          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview"); if (sidebarOpen) setSidebarOpen(false);}}>{t("overviewLink")}</a>
         </nav>
 
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
@@ -330,7 +336,8 @@ useEffect(() => {
               value={activeProjectId ?? undefined}
               onChange={(e) => {
                 setActiveProjectId(Number(e.target.value));
-                if (view === "General Overview") setView("Tasks"); 
+                if (view === "General Overview") setView("Tasks");
+                if (sidebarOpen) setSidebarOpen(false); // Close sidebar on selection
               }}
             >
               {projects.map((p) => (
@@ -353,6 +360,7 @@ useEffect(() => {
                     setPinnedIds(togglePin(activeProject.id));
                   }}
                   title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
+                  style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
                 >
                   {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
                 </button>
@@ -368,7 +376,7 @@ useEffect(() => {
         <button
           key={p.id}
           className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); }}
+          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
           title={p.title}
         >
           <span className="chipDot" />
@@ -387,7 +395,7 @@ useEffect(() => {
         <button
           key={p.id}
           className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); }}
+          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
           title={p.title}
         >
           <span className="chipDot muted" />
@@ -428,7 +436,7 @@ useEffect(() => {
                 ) : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
               </p>
               {view !== "General Overview" && activeProject && (
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
                   <div className="small" style={{ fontWeight: 900 }}>
                     <b>{t("status")}</b>: {activeProject?.status ?? "—"}
                   </div>
@@ -441,6 +449,7 @@ useEffect(() => {
                       setPinnedIds(togglePin(activeProject.id));
                     }}
                     title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
+                    style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
                   >
                     {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
                   </button>
@@ -502,10 +511,11 @@ useEffect(() => {
           ) : (
           <div className="contentGrid">
             <div className="leftColumn">
-              {!tipsDismissed ? (
+              {!tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
+                    actionLabel={t("close")}
                     onDismiss={() => {
                       if (activeProjectId) saveDismissedTips(activeProjectId);
                       setTipsDismissed(true);
@@ -516,13 +526,13 @@ useEffect(() => {
               {(kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
                 <div className="deadlineBanner">
                   <div style={{ fontWeight: 950 }}>
-                    Deadline alerts: {kpis.overdue > 0 ? `${kpis.overdue} overdue` : "0 overdue"} · {kpis.dueSoon > 0 ? `${kpis.dueSoon} due soon` : "0 due soon"}
+                    {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
                   </div>
                   <button className="btn" onClick={() => { 
                     setView("Timeline"); 
                     if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
                     setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
-                  }}>Review</button>
+                  }}>{t("reviewButton")}</button>
                 </div>
               ) : null}
 
