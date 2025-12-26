@@ -12,7 +12,7 @@ export function TasksTable({
   tasks: Task[];
   onEdit: (taskId: number, patch: Partial<Task>) => Promise<void>;
 }) {
-  const rows = useMemo(() => [...tasks].sort((a, b) => String(a.due_date ?? "").localeCompare(String(b.due_date ?? ""))), [tasks]);
+  const rows = useMemo(() => [...tasks].sort((a, b) => a.id - b.id), [tasks]);
 
   return (
     <table className="table">
