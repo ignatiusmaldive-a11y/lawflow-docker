@@ -291,16 +291,16 @@ useEffect(() => {
   }, [tasks, q]);
 
   const kpis = useMemo(() => {
-    const open = tasks.filter((t) => t.status !== "Done").length;
+    const open = tasks.filter((t) => t.status !== "Hecho").length;
     const dueSoon = tasks.filter((t) => {
       const d = daysUntil(t.due_date);
-      return d !== null && d <= 7 && d >= 0 && t.status !== "Done";
+      return d !== null && d <= 7 && d >= 0 && t.status !== "Hecho";
     }).length;
     const overdue = tasks.filter((t) => {
       const d = daysUntil(t.due_date);
-      return d !== null && d < 0 && t.status !== "Done";
+      return d !== null && d < 0 && t.status !== "Hecho";
     }).length;
-    const done = tasks.filter((t) => t.status === "Done").length;
+    const done = tasks.filter((t) => t.status === "Hecho").length;
     return { open, dueSoon, overdue, done };
   }, [tasks]);
 

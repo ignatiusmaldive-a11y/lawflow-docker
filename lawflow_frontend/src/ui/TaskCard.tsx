@@ -3,8 +3,8 @@ import { useDraggable } from "@dnd-kit/core";
 import { Task } from "../lib/api";
 
 function dot(priority: Task["priority"]) {
-  if (priority === "High") return <span className="dot bad" />;
-  if (priority === "Medium") return <span className="dot warn" />;
+  if (priority === "Alta") return <span className="dot bad" />;
+  if (priority === "Media") return <span className="dot warn" />;
   return <span className="dot ok" />;
 }
 

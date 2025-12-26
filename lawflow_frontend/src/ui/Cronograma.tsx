@@ -60,7 +60,7 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
 
   const upcoming = useMemo(() => {
     return [...tasks]
-      .filter((t) => t.due_date && t.status !== "Done")
+      .filter((t) => t.due_date && t.status !== "Hecho")
       .map((t) => ({ ...t, d: daysUntil(t.due_date) ?? 9999 }))
       .sort((a, b) => a.d - b.d)
       .slice(0, 12);

@@ -27,7 +27,7 @@ export function ClosingPackWizard({ projectId, project, tasks, checklist }: { pr
   const { t } = useI18n();
   const [step, setStep] = useState<Step>("Notary");
 
-  const openTasks = useMemo(() => tasks.filter((x) => x.status !== "Done"), [tasks]);
+  const openTasks = useMemo(() => tasks.filter((x) => x.status !== "Hecho"), [tasks]);
   const overdue = useMemo(() => openTasks.filter((x) => isOverdue(x.due_date)), [openTasks]);
 
   const byStage = useMemo(() => {

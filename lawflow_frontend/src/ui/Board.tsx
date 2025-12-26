@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { Task } from "../lib/api";
 import { TaskCard } from "./TaskCard";
 
-const STATUSES: Task["status"][] = ["Backlog", "In Progress", "Review", "Done"];
+const STATUSES: Task["status"][] = ["Pendiente", "En curso", "Revisión", "Hecho"];
 
 function Column({ status, tasks, children }: { status: Task["status"]; tasks: Task[]; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
@@ -21,7 +21,7 @@ function Column({ status, tasks, children }: { status: Task["status"]; tasks: Ta
 
 export function Board({ tasks, onMove }: { tasks: Task[]; onMove: (taskId: number, next: Task["status"]) => Promise<void> }) {
   const byStatus = useMemo(() => {
-    const m: Record<Task["status"], Task[]> = { "Backlog": [], "In Progress": [], "Review": [], "Done": [] };
+    const m: Record<Task["status"], Task[]> = { "Pendiente": [], "En curso": [], "Revisión": [], "Hecho": [] };
     for (const t of tasks) m[t.status].push(t);
     return m;
   }, [tasks]);

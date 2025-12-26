@@ -8,7 +8,7 @@ export function ClosingPackView({ projectId, project, tasks, checklist }: {
   tasks: Task[];
   checklist: ChecklistItem[];
 }) {
-  const openTasks = tasks.filter((t) => t.status !== "Done");
+  const openTasks = tasks.filter((t) => t.status !== "Hecho");
   const done = checklist.filter((c) => c.is_done).length;
 
   return (

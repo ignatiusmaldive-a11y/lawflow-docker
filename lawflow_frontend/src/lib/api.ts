@@ -19,10 +19,10 @@ export type Task = {
   id: number;
   project_id: number;
   title: string;
-  status: "Backlog" | "In Progress" | "Review" | "Done";
+  status: "Pendiente" | "En curso" | "Revisión" | "Hecho";
   assignee: string;
   due_date?: string | null;
-  priority: "Low" | "Medium" | "High";
+  priority: "Baja" | "Media" | "Alta";
   tags?: string | null;
   description?: string | null;
 };
