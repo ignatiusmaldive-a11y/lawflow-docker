@@ -182,6 +182,17 @@ button, input, select { font: inherit; }
 }
 select.select::-ms-expand { display: none; }
 
+/* Date input styling */
+input[type="date"].select {
+  background-image: none;
+  padding-right: 8px; /* Reduce distance to calendar icon (2/3 of previous) */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color: white;
+  filter: invert(1); /* Ensure white in dark theme */
+}
+
 
 .tabs{ display:flex; gap: 8px; }
 .tab{

@@ -42,8 +42,8 @@ export function TasksTable({
             <td>{t.assignee}</td>
             <td>
               <input
-                className={`select ${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
-                  daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
+                className={`select ${t.status !== "Hecho" && daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
+                  t.status !== "Hecho" && daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
                 }`}
                 type="date"
                 value={t.due_date ?? ""}
@@ -62,17 +62,26 @@ export function TasksTable({
             <td>
               <div>
                 <div>{t.tags ?? ""}</div>
-                {t.due_date && (
+                {t.status === "Hecho" ? (
                   <div
                     style={{ fontSize: 10, marginTop: 2 }}
-                    className={`${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
-                      daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
-                    }`}
+                    className="ok"
                   >
-                    {daysUntil(t.due_date)! < 0
-                      ? `${Math.abs(daysUntil(t.due_date)!)} días atrasado`
-                      : `${daysUntil(t.due_date)!} días restantes`}
+                    Completado
                   </div>
+                ) : (
+                  t.due_date && (
+                    <div
+                      style={{ fontSize: 10, marginTop: 2 }}
+                      className={`${daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
+                        daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
+                      }`}
+                    >
+                      {daysUntil(t.due_date)! < 0
+                        ? `${Math.abs(daysUntil(t.due_date)!)} días atrasado`
+                        : `${daysUntil(t.due_date)!} días restantes`}
+                    </div>
+                  )
                 )}
               </div>
             </td>

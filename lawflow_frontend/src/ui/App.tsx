@@ -586,8 +586,16 @@ useEffect(() => {
                     <TasksTable
                       tasks={filteredTasks}
                       onEdit={async (taskId, patch) => {
-                        await api.updateTask(taskId, patch);
-                        await refreshAll(activeProjectId);
+                        // Optimistically update local state for immediate UI feedback
+                        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
+                        try {
+                          await api.updateTask(taskId, patch);
+                          await refreshAll(activeProjectId);
+                        } catch (error) {
+                          // Revert on error
+                          console.error('Failed to update task:', error);
+                          await refreshAll(activeProjectId);
+                        }
                       }}
                     />
                     {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
