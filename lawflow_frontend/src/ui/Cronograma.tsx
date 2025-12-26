@@ -199,4 +199,3 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
     </div>
   );
 }
-

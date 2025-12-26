@@ -419,9 +419,30 @@ useEffect(() => {
       <main className="main">
         <header className="topbar">
           <div className="titleRow">
-            <p className="h1">
-              {view === "General Overview" ? "Portfolio Overview" : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
-            </p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <p className="h1">
+                {view === "General Overview" ? "Portfolio Overview" : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
+              </p>
+              {view !== "General Overview" && activeProject && (
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div className="small" style={{ fontWeight: 900 }}>
+                    <b>{t("status")}</b>: {activeProject?.status ?? "—"}
+                  </div>
+                  {riskPill(activeProject.risk)}
+                  <button
+                    className="btn ghost"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!activeProject) return;
+                      setPinnedIds(togglePin(activeProject.id));
+                    }}
+                    title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
+                  >
+                    {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+                  </button>
+                </div>
+              )}
+            </div>
             {/* <p className="subtitle">
               <span className="crumbs">
   {view === "General Overview" ? (
@@ -444,14 +465,7 @@ useEffect(() => {
                 </>
               )}
             </div>
-            {/* {view !== "General Overview" && (
-            <div className="statusStrip">
-              <span className="pill">{activeProject?.transaction_type ?? "—"}</span>
-              <span className="pill">{activeProject?.location ?? "—"}</span>
-              <span className="pill">Target: {fmtDateShort(activeProject?.target_close_date ?? null)}</span>
-              <span className="pill">Start: {fmtDateShort(activeProject?.start_date ?? null)}</span>
-            </div>
-            )} */}
+            {view !== "General Overview" && null}
           </div>
           <div className="actions">
             <button
@@ -462,7 +476,6 @@ useEffect(() => {
               ☰
             </button>
 
-            <input className="search" value={q} onChange={(e)=>setQ(e.target.value)} placeholder={t("searchPlaceholder")} />
             {view !== "General Overview" && (
               <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
             )}
@@ -517,7 +530,7 @@ useEffect(() => {
                       <span className="pill">{kpis.open}</span>
                     </div>
                     <div className="kpiValue">{kpis.open}</div>
-                    <div className="small">Across board columns</div>
+                    <div className="small">{t("acrossBoardColumns")}</div>
                   </div>
                   <div className="card cardPad">
                     <div className="kpiTop">
@@ -541,7 +554,7 @@ useEffect(() => {
                       <span className="pill ok">{kpis.done}</span>
                     </div>
                     <div className="kpiValue">{kpis.done}</div>
-                    <div className="small">Done tasks</div>
+                    <div className="small">{t("doneTasks")}</div>
                   </div>
                 </div>
               )}
@@ -563,14 +576,14 @@ useEffect(() => {
                         await refreshAll(activeProjectId);
                       }}
                     />
-                    <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
+                    {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
                     <Board
                       tasks={filteredTasks}
                       onMove={async (taskId, nextStatus) => {
                         await api.updateTask(taskId, { status: nextStatus });
                         await refreshAll(activeProjectId);
                       }}
-                    />
+                    /> */}
                   </>
                 )}
 
@@ -586,7 +599,7 @@ useEffect(() => {
     <div style={{ display: "grid", gap: 12 }}>
       <div className="card cardPad" style={{ padding: 12 }}>
         <div className="sectionTitle" style={{ marginBottom: 0 }}>
-          <h2>Municipality</h2>
+          <h2>{t("municipality")}</h2>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <select className="select" style={{ width: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
               {MUNICIPALITIES_LIST.map((m) => (

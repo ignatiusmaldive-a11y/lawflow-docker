@@ -121,7 +121,8 @@ button, input, select { font: inherit; }
 }
 .btn.ghost{ background: transparent; }
 
-.content{ padding: 16px 18px; overflow:auto; }
+.content{ padding: 16px 18px; overflow:auto; scrollbar-width: none; /* Firefox */ }
+.content::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
 
 .grid4{ display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .row{ display:grid; grid-template-columns: 1.6fr 1fr; gap: 12px; margin-top: 12px; }
@@ -229,7 +230,8 @@ select.select::-ms-expand { display: none; }
 .table th{ color: var(--muted); font-weight: 950; }
 .table tr:hover td{ background: color-mix(in oklab, var(--panel2) 55%, transparent); }
 
-.timelineWrap{ overflow-x: hidden; overflow-y: auto; }
+.timelineWrap{ overflow-x: auto; overflow-y: auto; scrollbar-width: none; /* Firefox */ }
+.timelineWrap::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
 .timeline{ display:grid; grid-template-columns: min(250px, 25vw) 1fr; gap: 12px; }
 .timelineLabels{ display:grid; auto-rows: 44px; gap: 6px; }
 .timelineGrid{
@@ -308,6 +310,37 @@ select.select::-ms-expand { display: none; }
 }
 .event strong{ font-size: 13px; }
 .event small{ color: var(--muted); font-weight: 900; }
+
+/* Minimal Stats Strip */
+.stats-strip {
+  display: flex;
+  align-items: center; /* Changed from baseline to center */
+  gap: 40px;
+  padding: 8px 0 24px 4px;
+}
+.stat-item {
+  display: flex;
+  flex-direction: row; /* Changed from column to row */
+  align-items: center; /* Added for alignment in row */
+  gap: 8px; /* Added gap between label and value */
+}
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  color: var(--muted);
+}
+.stat-value {
+  font-size: 18px; /* Reduced from 36px to 18px */
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text);
+  font-feature-settings: "tnum"; /* Tabular nums for better alignment if needed */
+}
+.stat-value.risk {
+  color: var(--danger);
+}
 
 /* Medium screens - hide sidebar by default, show hamburger */
 @media (max-width: 1100px){
@@ -651,7 +684,7 @@ select.select::-ms-expand { display: none; }
 
 /* Custom column widths for GeneralOverviewView */
 .column-matter {
-  width: 25%; /* Default for smaller screens */
+  width: auto; /* Allow Asunto to take needed space */
 }
 .column-location {
   width: 15%; /* Default for smaller screens */
@@ -659,7 +692,7 @@ select.select::-ms-expand { display: none; }
 
 @media (min-width: 769px) { /* Medium screens and up */
   .column-matter {
-    width: 25%; /* Give more space to Asunto */
+    width: auto;
   }
   .column-location {
     width: 15%; /* Keep location concise */
@@ -668,9 +701,20 @@ select.select::-ms-expand { display: none; }
 
 @media (min-width: 1041px) { /* Larger screens */
   .column-matter {
-    width: 25%; /* Even more space */
+    width: auto;
   }
   .column-location {
     width: 15%; /* Keep location concise */
   }
+}
+
+/* Reduce spacing for specific columns */
+.table th:nth-child(2), /* Ubicación header */
+.table td:nth-child(2), /* Ubicación cells */
+.table th:nth-child(3), /* Estado header */
+.table td:nth-child(3), /* Estado cells */
+.table th:nth-child(4), /* Riesgo header */
+.table td:nth-child(4) { /* Riesgo cells */
+  padding-left: 6px;
+  padding-right: 6px;
 }

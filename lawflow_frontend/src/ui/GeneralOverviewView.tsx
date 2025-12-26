@@ -134,37 +134,28 @@ export function GeneralOverviewView({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Stats Cards */}
-      <div className="grid4">
-        <div className="card cardPad">
-          <div className="kpiTop">
-            <div className="kpiLabel">{t("totalMatters")}</div>
-            <span className="pill">{summaryStats.total}</span>
-          </div>
-          <div className="kpiValue">{summaryStats.total}</div>
+      {/* Stats Cards - Replaced with Minimal Stats Strip
+      <div className="stats-strip">
+        <div className="stat-item">
+          <div className="stat-label">{t("totalMatters")}</div>
+          <div className="stat-value">{summaryStats.total}</div>
         </div>
-        <div className="card cardPad">
-          <div className="kpiTop">
-            <div className="kpiLabel">{t("activeProjects")}</div>
-            <span className="pill warn">{summaryStats.active}</span>
-          </div>
-          <div className="kpiValue">{summaryStats.active}</div>
+        <div className="stat-item">
+          <div className="stat-label">{t("activeProjects")}</div>
+          <div className="stat-value">{summaryStats.active}</div>
         </div>
-        <div className="card cardPad">
-          <div className="kpiTop">
-            <div className="kpiLabel">{t("closedProjects")}</div>
-            <span className="pill ok">{summaryStats.completed}</span>
-          </div>
-          <div className="kpiValue">{summaryStats.completed}</div>
+        <div className="stat-item">
+          <div className="stat-label">{t("closedProjects")}</div>
+          <div className="stat-value">{summaryStats.completed}</div>
         </div>
-        <div className="card cardPad">
-          <div className="kpiTop">
-            <div className="kpiLabel">{t("highRiskProjects")}</div>
-            <span className="pill bad">{summaryStats.highRisk}</span>
+        <div className="stat-item">
+          <div className="stat-label">{t("highRiskProjects")}</div>
+          <div className={`stat-value ${summaryStats.highRisk > 0 ? "risk" : ""}`}>
+            {summaryStats.highRisk}
           </div>
-          <div className="kpiValue">{summaryStats.highRisk}</div>
         </div>
       </div>
+      */}
 
       {/* Filters & Actions */}
       <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -176,13 +167,12 @@ export function GeneralOverviewView({
           style={{ width: 300 }}
         />
         
-        <select 
-          className="select" 
-          value={statusFilter} 
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ width: 150 }}
-        >
-          <option value="All">{t("allStatuses")}</option>
+                <select
+                  className="select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{ width: 220 }}
+                >          <option value="All">{t("allStatuses")}</option>
           <option value="Due Diligence">Due Diligence</option>
           <option value="Contracts">Contracts</option>
           <option value="Notary">Notary</option>
@@ -196,7 +186,7 @@ export function GeneralOverviewView({
       </div>
 
       {/* Main Table */}
-      <div className="card" style={{ overflow: "hidden" }}>
+      <div className="card" style={{ overflowX: "auto" }}>
         <table className="table" style={{ width: "100%" }}>
           <thead>
             <tr>
@@ -220,7 +210,7 @@ export function GeneralOverviewView({
                   onClick={() => onProjectSelect(p.id)} 
                   style={{ cursor: "pointer" }}
                 >
-                  <td>
+                  <td style={{ whiteSpace: "nowrap" }}>
                     <div style={{ fontWeight: 800 }}>{formatProjectLabel(p)}</div>
                   </td>
                   <td>
