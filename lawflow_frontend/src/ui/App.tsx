@@ -529,10 +529,9 @@ useEffect(() => {
                     {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
                   </div>
                   <button className="btn" onClick={() => { 
-                    setView("Timeline"); 
                     if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
                     setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
-                  }}>{t("reviewButton")}</button>
+                  }}>{t("close")}</button>
                 </div>
               ) : null}
 
