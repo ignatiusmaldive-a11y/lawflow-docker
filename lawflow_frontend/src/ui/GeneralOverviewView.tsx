@@ -40,9 +40,11 @@ function daysUntil(dateStr?: string | null) {
 export function GeneralOverviewView({
   projects,
   onProjectSelect,
+  onNewProject,
 }: {
   projects: Project[];
   onProjectSelect: (projectId: number) => void;
+  onNewProject: () => void;
 }) {
   const { t } = useI18n();
   const [sortField, setSortField] = useState<SortField>("target_close_date");
@@ -158,7 +160,8 @@ export function GeneralOverviewView({
       */}
 
       {/* Filters & Actions */}
-      <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      <div className="table-container">
+        <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <input
           className="search"
           placeholder={t("searchProjectsPlaceholder")}
@@ -181,14 +184,21 @@ export function GeneralOverviewView({
           <option value="Completed">Completed</option>
         </select>
 
-        <div style={{ marginLeft: "auto", fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-          {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+            {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
+          </div>
+          <button className="btn primary" onClick={onNewProject} style={{ padding: "8px 16px", fontSize: "13px" }}>
+            {t("newProject")}
+          </button>
+        </div>
         </div>
       </div>
 
       {/* Main Table */}
-      <div className="card" style={{ overflowX: "auto" }}>
-        <table className="table" style={{ width: "100%" }}>
+      <div className="table-container">
+        <div className="card" style={{ overflowX: "auto" }}>
+          <table className="table" style={{ width: "100%" }}>
           <thead>
             <tr>
               <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
@@ -245,6 +255,102 @@ export function GeneralOverviewView({
             )}
           </tbody>
         </table>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="table-container">
+        <footer style={{
+          marginTop: 'auto',
+          padding: '40px 0 20px',
+          borderTop: '1px solid var(--line)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '24px'
+        }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '32px',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%'
+        }}>
+          {/* Company Info */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                display: 'grid',
+                placeItems: 'center',
+                background: 'linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.65))'
+              }}>◆</div>
+              <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
+            </div>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
+              Gestión integral de transacciones inmobiliarias para despachos de abogados especializados en derecho inmobiliario.
+            </p>
+          </div>
+
+          {/* Product Links */}
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Características</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Precios</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Integraciones</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>API</a></li>
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Operación Polonia</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Política de Privacidad</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Términos de Servicio</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Cookies</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>RGPD</a></li>
+            </ul>
+          </div>
+
+          {/* Contact & Support */}
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Agente Inteligente</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Centro de Ayuda</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Contacto</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Estado del Sistema</a></li>
+              <li><a href="mailto:soporte@ama-crm.com" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>soporte@ama-crm.com</a></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div style={{
+          borderTop: '1px solid var(--line)',
+          paddingTop: '20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0 }}>
+            © 2026 AMA - CRM. Todos los derechos reservados.
+          </p>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Twitter</a>
+            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>LinkedIn</a>
+            <span style={{ color: 'var(--muted)', fontSize: '13px' }}>Made with ❤️ in Marbella</span>
+          </div>
+        </div>
+        </footer>
       </div>
     </div>
   );

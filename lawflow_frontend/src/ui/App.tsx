@@ -159,7 +159,7 @@ export function App() {
   const [defaultBg, setDefaultBg] = useState<string>(() => (typeof window !== 'undefined' ? loadPlatformDefaultBg() : '#0b1220'));
 
 
-  const [view, setView] = useState<View>("Tasks");
+  const [view, setView] = useState<View>("General Overview");
   const [pinnedIds, setPinnedIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_PINS) : []));
   const [recentIds, setRecentIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_RECENTS) : []));
 
@@ -221,24 +221,27 @@ const activeProject = useMemo(
       const ps = await api.projects();
       setProjects(ps);
       
-      // Check URL for /overview
-      if (window.location.pathname === "/overview") {
+      // Default to General Overview
+      if (window.location.pathname === "/" || window.location.pathname === "/overview") {
         setView("General Overview");
-        // We still set a default active project so the sidebar doesn't crash if they switch back
-        setActiveProjectId(ps[0]?.id ?? null);
+      } else if (window.location.pathname === "/project") {
+        setView("Tasks");
       } else {
-        setActiveProjectId(ps[0]?.id ?? null);
+        setView("General Overview");
       }
+      setActiveProjectId(ps[0]?.id ?? null);
     })().catch(console.error);
   }, []);
 
   // Handle browser navigation
   useEffect(() => {
     const handlePopState = () => {
-      if (window.location.pathname === "/overview") {
+      if (window.location.pathname === "/" || window.location.pathname === "/overview") {
         setView("General Overview");
-      } else {
+      } else if (window.location.pathname === "/project") {
         setView("Tasks");
+      } else {
+        setView("General Overview");
       }
     };
 
@@ -249,12 +252,12 @@ const activeProject = useMemo(
   // Update URL on view change
   useEffect(() => {
     if (view === "General Overview") {
-      if (window.location.pathname !== "/overview") {
-        window.history.pushState(null, "", "/overview");
+      if (window.location.pathname !== "/" && window.location.pathname !== "/overview") {
+        window.history.pushState(null, "", "/");
       }
     } else {
-      if (window.location.pathname !== "/") {
-        window.history.pushState(null, "", "/");
+      if (window.location.pathname !== "/project") {
+        window.history.pushState(null, "", "/project");
       }
     }
   }, [view]);
@@ -492,16 +495,18 @@ useEffect(() => {
             {view !== "General Overview" && (
               <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
             )}
-            {view === "General Overview" && (
-              <button className="btn primary" onClick={() => setNewProjectOpen(true)}>{t("newProject")}</button>
-            )}
           </div>
         </header>
+
+
+
+
 
         <div className="content">
           {view === "General Overview" ? (
              <GeneralOverviewView
                projects={projects}
+               onNewProject={() => setNewProjectOpen(true)}
                onProjectSelect={(id) => {
                  setActiveProjectId(id);
                  setView("Tasks");

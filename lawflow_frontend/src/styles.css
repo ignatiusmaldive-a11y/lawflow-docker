@@ -127,6 +127,7 @@ button, input, select { font: inherit; }
 
 .row{ display:grid; grid-template-columns: 1.6fr 1fr; gap: 12px; margin-top: 12px; }
 .contentGrid{ display:grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 12px; }
+.grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .card{
   border: 1px solid var(--line);
@@ -410,6 +411,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Very small screens */
 @media (max-width: 480px){
   .grid4{ grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
 }
 
 /* Matter chips (Pinned / Recents) */
@@ -721,4 +723,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   box-shadow: 0 14px 35px rgba(0,0,0,.18);
   padding: 14px;
   margin: 0 -14px -14px -14px;
+}
+
+/* Large screens - constrain main table width */
+@media (min-width: 1200px) {
+  .table-container {
+    max-width: 1200px;
+  }
 }

@@ -16,7 +16,7 @@ export function NewProjectModal({
   defaultBg: string;
   onCreated: (p: Project) => void;
 }) {
-  const [title, setTitle] = useState("Purchase – Apartment in Fuengirola");
+  const [title, setTitle] = useState("Compra – Apartamento en Fuengirola");
   const [transactionType, setTransactionType] = useState<"Purchase" | "Sale">("Purchase");
   const [location, setLocation] = useState("Marbella");
   const [risk, setRisk] = useState("Normal");
@@ -37,51 +37,51 @@ export function NewProjectModal({
   );
 
   return (
-    <Modal open={open} onClose={onClose} title="New project">
+    <Modal open={open} onClose={onClose} title="Nuevo asunto">
       <div className="grid2">
         <div>
-          <div className="small">Title</div>
-          <input className="search" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <div className="small" style={{ marginBottom: 4 }}>Asunto</div>
+          <input className="search" style={{ width: "100%" }} value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div>
-          <div className="small">Transaction</div>
-          <select className="select" value={transactionType} onChange={(e) => setTransactionType(e.target.value as any)}>
-            <option value="Purchase">Purchase</option>
-            <option value="Sale">Sale</option>
+          <div className="small" style={{ marginBottom: 4 }}>Transacción</div>
+          <select className="select" style={{ width: "100%" }} value={transactionType} onChange={(e) => setTransactionType(e.target.value as any)}>
+            <option value="Purchase">Compra</option>
+            <option value="Sale">Venta</option>
           </select>
         </div>
 
         <div>
-          <div className="small">Location</div>
-          <input className="search" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Marbella / Mijas / Estepona…" />
+          <div className="small" style={{ marginBottom: 4 }}>Ubicación</div>
+          <input className="search" style={{ width: "100%" }} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Marbella / Mijas / Estepona…" />
         </div>
         <div>
-          <div className="small">Status</div>
-          <select className="select" value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option>Intake</option>
-            <option>Due Diligence</option>
-            <option>Contracts</option>
-            <option>Notary</option>
-            <option>Registry</option>
+          <div className="small" style={{ marginBottom: 4 }}>Estado</div>
+          <select className="select" style={{ width: "100%" }} value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="Intake">Captación</option>
+            <option value="Due Diligence">Due Diligence</option>
+            <option value="Contracts">Contratos</option>
+            <option value="Notary">Notaría</option>
+            <option value="Registry">Registro</option>
           </select>
         </div>
 
         <div>
-          <div className="small">Risk</div>
-          <select className="select" value={risk} onChange={(e) => setRisk(e.target.value)}>
-            <option>Normal</option>
-            <option>At Risk</option>
-            <option>Critical</option>
+          <div className="small" style={{ marginBottom: 4 }}>Riesgo</div>
+          <select className="select" style={{ width: "100%" }} value={risk} onChange={(e) => setRisk(e.target.value)}>
+            <option value="Normal">Normal</option>
+            <option value="At Risk">En riesgo</option>
+            <option value="Critical">Crítico</option>
           </select>
         </div>
         <div>
-          <div className="small">Color</div>
-          <div className="pill" style={{ display: "inline-flex" }}>Uses default platform color</div>
+          <div className="small" style={{ marginBottom: 4 }}>Color</div>
+          <div className="pill" style={{ display: "inline-flex", marginTop: 4 }}>Usa el color predeterminado</div>
         </div>
       </div>
 
-      <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button className="btn" onClick={onClose}>Cancel</button>
+      <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <button className="btn" onClick={onClose}>Cancelar</button>
         <button
           className="btn primary"
           disabled={saving}
@@ -96,7 +96,7 @@ export function NewProjectModal({
             }
           }}
         >
-          Create
+          Crear
         </button>
       </div>
     </Modal>

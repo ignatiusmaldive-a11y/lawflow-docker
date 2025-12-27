@@ -17,11 +17,11 @@ export function QuickAddModal({
   onCreated: (t: Task) => void;
 }) {
   const { t } = useI18n();
-  const [title, setTitle] = useState("Chase notary agenda confirmation");
+  const [title, setTitle] = useState("Confirmar agenda con notaría");
   const [assignee, setAssignee] = useState("Ana López");
   const [due, setDue] = useState<string>("");
   const [priority, setPriority] = useState("High");
-  const [tags, setTags] = useState("Notary");
+  const [tags, setTags] = useState("Notaría");
   const [saving, setSaving] = useState(false);
 
   const payload: TaskCreate | null = useMemo(() => {
@@ -38,40 +38,40 @@ export function QuickAddModal({
   }, [projectId, title, assignee, due, priority, tags]);
 
   return (
-    <Modal open={open} onClose={onClose} title={t("quickAdd")}>
+    <Modal open={open} onClose={onClose} title="Añadir tarea">
       {!projectId ? (
-        <div className="small">Select an active matter first.</div>
+        <div className="small">Selecciona un asunto activo primero.</div>
       ) : (
         <div className="grid2">
           <div style={{ gridColumn: "1 / -1" }}>
-            <div className="small">Task title</div>
-            <input className="search" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <div className="small" style={{ marginBottom: 4 }}>Título de la tarea</div>
+            <input className="search" style={{ width: "100%" }} value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div>
-            <div className="small">Assignee</div>
-            <input className="search" value={assignee} onChange={(e) => setAssignee(e.target.value)} />
+            <div className="small" style={{ marginBottom: 4 }}>Responsable</div>
+            <input className="search" style={{ width: "100%" }} value={assignee} onChange={(e) => setAssignee(e.target.value)} />
           </div>
           <div>
-            <div className="small">Due date</div>
-            <input className="search" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+            <div className="small" style={{ marginBottom: 4 }}>Fecha de vencimiento</div>
+            <input className="search" style={{ width: "100%" }} type="date" value={due} onChange={(e) => setDue(e.target.value)} />
           </div>
           <div>
-            <div className="small">Priority</div>
-            <select className="select" value={priority} onChange={(e) => setPriority(e.target.value)}>
-              <option>Low</option>
-              <option>Medium</option>
-              <option>High</option>
+            <div className="small" style={{ marginBottom: 4 }}>Prioridad</div>
+            <select className="select" style={{ width: "100%" }} value={priority} onChange={(e) => setPriority(e.target.value)}>
+              <option value="Low">Baja</option>
+              <option value="Medium">Media</option>
+              <option value="High">Alta</option>
             </select>
           </div>
           <div>
-            <div className="small">Tags</div>
-            <input className="search" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="Notary, Taxes, Registry…" />
+            <div className="small" style={{ marginBottom: 4 }}>Etiquetas</div>
+            <input className="search" style={{ width: "100%" }} value={tags} onChange={(e) => setTags(e.target.value)} placeholder="Notaría, Impuestos, Registro…" />
           </div>
         </div>
       )}
 
-      <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button className="btn" onClick={onClose}>Cancel</button>
+      <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <button className="btn" onClick={onClose}>Cancelar</button>
         <button
           className="btn primary"
           disabled={saving || !payload}
@@ -87,7 +87,7 @@ export function QuickAddModal({
             }
           }}
         >
-          Add
+          Añadir
         </button>
       </div>
     </Modal>
