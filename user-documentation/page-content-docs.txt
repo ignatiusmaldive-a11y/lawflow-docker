@@ -1,0 +1,408 @@
+uid=2_0 RootWebArea "LawFlow Blog | LawFlow Documentation" url="http://localhost:3000/blog"
+  uid=2_1 ignored
+    uid=2_2 ignored
+      uid=2_3 generic
+        uid=2_4 region "Skip to main content"
+          uid=2_5 link "Skip to main content" url="http://localhost:3000/blog#__docusaurus_skipToContent_fallback"
+            uid=2_6 StaticText "Skip to main content"
+              uid=2_7 InlineTextBox "Skip to "
+              uid=2_8 InlineTextBox "main "
+              uid=2_9 InlineTextBox "content"
+        uid=2_10 navigation "Main"
+          uid=2_11 ignored
+            uid=2_12 ignored
+              uid=2_13 link "LawFlow Logo LawFlow Docs" url="http://localhost:3000/"
+                uid=2_14 generic
+                  uid=2_15 image "LawFlow Logo" url="http://localhost:3000/img/logo.svg"
+                uid=2_16 generic
+                  uid=2_17 StaticText "LawFlow Docs"
+                    uid=2_18 InlineTextBox "LawFlow Docs"
+              uid=2_19 link "Documentation" url="http://localhost:3000/docs/intro"
+                uid=2_20 StaticText "Documentation"
+                  uid=2_21 InlineTextBox "Documentation"
+              uid=2_22 link "Blog" url="http://localhost:3000/blog"
+                uid=2_23 StaticText "Blog"
+                  uid=2_24 InlineTextBox "Blog"
+            uid=2_25 ignored
+              uid=2_26 link "GitHub (opens in new tab)" url="https://github.com/lawflow/lawflow"
+                uid=2_27 StaticText "GitHub"
+                  uid=2_28 InlineTextBox "GitHub"
+                uid=2_29 image "(opens in new tab)"
+                  uid=2_30 ignored
+              uid=2_31 generic
+                uid=2_32 button "English" expandable haspopup="menu"
+                  uid=2_33 StaticText "English"
+                    uid=2_34 InlineTextBox "English"
+                  uid=2_35 generic
+                uid=2_36 ignored
+                uid=2_37 ignored
+              uid=2_38 ignored
+                uid=2_39 button "Switch between dark and light mode (currently dark mode)" description="dark mode"
+        uid=2_40 generic
+          uid=2_41 ignored
+            uid=2_42 ignored
+              uid=2_43 complementary
+                uid=2_44 navigation "Blog recent posts navigation"
+                  uid=2_45 generic
+                    uid=2_46 StaticText "Recent Posts"
+                      uid=2_47 InlineTextBox "Recent Posts"
+                  uid=2_48 group
+                    uid=2_49 heading "2021" level="3"
+                      uid=2_50 StaticText "2021"
+                        uid=2_51 InlineTextBox "2021"
+                    uid=2_52 list
+                      uid=2_53 listitem level="1"
+                        uid=2_54 link "Welcome" url="http://localhost:3000/blog/welcome"
+                          uid=2_55 StaticText "Welcome"
+                            uid=2_56 InlineTextBox "Welcome"
+                      uid=2_57 listitem level="1"
+                        uid=2_58 link "MDX Blog Post" url="http://localhost:3000/blog/mdx-blog-post"
+                          uid=2_59 StaticText "MDX Blog Post"
+                            uid=2_60 InlineTextBox "MDX Blog Post"
+                  uid=2_61 group
+                    uid=2_62 heading "2019" level="3"
+                      uid=2_63 StaticText "2019"
+                        uid=2_64 InlineTextBox "2019"
+                    uid=2_65 list
+                      uid=2_66 listitem level="1"
+                        uid=2_67 link "Long Blog Post" url="http://localhost:3000/blog/long-blog-post"
+                          uid=2_68 StaticText "Long Blog Post"
+                            uid=2_69 InlineTextBox "Long Blog Post"
+                      uid=2_70 listitem level="1"
+                        uid=2_71 link "First Blog Post" url="http://localhost:3000/blog/first-blog-post"
+                          uid=2_72 StaticText "First Blog Post"
+                            uid=2_73 InlineTextBox "First Blog Post"
+              uid=2_74 main
+                uid=2_75 article
+                  uid=2_76 sectionheader
+                    uid=2_77 heading "Welcome" level="2"
+                      uid=2_78 link "Welcome" url="http://localhost:3000/blog/welcome"
+                        uid=2_79 StaticText "Welcome"
+                          uid=2_80 InlineTextBox "Welcome"
+                    uid=2_81 generic
+                      uid=2_82 time
+                        uid=2_83 StaticText "August 26, 2021"
+                          uid=2_84 InlineTextBox "August 26, 2021"
+                      uid=2_85 StaticText " · "
+                        uid=2_86 InlineTextBox " · "
+                      uid=2_87 StaticText "One min read"
+                        uid=2_88 InlineTextBox "One min read"
+                    uid=2_89 ignored
+                      uid=2_90 ignored
+                        uid=2_91 ignored
+                          uid=2_92 link "Sébastien Lorber" url="https://sebastienlorber.com/"
+                            uid=2_93 image "Sébastien Lorber" url="https://github.com/slorber.png"
+                          uid=2_94 ignored
+                            uid=2_95 generic
+                              uid=2_96 link "Sébastien Lorber" url="https://sebastienlorber.com/"
+                                uid=2_97 ignored
+                                  uid=2_98 StaticText "Sébastien Lorber"
+                                    uid=2_99 InlineTextBox "Sébastien Lorber"
+                            uid=2_100 generic
+                              uid=2_101 StaticText "Open Source @ Facebook"
+                                uid=2_102 InlineTextBox "Open Source @ Facebook"
+                            uid=2_103 ignored
+                      uid=2_104 ignored
+                        uid=2_105 ignored
+                          uid=2_106 link "Yangshun Tay" url="https://github.com/yangshun"
+                            uid=2_107 image "Yangshun Tay" url="https://github.com/yangshun.png"
+                          uid=2_108 ignored
+                            uid=2_109 generic
+                              uid=2_110 link "Yangshun Tay" url="https://github.com/yangshun"
+                                uid=2_111 ignored
+                                  uid=2_112 StaticText "Yangshun Tay"
+                                    uid=2_113 InlineTextBox "Yangshun Tay"
+                            uid=2_114 generic
+                              uid=2_115 StaticText "Front End Engineer @ Facebook"
+                                uid=2_116 InlineTextBox "Front End Engineer @ Facebook"
+                            uid=2_117 ignored
+                  uid=2_118 ignored
+                    uid=2_119 paragraph
+                      uid=2_120 link "Docusaurus blogging features" url="https://docusaurus.io/docs/blog"
+                        uid=2_121 StaticText "Docusaurus blogging features"
+                          uid=2_122 InlineTextBox "Docusaurus blogging features"
+                      uid=2_123 StaticText " are powered by the "
+                        uid=2_124 InlineTextBox " are powered by the "
+                      uid=2_125 link "blog plugin" url="https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-blog"
+                        uid=2_126 StaticText "blog plugin"
+                          uid=2_127 InlineTextBox "blog plugin"
+                      uid=2_128 StaticText "."
+                        uid=2_129 InlineTextBox "."
+                    uid=2_130 paragraph
+                      uid=2_131 StaticText "Here are a few tips you might find useful."
+                        uid=2_132 InlineTextBox "Here are a few tips you might find useful."
+                  uid=2_133 sectionfooter
+                    uid=2_134 generic
+                      uid=2_135 StaticText "Tags:"
+                        uid=2_136 InlineTextBox "Tags:"
+                      uid=2_137 list
+                        uid=2_138 listitem level="1"
+                          uid=2_139 link "Facebook" description="Facebook tag description" url="http://localhost:3000/blog/tags/facebook"
+                            uid=2_140 StaticText "Facebook"
+                              uid=2_141 InlineTextBox "Facebook"
+                        uid=2_142 listitem level="1"
+                          uid=2_143 link "Hello" description="Hello tag description" url="http://localhost:3000/blog/tags/hello"
+                            uid=2_144 StaticText "Hello"
+                              uid=2_145 InlineTextBox "Hello"
+                        uid=2_146 listitem level="1"
+                          uid=2_147 link "Docusaurus" description="Docusaurus tag description" url="http://localhost:3000/blog/tags/docusaurus"
+                            uid=2_148 StaticText "Docusaurus"
+                              uid=2_149 InlineTextBox "Docusaurus"
+                    uid=2_150 generic
+                      uid=2_151 link "Read more about Welcome" url="http://localhost:3000/blog/welcome"
+                        uid=2_152 StaticText "Read more"
+                          uid=2_153 InlineTextBox "Read more"
+                uid=2_154 article
+                  uid=2_155 sectionheader
+                    uid=2_156 heading "MDX Blog Post" level="2"
+                      uid=2_157 link "MDX Blog Post" url="http://localhost:3000/blog/mdx-blog-post"
+                        uid=2_158 StaticText "MDX Blog Post"
+                          uid=2_159 InlineTextBox "MDX Blog Post"
+                    uid=2_160 generic
+                      uid=2_161 time
+                        uid=2_162 StaticText "August 1, 2021"
+                          uid=2_163 InlineTextBox "August 1, 2021"
+                      uid=2_164 StaticText " · "
+                        uid=2_165 InlineTextBox " · "
+                      uid=2_166 StaticText "One min read"
+                        uid=2_167 InlineTextBox "One min read"
+                    uid=2_168 ignored
+                      uid=2_169 ignored
+                        uid=2_170 ignored
+                          uid=2_171 link "Sébastien Lorber" url="https://sebastienlorber.com/"
+                            uid=2_172 image "Sébastien Lorber" url="https://github.com/slorber.png"
+                          uid=2_173 ignored
+                            uid=2_174 generic
+                              uid=2_175 link "Sébastien Lorber" url="https://sebastienlorber.com/"
+                                uid=2_176 ignored
+                                  uid=2_177 StaticText "Sébastien Lorber"
+                                    uid=2_178 InlineTextBox "Sébastien Lorber"
+                            uid=2_179 generic
+                              uid=2_180 StaticText "Open Source @ Facebook"
+                                uid=2_181 InlineTextBox "Open Source @ Facebook"
+                            uid=2_182 ignored
+                  uid=2_183 ignored
+                    uid=2_184 paragraph
+                      uid=2_185 StaticText "Blog posts support "
+                        uid=2_186 InlineTextBox "Blog posts support "
+                      uid=2_187 link "Docusaurus Markdown features" url="https://docusaurus.io/docs/markdown-features"
+                        uid=2_188 StaticText "Docusaurus Markdown features"
+                          uid=2_189 InlineTextBox "Docusaurus Markdown features"
+                      uid=2_190 StaticText ", such as "
+                        uid=2_191 InlineTextBox ", such as "
+                      uid=2_192 link "MDX" url="https://mdxjs.com/"
+                        uid=2_193 StaticText "MDX"
+                          uid=2_194 InlineTextBox "MDX"
+                      uid=2_195 StaticText "."
+                        uid=2_196 InlineTextBox "."
+                    uid=2_197 ignored
+                      uid=2_198 generic
+                        uid=2_199 image
+                        uid=2_200 StaticText "TIP"
+                          uid=2_201 InlineTextBox "TIP"
+                      uid=2_202 ignored
+                        uid=2_203 paragraph
+                          uid=2_204 StaticText "Use the power of React to create interactive blog posts."
+                            uid=2_205 InlineTextBox "Use the power of React to create interactive blog posts."
+                  uid=2_206 sectionfooter
+                    uid=2_207 generic
+                      uid=2_208 StaticText "Tags:"
+                        uid=2_209 InlineTextBox "Tags:"
+                      uid=2_210 list
+                        uid=2_211 listitem level="1"
+                          uid=2_212 link "Docusaurus" description="Docusaurus tag description" url="http://localhost:3000/blog/tags/docusaurus"
+                            uid=2_213 StaticText "Docusaurus"
+                              uid=2_214 InlineTextBox "Docusaurus"
+                    uid=2_215 generic
+                      uid=2_216 link "Read more about MDX Blog Post" url="http://localhost:3000/blog/mdx-blog-post"
+                        uid=2_217 StaticText "Read more"
+                          uid=2_218 InlineTextBox "Read more"
+                uid=2_219 article
+                  uid=2_220 sectionheader
+                    uid=2_221 heading "Long Blog Post" level="2"
+                      uid=2_222 link "Long Blog Post" url="http://localhost:3000/blog/long-blog-post"
+                        uid=2_223 StaticText "Long Blog Post"
+                          uid=2_224 InlineTextBox "Long Blog Post"
+                    uid=2_225 generic
+                      uid=2_226 time
+                        uid=2_227 StaticText "May 29, 2019"
+                          uid=2_228 InlineTextBox "May 29, 2019"
+                      uid=2_229 StaticText " · "
+                        uid=2_230 InlineTextBox " · "
+                      uid=2_231 StaticText "3 min read"
+                        uid=2_232 InlineTextBox "3 min read"
+                    uid=2_233 ignored
+                      uid=2_234 ignored
+                        uid=2_235 ignored
+                          uid=2_236 link "Yangshun Tay" url="https://github.com/yangshun"
+                            uid=2_237 image "Yangshun Tay" url="https://github.com/yangshun.png"
+                          uid=2_238 ignored
+                            uid=2_239 generic
+                              uid=2_240 link "Yangshun Tay" url="https://github.com/yangshun"
+                                uid=2_241 ignored
+                                  uid=2_242 StaticText "Yangshun Tay"
+                                    uid=2_243 InlineTextBox "Yangshun Tay"
+                            uid=2_244 generic
+                              uid=2_245 StaticText "Front End Engineer @ Facebook"
+                                uid=2_246 InlineTextBox "Front End Engineer @ Facebook"
+                            uid=2_247 ignored
+                  uid=2_248 ignored
+                    uid=2_249 paragraph
+                      uid=2_250 StaticText "This is the summary of a very long blog post,"
+                        uid=2_251 InlineTextBox "This is the summary of a very long blog post,"
+                    uid=2_252 paragraph
+                      uid=2_253 StaticText "Use a "
+                        uid=2_254 InlineTextBox "Use a "
+                      uid=2_255 code
+                        uid=2_256 StaticText "<!--"
+                          uid=2_257 InlineTextBox "<!--"
+                      uid=2_258 StaticText " "
+                        uid=2_259 InlineTextBox " "
+                      uid=2_260 code
+                        uid=2_261 StaticText "truncate"
+                          uid=2_262 InlineTextBox "truncate"
+                      uid=2_263 StaticText " "
+                        uid=2_264 InlineTextBox " "
+                      uid=2_265 code
+                        uid=2_266 StaticText "-->"
+                          uid=2_267 InlineTextBox "-->"
+                      uid=2_268 StaticText " comment to limit blog post size in the list view."
+                        uid=2_269 InlineTextBox " comment to limit blog post size in the list view."
+                  uid=2_270 sectionfooter
+                    uid=2_271 generic
+                      uid=2_272 StaticText "Tags:"
+                        uid=2_273 InlineTextBox "Tags:"
+                      uid=2_274 list
+                        uid=2_275 listitem level="1"
+                          uid=2_276 link "Hello" description="Hello tag description" url="http://localhost:3000/blog/tags/hello"
+                            uid=2_277 StaticText "Hello"
+                              uid=2_278 InlineTextBox "Hello"
+                        uid=2_279 listitem level="1"
+                          uid=2_280 link "Docusaurus" description="Docusaurus tag description" url="http://localhost:3000/blog/tags/docusaurus"
+                            uid=2_281 StaticText "Docusaurus"
+                              uid=2_282 InlineTextBox "Docusaurus"
+                    uid=2_283 generic
+                      uid=2_284 link "Read more about Long Blog Post" url="http://localhost:3000/blog/long-blog-post"
+                        uid=2_285 StaticText "Read more"
+                          uid=2_286 InlineTextBox "Read more"
+                uid=2_287 article
+                  uid=2_288 sectionheader
+                    uid=2_289 heading "First Blog Post" level="2"
+                      uid=2_290 link "First Blog Post" url="http://localhost:3000/blog/first-blog-post"
+                        uid=2_291 StaticText "First Blog Post"
+                          uid=2_292 InlineTextBox "First Blog Post"
+                    uid=2_293 generic
+                      uid=2_294 time
+                        uid=2_295 StaticText "May 28, 2019"
+                          uid=2_296 InlineTextBox "May 28, 2019"
+                      uid=2_297 StaticText " · "
+                        uid=2_298 InlineTextBox " · "
+                      uid=2_299 StaticText "One min read"
+                        uid=2_300 InlineTextBox "One min read"
+                    uid=2_301 ignored
+                      uid=2_302 ignored
+                        uid=2_303 ignored
+                          uid=2_304 link "Sébastien Lorber" url="https://sebastienlorber.com/"
+                            uid=2_305 image "Sébastien Lorber" url="https://github.com/slorber.png"
+                          uid=2_306 ignored
+                            uid=2_307 generic
+                              uid=2_308 link "Sébastien Lorber" url="https://sebastienlorber.com/"
+                                uid=2_309 ignored
+                                  uid=2_310 StaticText "Sébastien Lorber"
+                                    uid=2_311 InlineTextBox "Sébastien Lorber"
+                            uid=2_312 generic
+                              uid=2_313 StaticText "Open Source @ Facebook"
+                                uid=2_314 InlineTextBox "Open Source @ Facebook"
+                            uid=2_315 ignored
+                      uid=2_316 ignored
+                        uid=2_317 ignored
+                          uid=2_318 link "Yangshun Tay" url="https://github.com/yangshun"
+                            uid=2_319 image "Yangshun Tay" url="https://github.com/yangshun.png"
+                          uid=2_320 ignored
+                            uid=2_321 generic
+                              uid=2_322 link "Yangshun Tay" url="https://github.com/yangshun"
+                                uid=2_323 ignored
+                                  uid=2_324 StaticText "Yangshun Tay"
+                                    uid=2_325 InlineTextBox "Yangshun Tay"
+                            uid=2_326 generic
+                              uid=2_327 StaticText "Front End Engineer @ Facebook"
+                                uid=2_328 InlineTextBox "Front End Engineer @ Facebook"
+                            uid=2_329 ignored
+                  uid=2_330 ignored
+                    uid=2_331 paragraph
+                      uid=2_332 StaticText "Lorem ipsum dolor sit amet..."
+                        uid=2_333 InlineTextBox "Lorem ipsum dolor sit amet..."
+                  uid=2_334 sectionfooter
+                    uid=2_335 generic
+                      uid=2_336 StaticText "Tags:"
+                        uid=2_337 InlineTextBox "Tags:"
+                      uid=2_338 list
+                        uid=2_339 listitem level="1"
+                          uid=2_340 link "Hola" description="Hola tag description" url="http://localhost:3000/blog/tags/hola"
+                            uid=2_341 StaticText "Hola"
+                              uid=2_342 InlineTextBox "Hola"
+                        uid=2_343 listitem level="1"
+                          uid=2_344 link "Docusaurus" description="Docusaurus tag description" url="http://localhost:3000/blog/tags/docusaurus"
+                            uid=2_345 StaticText "Docusaurus"
+                              uid=2_346 InlineTextBox "Docusaurus"
+                    uid=2_347 generic
+                      uid=2_348 link "Read more about First Blog Post" url="http://localhost:3000/blog/first-blog-post"
+                        uid=2_349 StaticText "Read more"
+                          uid=2_350 InlineTextBox "Read more"
+                uid=2_351 navigation "Blog list page navigation"
+        uid=2_352 contentinfo
+          uid=2_353 ignored
+            uid=2_354 ignored
+              uid=2_355 ignored
+                uid=2_356 generic
+                  uid=2_357 StaticText "Docs"
+                    uid=2_358 InlineTextBox "Docs"
+                uid=2_359 list
+                  uid=2_360 listitem level="1"
+                    uid=2_361 link "Getting Started" url="http://localhost:3000/docs/getting-started"
+                      uid=2_362 StaticText "Getting Started"
+                        uid=2_363 InlineTextBox "Getting Started"
+                  uid=2_364 listitem level="1"
+                    uid=2_365 link "Core Workflows" url="http://localhost:3000/docs/core-workflows/matters"
+                      uid=2_366 StaticText "Core Workflows"
+                        uid=2_367 InlineTextBox "Core Workflows"
+                  uid=2_368 listitem level="1"
+                    uid=2_369 link "Technical Setup" url="http://localhost:3000/docs/technical-setup"
+                      uid=2_370 StaticText "Technical Setup"
+                        uid=2_371 InlineTextBox "Technical Setup"
+              uid=2_372 ignored
+                uid=2_373 generic
+                  uid=2_374 StaticText "Community"
+                    uid=2_375 InlineTextBox "Community"
+                uid=2_376 list
+                  uid=2_377 listitem level="1"
+                    uid=2_378 link "GitHub (opens in new tab)" url="https://github.com/lawflow/lawflow"
+                      uid=2_379 StaticText "GitHub"
+                        uid=2_380 InlineTextBox "GitHub"
+                      uid=2_381 image "(opens in new tab)"
+                        uid=2_382 ignored
+                  uid=2_383 listitem level="1"
+                    uid=2_384 link "Discord (opens in new tab)" url="https://discord.gg/lawflow"
+                      uid=2_385 StaticText "Discord"
+                        uid=2_386 InlineTextBox "Discord"
+                      uid=2_387 image "(opens in new tab)"
+                        uid=2_388 ignored
+              uid=2_389 ignored
+                uid=2_390 generic
+                  uid=2_391 StaticText "More"
+                    uid=2_392 InlineTextBox "More"
+                uid=2_393 list
+                  uid=2_394 listitem level="1"
+                    uid=2_395 link "Blog" url="http://localhost:3000/blog"
+                      uid=2_396 StaticText "Blog"
+                        uid=2_397 InlineTextBox "Blog"
+                  uid=2_398 listitem level="1"
+                    uid=2_399 link "LawFlow App (opens in new tab)" url="https://app.lawflow.app/"
+                      uid=2_400 StaticText "LawFlow App"
+                        uid=2_401 InlineTextBox "LawFlow App"
+                      uid=2_402 image "(opens in new tab)"
+                        uid=2_403 ignored
+            uid=2_404 ignored
+              uid=2_405 generic
+                uid=2_406 StaticText "Copyright © 2025 LawFlow. Built with Docusaurus."
+                  uid=2_407 InlineTextBox "Copyright © 2025 LawFlow. Built with Docusaurus."

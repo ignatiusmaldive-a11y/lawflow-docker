@@ -65,8 +65,8 @@ This repo is designed to *look and feel like a polished SaaS*, while keeping imp
 ## Local development
 
 ### 1) Prerequisites
-- Python 3.10+ recommended
-- Node 18+ recommended
+- Python 3.11+ (required by pyproject.toml)
+- Node.js 18+
 - npm
 
 ### 2) Run with the provided script
@@ -96,7 +96,7 @@ Restart `./run.sh up`.
 
 ## Production Deployment
 
-This repository includes a production-ready setup using Docker (optional), Nginx, and systemd services.
+This repository includes a production-ready setup using systemd services and Nginx reverse proxy.
 
 ### Deployment Script
 
@@ -113,6 +113,13 @@ A `deployment-script.sh` is provided to automate the setup and update process on
 ./deployment-script.sh update
 ```
 
+This script handles:
+- System dependency installation (nginx)
+- Python virtual environment setup
+- Node.js dependencies and frontend build
+- Systemd service configuration
+- Nginx reverse proxy setup
+
 ### Database Support
 
 LawFlow supports both **SQLite** (default) and **PostgreSQL**.
@@ -127,9 +134,9 @@ See `config/database/README.md` for detailed database configuration.
 
 ### Services
 
-- **Backend**: Runs as a systemd service (`lawflow-backend.service`) or via Docker.
-- **Frontend**: Served via Nginx (reverse proxy) or as a service (`lawflow-frontend.service`).
-- **Nginx**: Handles routing (`/` -> Frontend, `/api` -> Backend).
+- **Backend**: Runs as a systemd service (`production/lawflow-backend.service`)
+- **Frontend**: Runs as a systemd service (`production/lawflow-frontend.service`)
+- **Nginx**: Handles routing (`/` -> Frontend on port 8080, `/api` -> Backend on port 8000)
 
 ---
 
@@ -151,33 +158,73 @@ See `config/database/README.md` for detailed database configuration.
 ## Backend API (FastAPI)
 
 Base: `http://localhost:8000`  
-Interactive docs: `http://localhost:8000/docs`
+Interactive docs: `http://localhost:8000/docs`  
+Health check: `http://localhost:8000/health`
 
 ### Core endpoints
-- `GET /projects` — list matters
-- `POST /projects` — create matter
-- `PATCH /projects/{id}` — update matter (e.g. `bg_color`)
 
-- `GET /tasks?project_id=...` — list tasks
-- `POST /tasks` — create task
+#### Projects (Matters)
+- `GET /projects` — list all matters
+- `POST /projects` — create new matter
+  ```json
+  {
+    "title": "Purchase - Villa Marina, Marbella",
+    "transaction_type": "Purchase",
+    "location": "Marbella",
+    "status": "Due Diligence",
+    "client_id": 1
+  }
+  ```
+- `GET /projects/{id}` — get matter details
+- `PATCH /projects/{id}` — update matter (e.g., background color)
+  ```json
+  {
+    "bg_color": "#1a365d"
+  }
+  ```
 
-- `GET /checklist?project_id=...` — checklist items
-- `GET /timeline?project_id=...` — phases + milestones
-- `GET /activity?project_id=...` — activity feed
+#### Tasks
+- `GET /tasks?project_id=1` — list tasks for a matter
+- `POST /tasks` — create new task
+  ```json
+  {
+    "project_id": 1,
+    "title": "Obtain NIE certificate",
+    "status": "In Progress",
+    "assignee": "Ana López",
+    "due_date": "2025-12-31"
+  }
+  ```
+- `PATCH /tasks/{id}` — update task status/fields
+
+#### Checklist
+- `GET /checklist?project_id=1` — get checklist items
+- `PATCH /checklist/{id}` — toggle checklist item completion
+
+#### Timeline
+- `GET /timeline?project_id=1` — get phases and milestones
+
+#### Activity Feed
+- `GET /activity?project_id=1` — get recent activity
 
 ### Calendar
-- `GET /calendar/ics?project_id=...` — ICS file (deadlines + milestones)
+- `GET /calendar/ics?project_id=1` — download ICS file for calendar integration
 
 ### Files
-- `GET /files?project_id=...` — list file metadata
-- `POST /files/upload` — multipart upload
-- `GET /files/download/{file_id}` — download (and preview) uploaded file
+- `GET /files?project_id=1` — list file metadata
+- `POST /files/upload` — upload file (multipart/form-data)
+  - Form fields: `file`, `project_id`
+- `GET /files/download/{file_id}` — download/preview file
 
-### Templates (demo rules)
-- `GET /templates?municipality=Marbella&transaction_type=Purchase`
+### Templates (Municipality Rules)
+- `GET /templates?municipality=Marbella&transaction_type=Purchase` — get rules and templates
 
-### Closing pack
-- `GET /closing-pack/{project_id}` — returns a ZIP (markdown pack + manifest)
+### Closing Pack
+- `GET /closing-pack/{project_id}` — generate and download ZIP file
+
+### Health & Monitoring
+- `GET /health` — basic health check
+- `GET /health/detailed` — detailed health with component status
 
 ---
 
@@ -215,6 +262,71 @@ Key UX patterns included:
 
 ---
 
+## Troubleshooting
+
+### Development Issues
+
+**Backend won't start:**
+- Check Python version: `python --version` (requires 3.11+)
+- Activate virtual environment: `source lawflow_backend/.venv/bin/activate`
+- Install dependencies: `pip install -e .`
+- Check database: ensure `lawflow_backend/lawflow.db` exists or delete it to reseed
+
+**Frontend won't start:**
+- Check Node version: `node --version` (requires 18+)
+- Install dependencies: `npm install`
+- Clear cache: `rm -rf node_modules package-lock.json && npm install`
+
+**API connection issues:**
+- Backend runs on `http://localhost:8000`
+- Frontend runs on `http://localhost:5173`
+- Check CORS settings in backend if needed
+
+### Production Issues
+
+**Services won't start:**
+```bash
+# Check service status
+sudo systemctl status lawflow-backend
+sudo systemctl status lawflow-frontend
+sudo systemctl status nginx
+
+# Check logs
+sudo journalctl -u lawflow-backend -f
+sudo journalctl -u lawflow-frontend -f
+sudo tail -f /var/log/nginx/error.log
+```
+
+**Database issues:**
+- SQLite: Check file permissions on `lawflow_backend/lawflow.db`
+- PostgreSQL: Verify connection string and credentials
+
+**File upload issues:**
+- Check permissions on `lawflow_backend/uploads/` directory
+- Ensure sufficient disk space
+
+### Common Fixes
+
+**Reset demo data:**
+```bash
+rm -f lawflow_backend/lawflow.db
+# Restart backend to reseed
+```
+
+**Update deployment:**
+```bash
+./deployment-script.sh update
+```
+
+**Check system resources:**
+```bash
+df -h  # Disk space
+free -h  # Memory
+sudo systemctl status nginx  # Web server
+```
+
+---
+
 ## Implementation notes (intentional demo tradeoffs)
 - **Database**: SQLite is used by default for simplicity (single-file DB), but the app is fully compatible with **PostgreSQL** for production.
 - File uploads store content in `uploads/` and metadata in DB.
@@ -234,6 +346,10 @@ Key UX patterns included:
 - Document checklists per municipality editable via admin UI
 
 ---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes and updates.
 
 ## License
 Demo code — adapt as needed for your project.
