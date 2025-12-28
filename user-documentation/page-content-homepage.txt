@@ -1,0 +1,250 @@
+uid=1_0 RootWebArea "Hello from LawFlow Documentation | LawFlow Documentation" url="http://localhost:3000/"
+  uid=1_1 ignored
+    uid=1_2 ignored
+      uid=1_3 generic
+        uid=1_4 region "Skip to main content"
+          uid=1_5 link "Skip to main content" url="http://localhost:3000/#__docusaurus_skipToContent_fallback"
+            uid=1_6 StaticText "Skip to main content"
+              uid=1_7 InlineTextBox "Skip to "
+              uid=1_8 InlineTextBox "main "
+              uid=1_9 InlineTextBox "content"
+        uid=1_10 navigation "Main"
+          uid=1_11 ignored
+            uid=1_12 ignored
+              uid=1_13 button "Toggle navigation bar" expandable
+              uid=1_14 link "LawFlow Logo LawFlow Docs" url="http://localhost:3000/"
+                uid=1_15 generic
+                  uid=1_16 image "LawFlow Logo" url="http://localhost:3000/img/logo.svg"
+                uid=1_17 generic
+                  uid=1_18 StaticText "LawFlow Docs"
+                    uid=1_19 InlineTextBox "LawFlow Docs"
+            uid=1_20 ignored
+              uid=1_21 ignored
+              uid=1_22 ignored
+              uid=1_23 ignored
+          uid=1_24 ignored
+          uid=1_25 ignored
+        uid=1_26 generic
+          uid=1_27 banner
+            uid=1_28 ignored
+              uid=1_29 heading "LawFlow Documentation" level="1"
+                uid=1_30 StaticText "LawFlow Documentation"
+                  uid=1_31 InlineTextBox "LawFlow Documentation"
+              uid=1_32 paragraph
+                uid=1_33 StaticText "Legal Practice Management Made Simple"
+                  uid=1_34 InlineTextBox "Legal Practice Management Made Simple"
+              uid=1_35 ignored
+                uid=1_36 link "Docusaurus Tutorial - 5min ⏱️" url="http://localhost:3000/docs/intro"
+                  uid=1_37 StaticText "Docusaurus Tutorial - 5min ⏱️"
+                    uid=1_38 InlineTextBox "Docusaurus Tutorial - 5min ⏱️"
+          uid=1_39 main
+            uid=1_40 generic
+              uid=1_41 ignored
+                uid=1_42 ignored
+                  uid=1_43 ignored
+                    uid=1_44 generic
+                      uid=1_45 image "Easy to Use"
+                    uid=1_46 ignored
+                      uid=1_47 heading "Easy to Use" level="3"
+                        uid=1_48 StaticText "Easy to Use"
+                          uid=1_49 InlineTextBox "Easy to Use"
+                      uid=1_50 paragraph
+                        uid=1_51 StaticText "Docusaurus was designed from the ground up to be easily installed and used to get your website up and running quickly."
+                          uid=1_52 InlineTextBox "Docusaurus was designed from the ground up to be easily installed and used to get your website up and running "
+                          uid=1_53 InlineTextBox "quickly."
+                  uid=1_54 ignored
+                    uid=1_55 generic
+                      uid=1_56 image "Focus on What Matters"
+                    uid=1_57 ignored
+                      uid=1_58 heading "Focus on What Matters" level="3"
+                        uid=1_59 StaticText "Focus on What Matters"
+                          uid=1_60 InlineTextBox "Focus on What Matters"
+                      uid=1_61 paragraph
+                        uid=1_62 StaticText "Docusaurus lets you focus on your docs, and we'll do the chores. Go ahead and move your docs into the "
+                          uid=1_63 InlineTextBox "Docusaurus lets you focus on your docs, and we'll do the chores. Go ahead and move your docs into the "
+                        uid=1_64 code
+                          uid=1_65 StaticText "docs"
+                            uid=1_66 InlineTextBox "docs"
+                        uid=1_67 StaticText " directory."
+                          uid=1_68 InlineTextBox "directory."
+                  uid=1_69 ignored
+                    uid=1_70 generic
+                      uid=1_71 image "Powered by React"
+                    uid=1_72 ignored
+                      uid=1_73 heading "Powered by React" level="3"
+                        uid=1_74 StaticText "Powered by React"
+                          uid=1_75 InlineTextBox "Powered by React"
+                      uid=1_76 paragraph
+                        uid=1_77 StaticText "Extend or customize your website layout by reusing React. Docusaurus can be extended while reusing the same header and footer."
+                          uid=1_78 InlineTextBox "Extend or customize your website layout by reusing React. Docusaurus can be extended while reusing the same "
+                          uid=1_79 InlineTextBox "header and footer."
+        uid=1_80 contentinfo
+          uid=1_81 ignored
+            uid=1_82 ignored
+              uid=1_83 ignored
+                uid=1_84 generic
+                  uid=1_85 StaticText "Docs"
+                    uid=1_86 InlineTextBox "Docs"
+                uid=1_87 list
+                  uid=1_88 listitem level="1"
+                    uid=1_89 link "Getting Started" url="http://localhost:3000/docs/getting-started"
+                      uid=1_90 StaticText "Getting Started"
+                        uid=1_91 InlineTextBox "Getting Started"
+                  uid=1_92 listitem level="1"
+                    uid=1_93 link "Core Workflows" url="http://localhost:3000/docs/core-workflows/matters"
+                      uid=1_94 StaticText "Core Workflows"
+                        uid=1_95 InlineTextBox "Core Workflows"
+                  uid=1_96 listitem level="1"
+                    uid=1_97 link "Technical Setup" url="http://localhost:3000/docs/technical-setup"
+                      uid=1_98 StaticText "Technical Setup"
+                        uid=1_99 InlineTextBox "Technical Setup"
+              uid=1_100 ignored
+                uid=1_101 generic
+                  uid=1_102 StaticText "Community"
+                    uid=1_103 InlineTextBox "Community"
+                uid=1_104 list
+                  uid=1_105 listitem level="1"
+                    uid=1_106 link "GitHub (opens in new tab)" url="https://github.com/lawflow/lawflow"
+                      uid=1_107 StaticText "GitHub"
+                        uid=1_108 InlineTextBox "GitHub"
+                      uid=1_109 image "(opens in new tab)"
+                        uid=1_110 ignored
+                  uid=1_111 listitem level="1"
+                    uid=1_112 link "Discord (opens in new tab)" url="https://discord.gg/lawflow"
+                      uid=1_113 StaticText "Discord"
+                        uid=1_114 InlineTextBox "Discord"
+                      uid=1_115 image "(opens in new tab)"
+                        uid=1_116 ignored
+              uid=1_117 ignored
+                uid=1_118 generic
+                  uid=1_119 StaticText "More"
+                    uid=1_120 InlineTextBox "More"
+                uid=1_121 list
+                  uid=1_122 listitem level="1"
+                    uid=1_123 link "Blog" url="http://localhost:3000/blog"
+                      uid=1_124 StaticText "Blog"
+                        uid=1_125 InlineTextBox "Blog"
+                  uid=1_126 listitem level="1"
+                    uid=1_127 link "LawFlow App (opens in new tab)" url="https://app.lawflow.app/"
+                      uid=1_128 StaticText "LawFlow App"
+                        uid=1_129 InlineTextBox "LawFlow App"
+                      uid=1_130 image "(opens in new tab)"
+                        uid=1_131 ignored
+            uid=1_132 ignored
+              uid=1_133 generic
+                uid=1_134 StaticText "Copyright © 2025 LawFlow. Built with Docusaurus."
+                  uid=1_135 InlineTextBox "Copyright © 2025 LawFlow. Built with Docusaurus."
+      uid=1_136 Iframe
+        uid=1_137 RootWebArea url="about:blank"
+          uid=1_138 ignored
+            uid=1_139 generic
+              uid=1_140 generic
+                uid=1_141 generic
+                  uid=1_142 StaticText "Compiled with problems:"
+                    uid=1_143 InlineTextBox "Compiled with problems:"
+                uid=1_144 button "Dismiss"
+                  uid=1_145 StaticText "×"
+                    uid=1_146 InlineTextBox "×"
+                uid=1_147 ignored
+                  uid=1_148 ignored
+                    uid=1_149 generic
+                      uid=1_150 StaticText "ERROR in ./blog/2024-01-15-lawflow-v2-launch.md?truncated=true"
+                        uid=1_151 InlineTextBox "ERROR in ./blog/2024-01-15-lawflow-v2-launch.md?truncated=true"
+                    uid=1_152 generic
+                      uid=1_153 StaticText "Module build failed (from ./node_modules/@docusaurus/mdx-loader/lib/index.js):
+Error: Blog post not found for  filePath=/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/blog/2024-01-15-lawflow-v2-launch.md
+    at Object.createAssets (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/node_modules/@docusaurus/plugin-content-blog/lib/index.js:86:27)
+    at loadMDX (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:53:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at process.processImmediate (node:internal/timers:479:9)
+    at async Object.mdxLoader (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:157:24)"
+                        uid=1_154 InlineTextBox "Module build failed (from ./node_modules/@docusaurus/mdx-loader/lib/index.js):"
+                        uid=1_155 InlineTextBox "
+"
+                        uid=1_156 InlineTextBox "Error: Blog post not found for"
+                        uid=1_157 InlineTextBox "  "
+                        uid=1_158 InlineTextBox "filePath=/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-"
+                        uid=1_159 InlineTextBox "front/user-documentation/blog/2024-01-15-lawflow-v2-launch.md"
+                        uid=1_160 InlineTextBox "
+"
+                        uid=1_161 InlineTextBox "    "
+                        uid=1_162 InlineTextBox "at Object.createAssets"
+                        uid=1_163 InlineTextBox " "
+                        uid=1_164 InlineTextBox "(/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-"
+                        uid=1_165 InlineTextBox "documentation/node_modules/@docusaurus/plugin-content-blog/lib/index.js:86:27)"
+                        uid=1_166 InlineTextBox "
+"
+                        uid=1_167 InlineTextBox "    "
+                        uid=1_168 InlineTextBox "at loadMDX (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-"
+                        uid=1_169 InlineTextBox "front/user-documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:53:19)"
+                        uid=1_170 InlineTextBox "
+"
+                        uid=1_171 InlineTextBox "    "
+                        uid=1_172 InlineTextBox "at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+                        uid=1_173 InlineTextBox "
+"
+                        uid=1_174 InlineTextBox "    "
+                        uid=1_175 InlineTextBox "at runNextTicks (node:internal/process/task_queues:69:3)"
+                        uid=1_176 InlineTextBox "
+"
+                        uid=1_177 InlineTextBox "    "
+                        uid=1_178 InlineTextBox "at process.processImmediate (node:internal/timers:479:9)"
+                        uid=1_179 InlineTextBox "
+"
+                        uid=1_180 InlineTextBox "    "
+                        uid=1_181 InlineTextBox "at async Object.mdxLoader"
+                        uid=1_182 InlineTextBox " "
+                        uid=1_183 InlineTextBox "(/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-"
+                        uid=1_184 InlineTextBox "documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:157:24)"
+                  uid=1_185 ignored
+                    uid=1_186 generic
+                      uid=1_187 StaticText "ERROR in ./blog/2024-01-15-lawflow-v2-launch.md"
+                        uid=1_188 InlineTextBox "ERROR in ./blog/2024-01-15-lawflow-v2-launch.md"
+                    uid=1_189 generic
+                      uid=1_190 StaticText "Module build failed (from ./node_modules/@docusaurus/mdx-loader/lib/index.js):
+Error: Blog post not found for  filePath=/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/blog/2024-01-15-lawflow-v2-launch.md
+    at Object.createAssets (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/node_modules/@docusaurus/plugin-content-blog/lib/index.js:86:27)
+    at loadMDX (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:53:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runNextTicks (node:internal/process/task_queues:69:3)
+    at process.processImmediate (node:internal/timers:479:9)
+    at async Object.mdxLoader (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:157:24)"
+                        uid=1_191 InlineTextBox "Module build failed (from ./node_modules/@docusaurus/mdx-loader/lib/index.js):"
+                        uid=1_192 InlineTextBox "
+"
+                        uid=1_193 InlineTextBox "Error: Blog post not found for"
+                        uid=1_194 InlineTextBox "  "
+                        uid=1_195 InlineTextBox "filePath=/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-"
+                        uid=1_196 InlineTextBox "front/user-documentation/blog/2024-01-15-lawflow-v2-launch.md"
+                        uid=1_197 InlineTextBox "
+"
+                        uid=1_198 InlineTextBox "    "
+                        uid=1_199 InlineTextBox "at Object.createAssets"
+                        uid=1_200 InlineTextBox " "
+                        uid=1_201 InlineTextBox "(/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-"
+                        uid=1_202 InlineTextBox "documentation/node_modules/@docusaurus/plugin-content-blog/lib/index.js:86:27)"
+                        uid=1_203 InlineTextBox "
+"
+                        uid=1_204 InlineTextBox "    "
+                        uid=1_205 InlineTextBox "at loadMDX (/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-"
+                        uid=1_206 InlineTextBox "front/user-documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:53:19)"
+                        uid=1_207 InlineTextBox "
+"
+                        uid=1_208 InlineTextBox "    "
+                        uid=1_209 InlineTextBox "at processTicksAndRejections (node:internal/process/task_queues:105:5)"
+                        uid=1_210 InlineTextBox "
+"
+                        uid=1_211 InlineTextBox "    "
+                        uid=1_212 InlineTextBox "at runNextTicks (node:internal/process/task_queues:69:3)"
+                        uid=1_213 InlineTextBox "
+"
+                        uid=1_214 InlineTextBox "    "
+                        uid=1_215 InlineTextBox "at process.processImmediate (node:internal/timers:479:9)"
+                        uid=1_216 InlineTextBox "
+"
+                        uid=1_217 InlineTextBox "    "
+                        uid=1_218 InlineTextBox "at async Object.mdxLoader"
+                        uid=1_219 InlineTextBox " "
+                        uid=1_220 InlineTextBox "(/home/ignat/Documents/agentes/chatgpt5dot2_oneshotedsites/02-back-front/user-"
+                        uid=1_221 InlineTextBox "documentation/node_modules/@docusaurus/mdx-loader/lib/loader.js:157:24)"

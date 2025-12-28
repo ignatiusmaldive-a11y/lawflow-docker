@@ -35,10 +35,10 @@ export function FilesRoom({ projectId }: { projectId: number }) {
       onDrop={async (e)=>{ e.preventDefault(); setDragging(false); const f=e.dataTransfer.files?.[0]; if(!f) return; try{ await api2.uploadFile(projectId, f); await refresh(); } catch(err){ console.error(err); } }}>
       {dragging ? (<div className="dropZone">{t("dragDrop")}</div>) : null}
       <div className="card cardPad">
-        <div className="sectionTitle">
+        <div className="sectionTitle" style={{ flexWrap: "wrap", gap: "10px" }}>
           <h2>{t("fileRoom")}</h2>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <input className="search" style={{ width: 280 }} placeholder={t("searchPlaceholder")} value={q} onChange={(e) => setQ(e.target.value)} />
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", width: "100%", justifyContent: "flex-end" }}>
+            <input className="search" style={{ width: "min(280px, 100%)", flex: "1 1 auto" }} placeholder={t("searchPlaceholder")} value={q} onChange={(e) => setQ(e.target.value)} />
             <input ref={inputRef} type="file" style={{ display: "none" }} onChange={async (e) => {
               const f = e.target.files?.[0];
               if (!f) return;
@@ -53,6 +53,7 @@ export function FilesRoom({ projectId }: { projectId: number }) {
       </div>
 
       <div className="card cardPad">
+        <div style={{ overflowX: "auto" }}>
         <table className="table">
           <thead>
             <tr>
@@ -78,6 +79,7 @@ export function FilesRoom({ projectId }: { projectId: number }) {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       <Drawer

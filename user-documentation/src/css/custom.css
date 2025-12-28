@@ -1,0 +1,253 @@
+/* LawFlow Dark Theme - Custom CSS for Docusaurus */
+
+:root {
+  /* LawFlow Color Palette */
+  --lawflow-bg: #0b1220;
+  --lawflow-panel: #1a202d;
+  --lawflow-panel2: #212734;
+  --lawflow-text: #f7fafc;
+  --lawflow-muted: #a0aec0;
+  --lawflow-line: #2d3748;
+  --lawflow-shadow: 0 18px 50px rgba(0,0,0,.45);
+  --lawflow-radius: 18px;
+  --lawflow-brand: #7c3aed;
+  --lawflow-brand2: #22c55e;
+  --lawflow-warn: #f59e0b;
+  --lawflow-danger: #ef4444;
+}
+
+/* Override Docusaurus default theme with LawFlow dark theme */
+html[data-theme='dark'] {
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* Global body styling */
+body {
+  background:
+    radial-gradient(1200px 800px at 15% 0%, rgba(124,58,237,.25), transparent 55%),
+    radial-gradient(900px 700px at 80% 20%, rgba(34,197,94,.16), transparent 55%),
+    var(--lawflow-bg);
+  color: var(--lawflow-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+
+/* Navbar styling */
+.navbar {
+  background: var(--lawflow-panel);
+  border-bottom: 1px solid var(--lawflow-line);
+  box-shadow: var(--lawflow-shadow);
+}
+
+.navbar__link--active {
+  color: var(--lawflow-brand);
+}
+
+.navbar__link:hover {
+  color: var(--lawflow-text);
+}
+
+/* Sidebar styling */
+.sidebar {
+  background: var(--lawflow-panel);
+  border-right: 1px solid var(--lawflow-line);
+}
+
+.menu {
+  background: transparent;
+}
+
+.menu__link {
+  color: var(--lawflow-muted);
+  border-radius: var(--lawflow-radius);
+}
+
+.menu__link:hover {
+  background: var(--lawflow-panel2);
+  color: var(--lawflow-text);
+}
+
+.menu__link--active {
+  background: var(--lawflow-panel2);
+  border-left: 3px solid var(--lawflow-brand);
+  color: var(--lawflow-text);
+}
+
+/* Main content area */
+.main-wrapper {
+  background: transparent;
+}
+
+.main {
+  background: transparent;
+}
+
+/* Cards and content */
+.card {
+  background: var(--lawflow-panel2);
+  border: 1px solid var(--lawflow-line);
+  border-radius: var(--lawflow-radius);
+  box-shadow: var(--lawflow-shadow);
+}
+
+.theme-doc-markdown h1,
+.theme-doc-markdown h2,
+.theme-doc-markdown h3,
+.theme-doc-markdown h4,
+.theme-doc-markdown h5,
+.theme-doc-markdown h6 {
+  color: var(--lawflow-text);
+}
+
+.theme-doc-markdown p,
+.theme-doc-markdown li {
+  color: var(--lawflow-text);
+}
+
+.theme-doc-markdown a {
+  color: var(--lawflow-brand);
+}
+
+.theme-doc-markdown a:hover {
+  color: var(--lawflow-brand2);
+}
+
+/* Code blocks */
+.theme-code-block {
+  background: var(--lawflow-panel);
+  border: 1px solid var(--lawflow-line);
+  border-radius: var(--lawflow-radius);
+}
+
+/* Tables */
+.theme-doc-markdown table {
+  background: var(--lawflow-panel2);
+  border: 1px solid var(--lawflow-line);
+  border-radius: var(--lawflow-radius);
+}
+
+.theme-doc-markdown table th {
+  background: var(--lawflow-panel);
+  color: var(--lawflow-text);
+  border-bottom: 1px solid var(--lawflow-line);
+}
+
+.theme-doc-markdown table td {
+  color: var(--lawflow-text);
+  border-bottom: 1px solid var(--lawflow-line);
+}
+
+/* Footer */
+.footer {
+  background: var(--lawflow-panel);
+  border-top: 1px solid var(--lawflow-line);
+}
+
+.footer__link-item {
+  color: var(--lawflow-muted);
+}
+
+.footer__link-item:hover {
+  color: var(--lawflow-text);
+}
+
+/* Buttons */
+.button {
+  background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.65));
+  border: 1px solid var(--lawflow-brand);
+  border-radius: 999px;
+  color: var(--lawflow-text);
+  font-weight: 800;
+}
+
+.button:hover {
+  background: linear-gradient(135deg, rgba(124,58,237,.85), rgba(34,197,94,.75));
+  transform: translateY(-1px);
+  box-shadow: var(--lawflow-shadow);
+}
+
+/* Pagination */
+.pagination-nav__link {
+  background: var(--lawflow-panel2);
+  border: 1px solid var(--lawflow-line);
+  color: var(--lawflow-text);
+  border-radius: var(--lawflow-radius);
+}
+
+.pagination-nav__link:hover {
+  background: var(--lawflow-panel);
+  border-color: var(--lawflow-brand);
+}
+
+/* Search */
+.search-input {
+  background: var(--lawflow-panel);
+  border: 1px solid var(--lawflow-line);
+  color: var(--lawflow-text);
+  border-radius: var(--lawflow-radius);
+}
+
+/* Tabs */
+.tabs__item {
+  color: var(--lawflow-muted);
+  border-bottom: 2px solid transparent;
+}
+
+.tabs__item:hover {
+  color: var(--lawflow-text);
+}
+
+.tabs__item--active {
+  color: var(--lawflow-brand);
+  border-bottom-color: var(--lawflow-brand);
+}
+
+/* Alerts/Callouts */
+.alert {
+  border-radius: var(--lawflow-radius);
+  border: 1px solid var(--lawflow-line);
+}
+
+.alert--info {
+  background: rgba(124,58,237,0.1);
+  border-color: var(--lawflow-brand);
+}
+
+.alert--warning {
+  background: rgba(245,158,11,0.1);
+  border-color: var(--lawflow-warn);
+}
+
+.alert--danger {
+  background: rgba(239,68,68,0.1);
+  border-color: var(--lawflow-danger);
+}
+
+.alert--success {
+  background: rgba(34,197,94,0.1);
+  border-color: var(--lawflow-brand2);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 996px) {
+  .navbar__item {
+    margin: 0 0.5rem;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--lawflow-panel);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lawflow-line);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lawflow-muted);
+}

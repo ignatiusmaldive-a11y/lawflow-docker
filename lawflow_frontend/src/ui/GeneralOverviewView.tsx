@@ -221,7 +221,7 @@ export function GeneralOverviewView({
                   onClick={() => onProjectSelect(p.id)} 
                   style={{ cursor: "pointer" }}
                 >
-                  <td style={{ whiteSpace: "nowrap" }}>
+                  <td style={{ minWidth: "200px" }}>
                     <div style={{ fontWeight: 800 }}>{formatProjectLabel(p)}</div>
                   </td>
                   <td>

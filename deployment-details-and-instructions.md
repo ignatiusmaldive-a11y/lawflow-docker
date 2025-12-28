@@ -1,119 +1,325 @@
 # LawFlow Deployment Guide
 
-This document outlines the Docker-based deployment setup for the LawFlow application (Frontend + Backend + Database) and provides instructions for deploying it to a VPS.
+This document outlines the production deployment setup for the LawFlow application using systemd services and Nginx reverse proxy.
 
 ## Architecture Overview
 
-The application is containerized using Docker and orchestrated with Docker Compose. It consists of four main services:
+The application runs as native system services on Linux (tested on Ubuntu). It consists of three main components:
 
-1.  **Nginx (Reverse Proxy)**:
-    *   Listens on port `80`.
-    *   Serves the Frontend at the root path `/`.
-    *   Proxies API requests from `/api/*` to the Backend.
-2.  **Frontend**:
-    *   A React/Vite application served by an internal Nginx instance.
-    *   Built using a multi-stage Dockerfile.
-3.  **Backend**:
-    *   A FastAPI (Python) application.
-    *   Connects to the PostgreSQL database.
-    *   Stores uploaded files in a persistent Docker volume.
-4.  **Database**:
-    *   PostgreSQL 15.
-    *   Data is persisted in a Docker volume.
+1. **Nginx (Reverse Proxy)**:
+   * Listens on port `80`
+   * Serves the Frontend at the root path `/`
+   * Proxies API requests from `/api/*` to the Backend
 
-## Project Structure Changes
+2. **Frontend**:
+   * React/Vite application served by Node.js preview server
+   * Runs on port `8080`
+   * Built for production with `npm run build`
 
-*   **`docker-compose.yml`**: Orchestrates the services, networks, and volumes.
-*   **`nginx/default.conf`**: Configuration for the main Nginx reverse proxy.
-*   **`lawflow_backend/Dockerfile`**: Python environment setup.
-*   **`lawflow_frontend/Dockerfile`**: Node.js build and Nginx static serve setup.
+3. **Backend**:
+   * FastAPI (Python) application
+   * Runs on port `8000`
+   * Uses SQLite database (configurable to PostgreSQL)
+   * Stores uploaded files in `lawflow_backend/uploads/`
 
 ## Prerequisites
 
-*   A VPS running Linux (e.g., Ubuntu, Debian).
-*   **Docker Engine** and **Docker Compose** installed on the VPS.
+* Linux VPS (Ubuntu/Debian recommended)
+* Python 3.11+
+* Node.js 18+
+* Nginx
+* Git
 
-## Deployment Instructions
+## Quick Deployment Script
+
+LawFlow includes an automated deployment script that handles the entire setup process.
 
 ### 1. Transfer Code to VPS
 
-You can transfer the project files to your VPS using `scp` or by cloning your Git repository.
-
-**Option A: Using Git (Recommended)**
 ```bash
-# On your VPS
+# Clone the repository
 git clone <your-repo-url> lawflow
 cd lawflow
 ```
 
-**Option B: Using SCP**
-```bash
-# From your local machine
-scp -r /path/to/project user@your-vps-ip:/home/user/lawflow
-```
-
-### 2. Configure Environment (Optional)
-
-The `docker-compose.yml` file comes with default environment variables for the database and backend.
-*   **Database Credentials**: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` in `docker-compose.yml`.
-*   **Backend Connection**: `DATABASE_URL` in the `backend` service is pre-configured to talk to the `db` service.
-
-If you wish to change passwords, edit `docker-compose.yml` before running.
-
-### 3. Build and Start Services
-
-Navigate to the project directory on your VPS and run:
+### 2. Run Initial Setup
 
 ```bash
-docker compose up -d --build
+# Make script executable and run setup
+chmod +x deployment-script.sh
+./deployment-script.sh setup
 ```
 
-*   `up`: Creates and starts containers.
-*   `-d`: Runs in detached mode (in the background).
-*   `--build`: Forces a rebuild of the images to ensure the latest code is used.
+This will:
+- Install system dependencies (nginx)
+- Set up Python virtual environment and install backend dependencies
+- Install frontend dependencies and build the application
+- Configure systemd services
+- Set up Nginx reverse proxy
+
+### 3. Start Services
+
+```bash
+./deployment-script.sh start
+```
 
 ### 4. Verify Deployment
 
-Open your web browser and navigate to:
+Open your browser and navigate to `http://your-vps-ip`
 
-```
-http://<your-vps-ip>
-```
+## Manual Deployment (Alternative)
 
-*   You should see the LawFlow frontend.
-*   The application should automatically connect to the backend APIs.
+If you prefer manual setup:
 
-### 5. Management & Maintenance
+### Backend Setup
 
-**View Logs:**
-To see logs from all services:
 ```bash
-docker compose logs -f
+cd lawflow_backend
+
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -e .
+
+# Configure database (optional - defaults to SQLite)
+export DATABASE_URL="sqlite:///./lawflow.db"
+# OR for PostgreSQL:
+# export DATABASE_URL="postgresql://user:pass@host:5432/dbname"
 ```
-To see logs from a specific service (e.g., backend):
+
+### Frontend Setup
+
 ```bash
-docker compose logs -f backend
+cd lawflow_frontend
+
+# Install dependencies
+npm install
+
+# Build for production
+npm run build
 ```
 
-**Stop Services:**
+### Systemd Services
+
+Copy the service files and enable them:
+
 ```bash
-docker compose down
+sudo cp production/lawflow-backend.service /etc/systemd/system/
+sudo cp production/lawflow-frontend.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable lawflow-backend.service
+sudo systemctl enable lawflow-frontend.service
 ```
 
-**Update Application:**
-1.  Pull the latest code (`git pull`).
-2.  Rebuild and restart:
-    ```bash
-    docker compose up -d --build
-    ```
+### Nginx Configuration
 
-**Data Persistence:**
-*   Database data is stored in the `postgres_data` volume.
-*   Uploaded files are stored in the `uploads_data` volume.
-*   These volumes persist even if containers are destroyed. To remove them (and lose all data), use `docker compose down -v`.
+```bash
+sudo cp production/nginx.conf /etc/nginx/conf.d/lawflow.conf
+sudo systemctl restart nginx
+```
+
+## Database Configuration
+
+### SQLite (Default - Recommended for Small Deployments)
+
+No additional setup required. The database file `lawflow_backend/lawflow.db` will be created automatically.
+
+### PostgreSQL (For Production Scale)
+
+```bash
+# Install PostgreSQL
+sudo apt install postgresql postgresql-contrib
+
+# Create database and user
+sudo -u postgres psql
+CREATE DATABASE lawflow;
+CREATE USER lawflow WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE lawflow TO lawflow;
+\q
+
+# Update backend service environment
+# Edit /etc/systemd/system/lawflow-backend.service
+Environment="DATABASE_URL=postgresql://lawflow:your_password@localhost:5432/lawflow"
+
+# Reload and restart
+sudo systemctl daemon-reload
+sudo systemctl restart lawflow-backend
+```
+
+## Service Management
+
+### Using the Deployment Script
+
+```bash
+# Start all services
+./deployment-script.sh start
+
+# Stop all services
+./deployment-script.sh stop
+
+# Restart all services
+./deployment-script.sh restart
+
+# Update application
+./deployment-script.sh update
+```
+
+### Manual Service Control
+
+```bash
+# Backend
+sudo systemctl start lawflow-backend
+sudo systemctl stop lawflow-backend
+sudo systemctl restart lawflow-backend
+
+# Frontend
+sudo systemctl start lawflow-frontend
+sudo systemctl stop lawflow-frontend
+sudo systemctl restart lawflow-frontend
+
+# Nginx
+sudo systemctl restart nginx
+```
+
+### Viewing Logs
+
+```bash
+# Backend logs
+sudo journalctl -u lawflow-backend -f
+
+# Frontend logs
+sudo journalctl -u lawflow-frontend -f
+
+# Nginx logs
+sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/access.log
+```
+
+## File Uploads and Data Persistence
+
+* **Database**: SQLite file stored at `lawflow_backend/lawflow.db`
+* **Uploads**: Files stored in `lawflow_backend/uploads/`
+* **Configuration**: Service configurations in `/etc/systemd/system/`
+* **Nginx Config**: Reverse proxy config in `/etc/nginx/conf.d/lawflow.conf`
+
+## Environment Variables
+
+Configure these in the systemd service files:
+
+### Backend Service (`/etc/systemd/system/lawflow-backend.service`)
+
+```ini
+Environment="DATABASE_URL=sqlite:///./lawflow.db"
+Environment="ALLOWED_ORIGINS=*"
+```
+
+### Frontend Service
+
+No environment variables required for basic setup.
 
 ## Troubleshooting
 
-*   **Port Conflicts**: Ensure port `80` is not used by another service on your VPS.
-*   **Database Connection**: If the backend fails to connect to the DB, check the `docker compose logs backend` output. The `depends_on` condition in `docker-compose.yml` waits for the DB to be healthy, but startup issues can still occur.
-*   **Permissions**: If you encounter permission errors with uploads, ensure the Docker user has write access to the volume mount point (handled automatically by standard Docker volume behavior usually).
+### Common Issues
+
+**Backend won't start:**
+```bash
+# Check logs
+sudo journalctl -u lawflow-backend -f
+
+# Common issues:
+# - Missing dependencies: Run pip install -e . in backend directory
+# - Database connection: Check DATABASE_URL
+# - Port conflict: Ensure port 8000 is free
+```
+
+**Frontend won't start:**
+```bash
+# Check logs
+sudo journalctl -u lawflow-frontend -f
+
+# Common issues:
+# - Build failed: Run npm run build in frontend directory
+# - Port conflict: Ensure port 8080 is free
+```
+
+**Nginx errors:**
+```bash
+# Check config
+sudo nginx -t
+
+# Check logs
+sudo tail -f /var/log/nginx/error.log
+
+# Common issues:
+# - Upstream connection failed: Check if backend/frontend services are running
+# - Permission denied: Check file permissions
+```
+
+**Application not accessible:**
+- Check firewall: `sudo ufw status`
+- Check services: `sudo systemctl status lawflow-backend lawflow-frontend nginx`
+- Check ports: `sudo netstat -tlnp | grep :80`
+
+### Database Issues
+
+**SQLite corruption:**
+```bash
+# Stop backend service
+sudo systemctl stop lawflow-backend
+
+# Remove corrupted database (WARNING: loses all data)
+rm lawflow_backend/lawflow.db
+
+# Restart (will recreate with seed data)
+sudo systemctl start lawflow-backend
+```
+
+**PostgreSQL connection issues:**
+- Verify DATABASE_URL format
+- Check PostgreSQL service: `sudo systemctl status postgresql`
+- Test connection: `psql -U lawflow -d lawflow -h localhost`
+
+## Updates and Maintenance
+
+### Automated Updates
+
+```bash
+./deployment-script.sh update
+```
+
+This will:
+- Pull latest code from git
+- Update backend dependencies
+- Rebuild frontend
+- Restart all services
+
+### Manual Updates
+
+```bash
+# Pull changes
+git pull origin main
+
+# Update backend
+cd lawflow_backend
+source .venv/bin/activate
+pip install -e .
+
+# Update frontend
+cd ../lawflow_frontend
+npm install
+npm run build
+
+# Restart services
+sudo systemctl restart lawflow-backend lawflow-frontend nginx
+```
+
+## Security Considerations
+
+* **Firewall**: Configure ufw to only allow necessary ports
+* **User Permissions**: Services run as root (consider creating dedicated user)
+* **Environment Variables**: Store sensitive data securely
+* **SSL/TLS**: Consider adding HTTPS with Let's Encrypt
+* **Database**: Use strong passwords for PostgreSQL
+* **File Permissions**: Restrict access to uploads directory

@@ -1,0 +1,18 @@
+yangshun:
+  name: Yangshun Tay
+  title: Front End Engineer @ Facebook
+  url: https://github.com/yangshun
+  image_url: https://github.com/yangshun.png
+
+slorber:
+  name: Sébastien Lorber
+  title: Open Source @ Facebook
+  url: https://sebastienlorber.com
+  image_url: https://github.com/slorber.png
+
+john:
+  name: John Smith
+  title: Product Manager @ LawFlow
+  url: https://github.com/johnsmith
+  image_url: https://avatars.githubusercontent.com/u/12345678?v=4
+  email: john@lawflow.app

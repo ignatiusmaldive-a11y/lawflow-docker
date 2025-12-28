@@ -155,6 +155,7 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
             {overdue.length ? t("overdueCount").replace("{count}", String(overdue.length)) : t("noOverdue")}
           </span>
         </div>
+        <div style={{ overflowX: "auto" }}>
         <table className="table">
           <thead>
             <tr>
@@ -182,6 +183,7 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Calendar Section */}
