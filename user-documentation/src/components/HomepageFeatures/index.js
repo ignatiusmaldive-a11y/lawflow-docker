@@ -4,34 +4,67 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Matter Management',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Organize cases, track progress, and manage deadlines with comprehensive
+        matter management tools designed specifically for property law.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Task Automation',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Streamline workflows with automated task creation, visual kanban boards,
+        and intelligent deadline tracking to keep your team on track.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Document Management',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Secure file storage with version control, collaboration tools, and
+        integrated document templates for efficient legal document handling.
       </>
     ),
+  },
+];
+
+const AdditionalFeatures = [
+  {
+    title: 'Calendar Integration',
+    description: 'Sync with Google Calendar for seamless appointment management and scheduling.',
+    icon: '📅',
+  },
+  {
+    title: 'Client Portal',
+    description: 'Secure client communication and document sharing with dedicated client portals.',
+    icon: '👥',
+  },
+  {
+    title: 'Reporting & Analytics',
+    description: 'Comprehensive analytics and reporting tools to track performance and productivity.',
+    icon: '📊',
+  },
+  {
+    title: 'Mobile Access',
+    description: 'Access your matters and tasks on-the-go with our responsive mobile interface.',
+    icon: '📱',
+  },
+  {
+    title: 'API Integration',
+    description: 'Connect with external services and automate workflows through our REST API.',
+    icon: '🔌',
+  },
+  {
+    title: 'Security & Compliance',
+    description: 'Enterprise-grade security with GDPR compliance and data encryption.',
+    icon: '🔒',
   },
 ];
 
@@ -49,14 +82,37 @@ function Feature({Svg, title, description}) {
   );
 }
 
+function AdditionalFeaturesGrid() {
+  return (
+    <div className="row">
+      {AdditionalFeatures.map((feature, idx) => (
+        <div key={idx} className="col col--4 margin-bottom--lg">
+          <div className="text--center">
+            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{feature.icon}</div>
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function HomepageFeatures() {
   return (
-    <section className={styles.features}>
+    <section id="features" className={styles.features}>
       <div className="container">
+        <div className="text--center margin-bottom--xl">
+          <h2>Everything You Need for Modern Legal Practice</h2>
+          <p>LawFlow combines powerful features with an intuitive interface</p>
+        </div>
         <div className="row">
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
           ))}
+        </div>
+        <div className="margin-top--xl">
+          <AdditionalFeaturesGrid />
         </div>
       </div>
     </section>

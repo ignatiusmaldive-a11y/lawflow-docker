@@ -20,6 +20,7 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
+  onBrokenAnchors: 'ignore',
 
   // i18n: {
   //   defaultLocale: 'en',
@@ -78,19 +79,33 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/lawflow-social-card.jpg',
     navbar: {
-      title: 'LawFlow Docs',
+      title: 'LawFlow',
       logo: {
         alt: 'LawFlow Logo',
         src: 'img/logo.svg',
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          to: '/#features',
+          label: 'Features',
           position: 'left',
+        },
+        {
+          to: '/docs/getting-started',
           label: 'Documentation',
+          position: 'left',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
+        {
+          to: '/#pricing',
+          label: 'Pricing',
+          position: 'left',
+        },
+        {
+          href: 'https://app.lawflow.app',
+          label: 'Sign In',
+          position: 'right',
+        },
         {
           href: 'https://github.com/lawflow/lawflow',
           label: 'GitHub',

@@ -597,6 +597,7 @@ useEffect(() => {
               <div className="card cardPad" style={{ marginTop: 12 }}>
                 {activeProjectId && view === "Tasks" && (
                   <>
+                    <div style={{ overflowX: "auto" }}>
                     <TasksTable
                       tasks={filteredTasks}
                       onEdit={async (taskId, patch) => {
@@ -612,6 +613,7 @@ useEffect(() => {
                         }
                       }}
                     />
+                    </div>
                     {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
                     <Board
                       tasks={filteredTasks}

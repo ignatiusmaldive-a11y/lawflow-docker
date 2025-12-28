@@ -18,6 +18,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Getting Started',
       items: [
+        'getting-started/index',
         'getting-started/quick-start',
       ],
     },
@@ -34,6 +35,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Technical Setup',
       items: [
+        'technical-setup/index',
         'technical-setup/local-development',
         'technical-setup/troubleshooting',
       ],
