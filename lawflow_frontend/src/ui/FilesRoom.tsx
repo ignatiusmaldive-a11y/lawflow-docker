@@ -34,6 +34,37 @@ export function FilesRoom({ projectId }: { projectId: number }) {
       onDragLeave={(e)=>{ e.preventDefault(); setDragging(false); }}
       onDrop={async (e)=>{ e.preventDefault(); setDragging(false); const f=e.dataTransfer.files?.[0]; if(!f) return; try{ await api2.uploadFile(projectId, f); await refresh(); } catch(err){ console.error(err); } }}>
       {dragging ? (<div className="dropZone">{t("dragDrop")}</div>) : null}
+
+      <div className="card cardPad">
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>{t("filename")}</th>
+                <th>{t("type")}</th>
+                <th>{t("uploader")}</th>
+                <th>{t("uploaded")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((f) => (
+                <tr key={f.id} onClick={()=>{ setSelected(f); setPreviewError(null); }} style={{ cursor: 'pointer' }}>
+                  <td style={{ fontWeight: 950 }}>{f.filename}</td>
+                  <td className="small">{f.mime_type ?? "—"}</td>
+                  <td>{f.uploader}</td>
+                  <td className="small">{new Date(f.uploaded_at).toLocaleString()}</td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="small">{t("noFiles")}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="card cardPad">
         <div className="sectionTitle" style={{ flexWrap: "wrap", gap: "10px" }}>
           <h2>{t("fileRoom")}</h2>
@@ -49,37 +80,7 @@ export function FilesRoom({ projectId }: { projectId: number }) {
             <button className="btn primary" onClick={() => inputRef.current?.click()}>{t("upload")}</button>
           </div>
         </div>
-        <div className="small">Upload stores files under backend <b>uploads/</b> and writes metadata to SQLite.</div>
-      </div>
-
-      <div className="card cardPad">
-        <div style={{ overflowX: "auto" }}>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Filename</th>
-              <th>Type</th>
-              <th>Uploader</th>
-              <th>Uploaded</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((f) => (
-              <tr key={f.id} onClick={()=>{ setSelected(f); setPreviewError(null); }} style={{ cursor: 'pointer' }}>
-                <td style={{ fontWeight: 950 }}>{f.filename}</td>
-                <td className="small">{f.mime_type ?? "—"}</td>
-                <td>{f.uploader}</td>
-                <td className="small">{new Date(f.uploaded_at).toLocaleString()}</td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={4} className="small">{t("noFiles")}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        </div>
+        <div className="small">{t("filesDescription")}</div>
       </div>
 
       <Drawer
@@ -89,15 +90,15 @@ export function FilesRoom({ projectId }: { projectId: number }) {
       >
         {selected ? (
           <div style={{ display: "grid", gap: 10 }}>
-            <div className="small"><b>Type:</b> {selected.mime_type ?? "—"}</div>
-            <div className="small"><b>Uploader:</b> {selected.uploader}</div>
-            <div className="small"><b>Uploaded:</b> {new Date(selected.uploaded_at).toLocaleString()}</div>
+            <div className="small"><b>{t("type")}:</b> {selected.mime_type ?? "—"}</div>
+            <div className="small"><b>{t("uploader")}:</b> {selected.uploader}</div>
+            <div className="small"><b>{t("uploaded")}:</b> {new Date(selected.uploaded_at).toLocaleString()}</div>
 
             <div className="card cardPad" style={{ padding: 12 }}>
               <div className="sectionTitle">
                 <h2 style={{ margin: 0, fontSize: 14 }}>{t("preview")}</h2>
                 <a className="btn" href={api2.downloadFileUrl(selected.id)} target="_blank" rel="noreferrer">
-                  Download
+                  {t("download")}
                 </a>
               </div>
 
@@ -108,19 +109,19 @@ export function FilesRoom({ projectId }: { projectId: number }) {
                   title="pdf"
                   src={api2.downloadFileUrl(selected.id)}
                   style={{ width: "100%", height: 420, border: "1px solid var(--line)", borderRadius: 14 }}
-                  onError={() => setPreviewError("Preview unavailable. Seed rows are metadata-only — upload a real PDF to preview.")}
+                  onError={() => setPreviewError(t("pdfPreviewError"))}
                 />
               ) : (selected.mime_type ?? "").startsWith("image/") ? (
                 <img
                   src={api2.downloadFileUrl(selected.id)}
                   alt={selected.filename}
                   style={{ width: "100%", borderRadius: 14, border: "1px solid var(--line)" }}
-                  onError={() => setPreviewError("Image preview unavailable. Upload a real image to preview.")}
+                  onError={() => setPreviewError(t("imagePreviewError"))}
                 />
               ) : (
                 <div className="small">
-                  This file type can’t be previewed in the demo. Use Download.
-                  <div className="small" style={{ marginTop: 8, opacity: .9 }}>Tip: upload a PDF or image to see inline preview.</div>
+                  {t("filePreviewNotSupported")}
+                  <div className="small" style={{ marginTop: 8, opacity: .9 }}>{t("filePreviewTip")}</div>
                 </div>
               )}
             </div>
