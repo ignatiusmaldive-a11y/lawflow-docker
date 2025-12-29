@@ -153,7 +153,8 @@ button, input, select { font: inherit; }
 .pill{
   font-size: 12px; padding: 4px 10px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--panel); color: var(--muted);
-  white-space: nowrap;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 150px; /* Prevent pills from being too wide */
 }
 .pill.warn{ border-color: color-mix(in oklab, var(--warn) 55%, var(--line)); color: color-mix(in oklab, var(--warn) 85%, white); }
 .pill.ok{ border-color: color-mix(in oklab, var(--brand2) 55%, var(--line)); color: color-mix(in oklab, var(--brand2) 85%, white); }
@@ -432,6 +433,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 480px){
   .grid4{ grid-template-columns: 1fr; }
   .grid2 { grid-template-columns: 1fr; }
+  .sectionTitle{ font-size: 13px; }
+  .sectionTitle h2{ font-size: 13px; }
+}
+
+/* Ultra small screens - aggressive responsive fixes */
+@media (max-width: 360px){
+  .topbar{ padding: 12px 8px; }
+  .content{ padding: 12px 8px; }
+  .cardPad{ padding: 10px; }
+  .sectionTitle{ gap: 6px; margin-bottom: 8px; }
+  .sectionTitle h2{ font-size: 12px; }
+  .pill{ font-size: 11px; padding: 2px 6px; max-width: 100px; }
+  .btn{ padding: 8px 10px; font-size: 12px; }
+  .topNavItem{ padding: 6px 8px; font-size: 12px; }
+  .table th, .table td{ padding: 8px 6px; font-size: 12px; }
+  .deadlineBanner{ padding: 8px; font-size: 12px; }
+  .actions{ gap: 6px; }
 }
 
 /* Matter chips (Pinned / Recents) */
@@ -710,6 +728,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .topNavItem:hover {
