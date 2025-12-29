@@ -20,13 +20,13 @@ export function TemplatesView({ municipality, transactionType }: { municipality:
           <span className="pill">{municipality}</span>
         </div>
         <div className="small">
-          These are demo template rules (Costa del Sol). Real firms usually maintain these as editable checklists + document templates.
+          {t("templatesDescription")}
         </div>
       </div>
 
       <div className="card cardPad">
         <div className="sectionTitle">
-          <h2>Checklist overrides</h2>
+          <h2>{t("checklistOverrides")}</h2>
           <span className="pill">{transactionType}</span>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
@@ -36,20 +36,20 @@ export function TemplatesView({ municipality, transactionType }: { municipality:
                 <span className="chipDot" />
                 <div>
                   <div className="chkLabel">{x}</div>
-                  <div className="small">Applies to: {municipality} · {transactionType}</div>
+                  <div className="small">{t("appliesTo")}: {municipality} · {transactionType}</div>
                 </div>
               </div>
-              <span className="pill">Template</span>
+              <span className="pill">{t("template")}</span>
             </div>
           ))}
-          {(tpl?.checklist_overrides?.length ?? 0) === 0 && <div className="small">No overrides for this combination.</div>}
+          {(tpl?.checklist_overrides?.length ?? 0) === 0 && <div className="small">{t("noOverrides")}</div>}
         </div>
       </div>
 
       <div className="card cardPad">
         <div className="sectionTitle">
-          <h2>Document templates</h2>
-          <span className="pill">{(tpl?.document_templates?.length ?? 0) + " items"}</span>
+          <h2>{t("documentTemplates")}</h2>
+          <span className="pill">{(tpl?.document_templates?.length ?? 0) + " " + t("items")}</span>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
           {(tpl?.document_templates ?? []).map((x, i) => (
@@ -58,13 +58,13 @@ export function TemplatesView({ municipality, transactionType }: { municipality:
                 <span className="chipDot muted" />
                 <div>
                   <div className="chkLabel">{x}</div>
-                  <div className="small">Location pack: {municipality}</div>
+                  <div className="small">{t("locationPack")}: {municipality}</div>
                 </div>
               </div>
-              <button className="btn">Preview</button>
+              <button className="btn">{t("preview")}</button>
             </div>
           ))}
-          {(tpl?.document_templates?.length ?? 0) === 0 && <div className="small">No document templates available.</div>}
+          {(tpl?.document_templates?.length ?? 0) === 0 && <div className="small">{t("noDocumentTemplates")}</div>}
         </div>
       </div>
     </div>

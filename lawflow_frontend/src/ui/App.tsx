@@ -20,7 +20,7 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { Callout } from "./components/Callout";
 
-type View = "Tasks" | "Timeline" | "Files" | "Templates" | "Closing Pack" | "Matter Settings" | "General Overview";
+type View = "Tasks" | "Timeline" | "Files" | "Closing Pack" | "Matter Settings" | "General Overview";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -476,7 +476,6 @@ useEffect(() => {
                   <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
                   <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
                   <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-                  <button className={"topNavItem" + (view==="Templates"?" active":"")} onClick={()=>setView("Templates")}>{t("templates")}</button>
                   <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
                 </>
               )}
@@ -597,22 +596,22 @@ useEffect(() => {
               <div className="card cardPad" style={{ marginTop: 12 }}>
                 {activeProjectId && view === "Tasks" && (
                   <>
-                    <div style={{ overflowX: "auto" }}>
-                    <TasksTable
-                      tasks={filteredTasks}
-                      onEdit={async (taskId, patch) => {
-                        // Optimistically update local state for immediate UI feedback
-                        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
-                        try {
-                          await api.updateTask(taskId, patch);
-                          await refreshAll(activeProjectId);
-                        } catch (error) {
-                          // Revert on error
-                          console.error('Failed to update task:', error);
-                          await refreshAll(activeProjectId);
-                        }
-                      }}
-                    />
+                    <div className="table-container">
+                      <TasksTable
+                        tasks={filteredTasks}
+                        onEdit={async (taskId, patch) => {
+                          // Optimistically update local state for immediate UI feedback
+                          setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
+                          try {
+                            await api.updateTask(taskId, patch);
+                            await refreshAll(activeProjectId);
+                          } catch (error) {
+                            // Revert on error
+                            console.error('Failed to update task:', error);
+                            await refreshAll(activeProjectId);
+                          }
+                        }}
+                      />
                     </div>
                     {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
                     <Board
@@ -630,16 +629,13 @@ useEffect(() => {
                 )}
 
   {activeProjectId && view === "Files" && (
-    <FilesRoom projectId={activeProjectId} />
-  )}
-
-  {activeProjectId && view === "Templates" && (
     <div style={{ display: "grid", gap: 12 }}>
+      <FilesRoom projectId={activeProjectId} />
       <div className="card cardPad" style={{ padding: 12 }}>
         <div className="sectionTitle" style={{ marginBottom: 0 }}>
           <h2>{t("municipality")}</h2>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <select className="select" style={{ width: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
               {MUNICIPALITIES_LIST.map((m) => (
                 <option key={m} value={m}>{m}</option>
               ))}

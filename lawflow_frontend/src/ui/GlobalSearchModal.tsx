@@ -18,7 +18,7 @@ export function GlobalSearchModal({
   files: FileItem[];
   checklist: ChecklistItem[];
   timeline: TimelineItem[];
-  onNavigate: (view: "Tasks" | "Timeline" | "Files" | "Templates" | "Closing Pack") => void;
+  onNavigate: (view: "Tasks" | "Timeline" | "Files" | "Closing Pack") => void;
 }) {
   const { t } = useI18n();
   const [q, setQ] = useState("");

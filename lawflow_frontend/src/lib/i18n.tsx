@@ -10,7 +10,7 @@ const EN: Dict = {
   activeMatter: "Active matter",
   tasks: "Tasks",
   timeline: "Timeline",
-  files: "Files",
+  files: "Documents",
 
   templates: "Templates",
   closingPack: "Closing pack",
@@ -96,6 +96,29 @@ const EN: Dict = {
   calendarSubtitle: "Subscribe this matter in Google Calendar / Outlook using the ICS file. (Demo: exports task due dates + milestones.)",
   dueSoonCount: "{count} due soon",
   reviewButton: "Review",
+
+  // Files section
+  filesDescription: "Upload stores files under backend uploads/ and writes metadata to SQLite.",
+  filename: "Filename",
+  type: "Type",
+  uploader: "Uploader",
+  uploaded: "Uploaded",
+  download: "Download",
+  pdfPreviewError: "Preview unavailable. Seed rows are metadata-only — upload a real PDF to preview.",
+  imagePreviewError: "Image preview unavailable. Upload a real image to preview.",
+  filePreviewNotSupported: "This file type can't be previewed in the demo. Use Download.",
+  filePreviewTip: "Tip: upload a PDF or image to see inline preview.",
+
+  // Templates section
+  templatesDescription: "These are demo template rules (Costa del Sol). Real firms usually maintain these as editable checklists + document templates.",
+  checklistOverrides: "Checklist overrides",
+  appliesTo: "Applies to",
+  template: "Template",
+  noOverrides: "No overrides for this combination.",
+  documentTemplates: "Document templates",
+  items: "items",
+  locationPack: "Location pack",
+  noDocumentTemplates: "No document templates available.",
 };
 
 const ES: Dict = {
@@ -103,7 +126,7 @@ const ES: Dict = {
   activeMatter: "Asunto activo",
   tasks: "Tareas",
   timeline: "Cronograma",
-  files: "Archivos",
+  files: "Documentos",
 
   templates: "Plantillas",
   closingPack: "Paquete de cierre",
@@ -189,6 +212,29 @@ const ES: Dict = {
   calendarSubtitle: "Suscribe este asunto en Google Calendar / Outlook usando el archivo ICS. (Demo: exporta fechas de vencimiento de tareas + hitos.)",
   dueSoonCount: "{count} vencen pronto",
   reviewButton: "Revisar",
+
+  // Files section
+  filesDescription: "Las subidas se almacenan en uploads/ del backend y escriben metadatos en SQLite.",
+  filename: "Nombre de archivo",
+  type: "Tipo",
+  uploader: "Subido por",
+  uploaded: "Subido",
+  download: "Descargar",
+  pdfPreviewError: "Vista previa no disponible. Las filas de ejemplo son solo metadatos — sube un PDF real para previsualizar.",
+  imagePreviewError: "Vista previa de imagen no disponible. Sube una imagen real para previsualizar.",
+  filePreviewNotSupported: "Este tipo de archivo no se puede previsualizar en la demo. Usa Descargar.",
+  filePreviewTip: "Consejo: sube un PDF o imagen para ver vista previa integrada.",
+
+  // Templates section
+  templatesDescription: "Estas son reglas de plantillas de demostración (Costa del Sol). Las firmas reales suelen mantenerlas como checklists editables + plantillas de documentos.",
+  checklistOverrides: "Anulaciones del checklist",
+  appliesTo: "Aplica a",
+  template: "Plantilla",
+  noOverrides: "No hay anulaciones para esta combinación.",
+  documentTemplates: "Plantillas de documentos",
+  items: "elementos",
+  locationPack: "Paquete de ubicación",
+  noDocumentTemplates: "No hay plantillas de documentos disponibles.",
 };
 
 const Ctx = createContext<{ lang: Lang; t: (k: keyof typeof EN) => string } | null>(null);

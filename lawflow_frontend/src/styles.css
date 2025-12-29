@@ -103,6 +103,7 @@ button, input, select { font: inherit; }
   background: var(--panel);
   border: 1px solid var(--line);
   color: var(--text);
+  max-width: 100%;
 }
 .btn{
   padding: 10px 12px;
@@ -244,9 +245,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .dot.bad{ background: var(--danger); }
 
 .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: var(--radius); }
-.table th, .table td{ text-align:left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; }
+.table th, .table td{ text-align:left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; white-space: nowrap; }
 .table th{ color: var(--muted); font-weight: 950; }
 .table tr:hover td{ background: color-mix(in oklab, var(--panel2) 55%, transparent); }
+
+/* Responsive table wrapper */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but allow scrolling */
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+.table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background-color: var(--line);
+  border-radius: 3px;
+}
 
 
 
