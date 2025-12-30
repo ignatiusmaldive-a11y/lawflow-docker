@@ -425,7 +425,8 @@ useEffect(() => {
 
       <main className="main">
         <header className="topbar">
-          <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
+          <div className="topbar-container">
+            <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <p className="h1">
                 {view === "General Overview" ? (
@@ -494,6 +495,7 @@ useEffect(() => {
             {view !== "General Overview" && (
               <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
             )}
+          </div>
           </div>
         </header>
 

@@ -76,9 +76,20 @@ button, input, select { font: inherit; }
 .main{ display:flex; flex-direction:column; overflow:hidden; }
 .topbar{
   padding: 16px 18px;
-  display:flex; align-items:center; justify-content:space-between; gap: 14px;
   border-bottom: 1px solid var(--line);
   background: transparent;
+  display: flex;
+  justify-content: center;
+}
+.topbar-container{
+  display:flex; align-items:center; justify-content:space-between; gap: 14px;
+  width: 100%;
+}
+@media (min-width: 1200px) {
+  .topbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 }
 .titleRow{ display:flex; flex-direction:column; gap: 2px; }
 .h1{ font-size: 18px; font-weight: 900; margin:0; }
@@ -768,5 +779,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (min-width: 1200px) {
   .table-container {
     max-width: 1200px;
+    margin: 0 auto;
   }
 }

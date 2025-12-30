@@ -290,7 +290,7 @@ export function GeneralOverviewView({
               <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
             </div>
             <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
-              Gestión integral de transacciones inmobiliarias para despachos de abogados especializados en derecho inmobiliario.
+              CRM para abogados especializados en derecho inmobiliario.
             </p>
           </div>
 
@@ -307,7 +307,7 @@ export function GeneralOverviewView({
 
           {/* Legal Links */}
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Operación Polonia</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Agencias Polacas</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Política de Privacidad</a></li>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Términos de Servicio</a></li>
