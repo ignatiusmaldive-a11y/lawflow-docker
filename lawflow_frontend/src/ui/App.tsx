@@ -430,11 +430,11 @@ useEffect(() => {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <p className="h1">
                 {view === "General Overview" ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div className="brandMark">◆</div>
                     <div>
                       <div className="brandName">AMA-CRM</div>
-                      <div className="small">Transacciones inmobiliarias</div>
+                      <div className="small">Listado General</div>
                     </div>
                   </div>
                 ) : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}

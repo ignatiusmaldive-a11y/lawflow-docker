@@ -167,7 +167,7 @@ export function GeneralOverviewView({
           placeholder={t("searchProjectsPlaceholder")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          style={{ width: 300 }}
+          style={{ width: 320 }}
         />
 
         <select
