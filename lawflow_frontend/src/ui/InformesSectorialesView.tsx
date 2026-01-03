@@ -99,15 +99,16 @@ export function InformesSectorialesView() {
   const [filter, setFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("All");
 
-  const sortedAndFilteredReports = useMemo(() => {
-    let filtered = SAMPLE_REPORTS.filter(r => {
+  const { localReports, nacionalReports, totalCount } = useMemo(() => {
+    const textQuery = filter.trim().toLowerCase();
+    let filtered = SAMPLE_REPORTS.filter((r) => {
       const matchesText =
-        r.title.toLowerCase().includes(filter.toLowerCase()) ||
-        (r.location || "").toLowerCase().includes(filter.toLowerCase()) ||
-        r.description.toLowerCase().includes(filter.toLowerCase());
+        !textQuery ||
+        r.title.toLowerCase().includes(textQuery) ||
+        (r.location || "").toLowerCase().includes(textQuery) ||
+        r.description.toLowerCase().includes(textQuery);
 
       const matchesType = typeFilter === "All" || r.type === typeFilter;
-
       return matchesText && matchesType;
     });
 
@@ -133,7 +134,9 @@ export function InformesSectorialesView() {
       return 0;
     });
 
-    return filtered;
+    const localReports = filtered.filter((r) => r.type === "Local");
+    const nacionalReports = filtered.filter((r) => r.type === "Nacional");
+    return { localReports, nacionalReports, totalCount: filtered.length };
   }, [sortField, sortDirection, filter, typeFilter]);
 
   const handleSort = (field: SortField) => {
@@ -182,52 +185,22 @@ export function InformesSectorialesView() {
     </th>
   );
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Header */}
-      <div style={{ textAlign: "center", padding: "40px 20px", background: "linear-gradient(135deg, rgba(124,58,237,.05), rgba(34,197,94,.05))", borderRadius: "12px" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 900, margin: "0 0 16px 0", color: "var(--text)" }}>
-          Informes Sectoriales
-        </h1>
-        <p style={{ fontSize: '1.2rem', color: 'var(--muted)', margin: '0 auto', maxWidth: '600px' }}>
-          Análisis de inteligencia de negocio para el sector inmobiliario español
-        </p>
-      </div>
-
-      {/* Filters & Actions */}
-      <div className="table-container">
-        <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <input
-          className="search"
-          placeholder="Buscar informes..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ width: 320 }}
-        />
-
-        <select
-          className="select"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          style={{ width: 180 }}
-        >
-          <option value="All">Todos los tipos</option>
-          <option value="Local">Local</option>
-          <option value="Nacional">Nacional</option>
-        </select>
-
-        <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-            {sortedAndFilteredReports.length} informes disponibles
+  const ReportsSection = ({
+    title,
+    reports,
+  }: {
+    title: string;
+    reports: BusinessReport[];
+  }) => (
+    <div className="table-container">
+      <div className="card" style={{ overflowX: "auto" }}>
+        <div className="cardPad" style={{ paddingBottom: 10 }}>
+          <div style={{ fontWeight: 900, color: "var(--text)" }}>{title}</div>
+          <div style={{ marginTop: 2, fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+            {reports.length} informes
           </div>
         </div>
-        </div>
-      </div>
-
-      {/* Reports Table */}
-      <div className="table-container">
-        <div className="card" style={{ overflowX: "auto" }}>
-          <table className="table" style={{ width: "100%" }}>
+        <table className="table" style={{ width: "100%" }}>
           <thead>
             <tr>
               <SortHeader field="title" label="Título del Informe" className="column-title" />
@@ -237,12 +210,11 @@ export function InformesSectorialesView() {
             </tr>
           </thead>
           <tbody>
-            {sortedAndFilteredReports.map((report) => (
+            {reports.map((report) => (
               <tr
                 key={report.id}
                 style={{ cursor: "pointer" }}
                 onClick={() => {
-                  // For now, just show an alert. In a real app, this would open the report
                   alert(`Informes completos disponibles próximamente. Este es un ejemplo del informe: "${report.title}"`);
                 }}
               >
@@ -271,7 +243,7 @@ export function InformesSectorialesView() {
                 </td>
               </tr>
             ))}
-            {sortedAndFilteredReports.length === 0 && (
+            {reports.length === 0 && (
               <tr>
                 <td colSpan={4} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
                   No se encontraron informes que coincidan con los criterios de búsqueda.
@@ -280,8 +252,59 @@ export function InformesSectorialesView() {
             )}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Filters & Actions */}
+      <div className="table-container">
+        <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <input
+          className="search"
+          placeholder="Buscar informes..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          style={{ width: 320 }}
+        />
+
+        <select
+          className="select"
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          style={{ width: 180 }}
+        >
+          <option value="All">Todos los tipos</option>
+          <option value="Local">Local</option>
+          <option value="Nacional">Nacional</option>
+        </select>
+
+        <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+            {totalCount} informes disponibles
+          </div>
+        </div>
         </div>
       </div>
+
+      {/* Reports Sections */}
+      {totalCount === 0 ? (
+        <div className="table-container">
+          <div className="card" style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
+            No se encontraron informes que coincidan con los criterios de búsqueda.
+          </div>
+        </div>
+      ) : (
+        <>
+          {(typeFilter === "Local" || (typeFilter === "All" && localReports.length > 0)) && (
+            <ReportsSection title="Local" reports={localReports} />
+          )}
+          {(typeFilter === "Nacional" || (typeFilter === "All" && nacionalReports.length > 0)) && (
+            <ReportsSection title="Nacional" reports={nacionalReports} />
+          )}
+        </>
+      )}
 
       {/* Footer */}
       <div className="table-container">

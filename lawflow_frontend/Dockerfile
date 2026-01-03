@@ -19,6 +19,9 @@ FROM nginx:alpine
 # Copy the built files from the previous stage to the Nginx html directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# SPA routing fallback (serve index.html for non-file routes)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 

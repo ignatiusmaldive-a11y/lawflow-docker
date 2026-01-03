@@ -237,8 +237,8 @@ export function GeneralOverviewView({
 
       {/* Main Table */}
       <div className="table-container">
-        <div className="card" style={{ overflowX: "auto" }}>
-          <table className="table" style={{ width: "100%" }}>
+        <div className="card" style={{ overflowX: "hidden" }}>
+          <table className="table mattersTable" style={{ width: "100%" }}>
           <thead>
             <tr>
               <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
@@ -254,6 +254,7 @@ export function GeneralOverviewView({
               const d = daysUntil(p.target_close_date);
               const isOverdue = d !== null && d < 0;
               const isSoon = d !== null && d <= 7 && d >= 0;
+              const matterLabel = formatProjectLabel(p);
 
               return (
                 <tr 
@@ -261,8 +262,10 @@ export function GeneralOverviewView({
                   onClick={() => onProjectSelect(p.id)} 
                   style={{ cursor: "pointer" }}
                 >
-                  <td style={{ minWidth: "140px", whiteSpace: "normal" }}>
-                    <div style={{ fontWeight: 800 }}>{formatProjectLabel(p)}</div>
+                  <td className="matterCell">
+                    <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
+                      {matterLabel}
+                    </div>
                   </td>
                   <td style={{ textAlign: "center" }}>
                     <span className="pill neutral">{p.location}</span>

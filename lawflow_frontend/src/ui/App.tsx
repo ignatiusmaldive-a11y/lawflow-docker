@@ -445,67 +445,76 @@ useEffect(() => {
         </div>
       </aside>
 
-      <main className="main">
-        <header className={"topbar" + (view === "General Overview" || view === "Informes Sectoriales" ? " landingTopbar" : "")}>
-          <div className="topbar-container">
-            <div className="titleRow" style={view === "General Overview" || view === "Informes Sectoriales" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-              <p className="h1">
-                {view === "General Overview" ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div className="brandMark">◆</div>
-                    <div>
-                      <div className="brandName">AMA-CRM</div>
-                      <div className="small">Listado General</div>
-                    </div>
-                  </div>
-                ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
-              </p>
-              {view !== "General Overview" && activeProject && (
-                <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
-                  <div className="small" style={{ fontWeight: 900 }}>
-                    <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
-                  </div>
-                  {riskPill(activeProject.risk, t)}
-                  <button
-                    className="btn ghost"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (!activeProject) return;
-                      setPinnedIds(togglePin(activeProject.id));
-                    }}
-                    title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-                    style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-                  >
-                    {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* <p className="subtitle">
-              <span className="crumbs">
-  {view === "General Overview" ? (
+	      <main className="main">
+	        <header className={"topbar" + (view === "General Overview" || view === "Informes Sectoriales" ? " landingTopbar" : "")}>
+	          <div className="topbar-container">
+		            <div className="titleRow" style={view === "General Overview" || view === "Informes Sectoriales" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
+		            {view === "Informes Sectoriales" ? (
+		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+		                <div style={{ textAlign: "left" }}>
+		                  <div className="brandName">Informes Sectoriales</div>
+		                  <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
+		                </div>
+		              </div>
+		            ) : (
+	              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+	                <p className="h1">
+	                  {view === "General Overview" ? (
+	                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+	                      <div className="brandMark">◆</div>
+	                      <div>
+	                        <div className="brandName">AMA-CRM</div>
+	                        <div className="small">Listado General</div>
+	                      </div>
+	                    </div>
+	                  ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
+	                </p>
+	                {view !== "General Overview" && activeProject && (
+	                  <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
+	                    <div className="small" style={{ fontWeight: 900 }}>
+	                      <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
+	                    </div>
+	                    {riskPill(activeProject.risk, t)}
+	                    <button
+	                      className="btn ghost"
+	                      onClick={(e) => {
+	                        e.preventDefault();
+	                        if (!activeProject) return;
+	                        setPinnedIds(togglePin(activeProject.id));
+	                      }}
+	                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+	                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+	                    >
+	                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+	                    </button>
+	                  </div>
+	                )}
+	              </div>
+	            )}
+	            {/* <p className="subtitle">
+	              <span className="crumbs">
+	  {view === "General Overview" ? (
      <span className="crumb">Portfolio Overview</span>
   ) : (
      breadcrumbParts(activeProject).map((c, idx) => (
        <span key={idx} className="crumb">{c}</span>
      ))
   )}
-</span>
-            </p> */}
-            <div className="topNav" style={{ minHeight: 42, display: view === "General Overview" ? "none" : "block" }}>
-              {activeProjectId && view !== "General Overview" && (
-                <>
-                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
-                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
-                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
-                </>
-              )}
-            </div>
-            {view !== "General Overview" && null}
-          </div>
-          <div className="actions">
+	</span>
+	            </p> */}
+	            <div className="topNav" style={{ minHeight: 42, display: view === "General Overview" || view === "Informes Sectoriales" ? "none" : "block" }}>
+	              {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && (
+	                <>
+	                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
+	                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
+	                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
+	                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
+	                </>
+	              )}
+	            </div>
+	            {view !== "General Overview" && null}
+	          </div>
+	          <div className="actions">
             <button
               className="hamburger"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -514,10 +523,10 @@ useEffect(() => {
               ☰
             </button>
 
-            {view !== "General Overview" && (
-              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
-            )}
-          </div>
+	            {view !== "General Overview" && view !== "Informes Sectoriales" && (
+	              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
+	            )}
+	          </div>
           </div>
         </header>
 

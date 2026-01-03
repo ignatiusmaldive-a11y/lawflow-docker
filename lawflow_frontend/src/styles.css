@@ -6,7 +6,7 @@
   --muted: #a0aec0;
   --line: #2d3748;
   --shadow: 0 18px 50px rgba(0,0,0,.45);
-  --radius: 18px;
+  --radius: 14px;
 
   --brand: #7c3aed;
   --brand2: #22c55e;
@@ -167,6 +167,7 @@ button, input, select { font: inherit; }
 .warn { color: var(--warn); }
 
 .pill{
+  display: inline-block;
   font-size: 12px; padding: 4px 10px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--panel); color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -263,8 +264,36 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .table{ width:100%; border-collapse: collapse; overflow:hidden; border-radius: var(--radius); }
 .table th, .table td{ text-align:left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: middle; white-space: nowrap; }
+.table th:first-child, .table td:first-child{ padding-left: 12px; }
 .table th{ color: var(--muted); font-weight: 950; }
 .table tr:hover td{ background: color-mix(in oklab, var(--panel2) 55%, transparent); }
+
+.table .matterText{
+  display: block;
+  max-width: min(46vw, 360px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mattersTable{
+  table-layout: fixed;
+}
+.mattersTable th, .mattersTable td{
+  overflow: hidden;
+}
+.mattersTable th:nth-child(1){ width: 34%; }
+.mattersTable th:nth-child(2){ width: 12%; }
+.mattersTable th:nth-child(3){ width: 12%; }
+.mattersTable th:nth-child(4){ width: 10%; }
+.mattersTable th:nth-child(5){ width: 14%; }
+.mattersTable th:nth-child(6){ width: 18%; }
+.mattersTable th:last-child, .mattersTable td:last-child{ padding-right: 8px; }
+
+@media (max-width: 1200px){
+  .mattersTable th:nth-child(1){ width: 36%; }
+  .mattersTable th:nth-child(6){ width: 16%; }
+}
 
 /* Files table: allow long filenames to wrap + mobile-friendly columns */
 .filesTable .fileNameCell{
