@@ -168,7 +168,7 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
           <tbody>
             {upcoming.map((t) => (
               <tr key={t.id}>
-                <td style={{ fontWeight: 950 }}>{t.title}</td>
+                <td style={{ fontWeight: 950, whiteSpace: "normal", minWidth: "160px" }}>{t.title}</td>
                 <td>{t.assignee}</td>
                 <td>{t.due_date}</td>
                 <td>{t.status}</td>
