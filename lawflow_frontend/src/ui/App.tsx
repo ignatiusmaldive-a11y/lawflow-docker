@@ -508,7 +508,7 @@ useEffect(() => {
 		                </div>
 		              </div>
 		            ) : (
-	              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+	              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
 	                <p className="h1">
 	                  {view === "General Overview" ? (
 	                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -521,23 +521,11 @@ useEffect(() => {
 	                  ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
 	                </p>
 	                {view !== "General Overview" && activeProject && (
-	                  <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
-	                    <div className="small" style={{ fontWeight: 900 }}>
-	                      <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
+	                  <div className="projectMetaInline">
+	                    <div className="small">
+	                      {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
 	                    </div>
 	                    {riskPill(activeProject.risk, t)}
-	                    <button
-	                      className="btn ghost"
-	                      onClick={(e) => {
-	                        e.preventDefault();
-	                        if (!activeProject) return;
-	                        setPinnedIds(togglePin(activeProject.id));
-	                      }}
-	                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-	                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-	                    >
-	                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-	                    </button>
 	                  </div>
 	                )}
 	              </div>
@@ -572,17 +560,61 @@ useEffect(() => {
 	            {view !== "General Overview" && null}
 	          </div>
 	          <div className="actions">
-            <button
-              className="hamburger"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              title={t("toggleSidebar")}
-            >
-              ☰
-            </button>
+	            {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" ? (
+	              <div className="projectHeaderActions">
+	                <button className="btn quickAddBtn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>
+	                  {t("quickAdd")}
+	                </button>
+	                <div className="headerIconRow">
+	                  <button
+	                    className="hamburger headerIconBtn"
+	                    onClick={() => setSidebarOpen(!sidebarOpen)}
+	                    title={t("toggleSidebar")}
+	                  >
+	                    ☰
+	                  </button>
 
-	            {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
-	              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
+	                  <button
+	                    className="iconSquare homeBtn headerIconBtn"
+	                    onClick={() => {
+	                      setActiveProjectId(null);
+	                      setView("General Overview");
+	                      setSidebarOpen(false);
+	                      window.scrollTo(0, 0);
+	                    }}
+	                    title={t("home")}
+	                  >
+	                    <span className="iconSquareGlyph">⌂</span>
+	                  </button>
+
+	                  {activeProject && (
+	                    <button
+	                      className="iconSquare headerIconBtn"
+	                      onClick={(e) => {
+	                        e.preventDefault();
+	                        if (!activeProject) return;
+	                        setPinnedIds(togglePin(activeProject.id));
+	                      }}
+	                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+	                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+	                    >
+	                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+	                    </button>
+	                  )}
+	                </div>
+	              </div>
+	            ) : (
+	              <div className="actionsRow">
+	                <button
+	                  className="hamburger"
+	                  onClick={() => setSidebarOpen(!sidebarOpen)}
+	                  title={t("toggleSidebar")}
+	                >
+	                  ☰
+	                </button>
+	              </div>
 	            )}
+
 	          </div>
           </div>
         </header>
