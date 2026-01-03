@@ -1,6 +1,7 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Task } from "../lib/api";
+import { useI18n } from "../lib/i18n";
 
 function dot(priority: Task["priority"]) {
   if (priority === "Alta") return <span className="dot bad" />;
@@ -20,6 +21,7 @@ function dueTone(due?: string | null) {
 }
 
 export function TaskCard({ task }: { task: Task }) {
+  const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id });
   const style: React.CSSProperties = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
@@ -38,7 +40,7 @@ export function TaskCard({ task }: { task: Task }) {
         <span className={"dot " + dueClass} />
         <span>{task.assignee}</span>
         <span>·</span>
-        <span>{task.due_date ?? "No due date"}</span>
+        <span>{task.due_date ?? t("noDueDate")}</span>
         {task.tags ? (
           <>
             <span>·</span>

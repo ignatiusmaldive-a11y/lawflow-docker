@@ -14,9 +14,9 @@ def list_items(project_id: int, db: Session = Depends(get_db)):
 def toggle_item(item_id: int, payload: ChecklistUpdate, db: Session = Depends(get_db)):
     it = db.get(ChecklistItem, item_id)
     if not it:
-        raise HTTPException(status_code=404, detail="Checklist item not found")
+        raise HTTPException(status_code=404, detail="Elemento de checklist no encontrado")
     it.is_done = payload.is_done
-    db.add(Activity(project_id=it.project_id, actor="Ana López", verb="Checklist updated", detail=it.label))
+    db.add(Activity(project_id=it.project_id, actor="Ana López", verb="Checklist actualizado", detail=it.label))
     db.commit()
     db.refresh(it)
     return it

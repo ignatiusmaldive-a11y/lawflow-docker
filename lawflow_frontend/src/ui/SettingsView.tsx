@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Project } from "../lib/api";
 import { api3 } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+import { formatTransactionType } from "../lib/formatting";
 
 const LS_PLATFORM = "lawflow.platform.settings.v1";
 
@@ -29,7 +30,7 @@ function saveSettings(s: PlatformSettings) {
 }
 
 export function SettingsView({ projects, onProjectUpdated }: { projects: Project[]; onProjectUpdated: (p: Project) => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [settings, setSettings] = useState<PlatformSettings>(() => loadSettings());
   const [savingId, setSavingId] = useState<number | null>(null);
 
@@ -96,7 +97,7 @@ export function SettingsView({ projects, onProjectUpdated }: { projects: Project
             <div key={p.id} className="projRow">
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: 1000, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</div>
-                <div className="small">{p.transaction_type} · {p.location} · {p.status}</div>
+                <div className="small">{formatTransactionType(p.transaction_type, lang)} · {p.location} · {p.status}</div>
               </div>
 
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

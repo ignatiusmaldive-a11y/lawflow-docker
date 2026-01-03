@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useI18n } from "../lib/i18n";
 import { api2, Template } from "../lib/api";
+import { formatTransactionType } from "../lib/formatting";
 
 const MUNICIPALITIES = ["Marbella", "Mijas", "Estepona"] as const;
 
 export function TemplatesView({ municipality, transactionType }: { municipality: string; transactionType: string }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [tpl, setTpl] = useState<Template | null>(null);
 
   useEffect(() => {
-    api2.template(municipality, transactionType).then(setTpl).catch(console.error);
-  }, [municipality, transactionType]);
+    api2.template(municipality, transactionType, lang).then(setTpl).catch(console.error);
+  }, [municipality, transactionType, lang]);
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
@@ -27,7 +28,7 @@ export function TemplatesView({ municipality, transactionType }: { municipality:
       <div className="card cardPad">
         <div className="sectionTitle">
           <h2>{t("checklistOverrides")}</h2>
-          <span className="pill">{transactionType}</span>
+          <span className="pill">{formatTransactionType(transactionType, lang)}</span>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
           {(tpl?.checklist_overrides ?? []).map((x, i) => (

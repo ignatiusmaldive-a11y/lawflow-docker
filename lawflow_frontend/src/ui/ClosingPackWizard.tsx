@@ -24,7 +24,7 @@ function isOverdue(due?: string | null) {
 }
 
 export function ClosingPackWizard({ projectId, project, tasks, checklist }: { projectId: number; project: Project | null; tasks: Task[]; checklist: ChecklistItem[] }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [step, setStep] = useState<Step>("Notary");
 
   const openTasks = useMemo(() => tasks.filter((x) => x.status !== "Hecho"), [tasks]);
@@ -55,7 +55,7 @@ export function ClosingPackWizard({ projectId, project, tasks, checklist }: { pr
       const threshold = Math.max(1, Math.ceil(v.total * 0.6));
       if (v.done < threshold) out.push(`${s}: ${v.done}/${v.total}`);
     }
-    if (overdue.length) out.unshift(`${overdue.length} overdue task(s)`);
+    if (overdue.length) out.unshift(t("overdueTasksCount").replace("{count}", String(overdue.length)));
     return out.slice(0, 8);
   }, [step, byStage, overdue]);
 
@@ -72,23 +72,26 @@ export function ClosingPackWizard({ projectId, project, tasks, checklist }: { pr
           <h2>{t("closingPackGen")}</h2>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <span className={"pill " + (ready ? "ok" : "warn")}>{ready ? t("ready") : t("notReady")}</span>
-            <a className="btn primary" style={{ opacity: ready ? 1 : 0.5, pointerEvents: ready ? "auto" : "none" }} href={api2.closingPackUrl(projectId)}>
+            <a className="btn primary" style={{ opacity: ready ? 1 : 0.5, pointerEvents: ready ? "auto" : "none" }} href={api2.closingPackUrl(projectId, lang)}>
               {t("generateZip")}
             </a>
           </div>
         </div>
         <div className="small">
-          <b>Matter:</b> {project?.title ?? "—"} · <b>Target:</b> {project?.target_close_date ?? "—"} · <b>Risk:</b> {project?.risk ?? "—"}
+          <b>{t("matterLabel")}:</b> {project?.title ?? "—"} · <b>{t("targetLabel")}:</b> {project?.target_close_date ?? "—"} · <b>{t("riskLabel")}:</b>{" "}
+          {project?.risk === "Critical" ? t("riskCritical") : project?.risk === "At Risk" ? t("riskAtRisk") : project?.risk === "Normal" ? t("riskNormal") : (project?.risk ?? "—")}
         </div>
         <div className="small" style={{ marginTop: 6 }}>
-          Readiness gate (demo): blocks if ≥2 overdue tasks or if the current step has ≥3 missing readiness items.
+          {t("readinessGate")}
         </div>
       </div>
 
       <div className="card cardPad">
         <div className="sectionTitle">
-          <h2>Steps</h2>
-          <span className="pill">Notary → Taxes → Registry → Utilities</span>
+          <h2>{t("steps")}</h2>
+          <span className="pill">
+            {t("step_notary")} → {t("step_taxes")} → {t("step_registry")} → {t("step_utilities")}
+          </span>
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -110,24 +113,24 @@ export function ClosingPackWizard({ projectId, project, tasks, checklist }: { pr
                     <span className="chipDot muted" />
                     <div>
                       <div className="chkLabel">{m}</div>
-                      <div className="small">Auto-suggested from tasks + checklist (demo)</div>
+                      <div className="small">{t("autoSuggested")}</div>
                     </div>
                   </div>
-                  <span className="pill warn">Fix</span>
+                  <span className="pill warn">{t("fix")}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="small">Looks good for this step.</div>
+            <div className="small">{t("looksGoodStep")}</div>
           )}
 
           {overdue.length ? (
             <div className="card cardPad" style={{ padding: 12, borderColor: "color-mix(in oklab, var(--danger) 50%, var(--line))" }}>
-              <div style={{ fontWeight: 1000, marginBottom: 6 }}>Overdue blockers</div>
-              <div className="small">Resolve these to unlock “Generate ZIP”.</div>
+              <div style={{ fontWeight: 1000, marginBottom: 6 }}>{t("overdueBlockers")}</div>
+              <div className="small">{t("resolveToUnlock")}</div>
               <ul className="small" style={{ margin: 8, paddingLeft: 18 }}>
                 {overdue.slice(0, 6).map((x) => (
-                  <li key={x.id}>{x.title} · {x.assignee} · due {x.due_date}</li>
+                  <li key={x.id}>{x.title} · {x.assignee} · {t("duePrefix")} {x.due_date}</li>
                 ))}
               </ul>
             </div>

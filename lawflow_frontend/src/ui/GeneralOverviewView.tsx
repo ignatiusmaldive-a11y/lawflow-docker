@@ -278,11 +278,13 @@ export function GeneralOverviewView({
                     </div>
                     {d !== null && (
                       <div style={{ fontSize: 10, color: "var(--muted)" }}>
-                        {isOverdue ? `${Math.abs(d)}d overdue` : `${d}d left`}
+                        {isOverdue
+                          ? t("overdueDays").replace("{count}", String(Math.abs(d)))
+                          : t("daysLeft").replace("{count}", String(d))}
                       </div>
                     )}
                   </td>
-                  <td>{formatClientName(p.client?.name)}</td>
+                  <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
                 </tr>
               );
             })}

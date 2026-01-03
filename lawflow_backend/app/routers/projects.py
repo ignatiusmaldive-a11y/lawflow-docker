@@ -14,14 +14,14 @@ def list_projects(db: Session = Depends(get_db)):
 def get_project(project_id: int, db: Session = Depends(get_db)):
     p = db.get(Project, project_id)
     if not p:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise HTTPException(status_code=404, detail="Asunto no encontrado")
     return p
 
 @router.post("", response_model=ProjectOut)
 def create_project(payload: ProjectCreate, db: Session = Depends(get_db)):
     p = Project(**payload.model_dump())
     db.add(p)
-    db.add(Activity(project_id=0, actor="System", verb="Created project", detail=p.title))
+    db.add(Activity(project_id=0, actor="System", verb="Asunto creado", detail=p.title))
     db.commit()
     db.refresh(p)
     return p
@@ -30,11 +30,11 @@ def create_project(payload: ProjectCreate, db: Session = Depends(get_db)):
 def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depends(get_db)):
     p = db.get(Project, project_id)
     if not p:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise HTTPException(status_code=404, detail="Asunto no encontrado")
     data = payload.model_dump(exclude_unset=True)
     for k, v in data.items():
         setattr(p, k, v)
-    db.add(Activity(project_id=p.id, actor="System", verb="Updated project", detail=", ".join(data.keys()) or "—"))
+    db.add(Activity(project_id=p.id, actor="System", verb="Asunto actualizado", detail=", ".join(data.keys()) or "—"))
     db.commit()
     db.refresh(p)
     return p

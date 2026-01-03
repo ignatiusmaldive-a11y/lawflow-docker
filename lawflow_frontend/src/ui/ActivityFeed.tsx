@@ -1,5 +1,6 @@
 import React from "react";
 import { Activity } from "../lib/api";
+import { useI18n } from "../lib/i18n";
 
 function fmt(iso: string) {
   const d = new Date(iso);
@@ -7,7 +8,8 @@ function fmt(iso: string) {
 }
 
 export function ActivityFeed({ items }: { items: Activity[] }) {
-  if (items.length === 0) return <div className="small">No activity yet.</div>;
+  const { t } = useI18n();
+  if (items.length === 0) return <div className="small">{t("noActivity")}</div>;
   return (
     <div className="activity">
       {items.slice(0, 10).map((e) => (

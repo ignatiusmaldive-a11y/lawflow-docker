@@ -36,19 +36,19 @@ export function GlobalSearchModal({
 
     for (const x of tasks) {
       const hay = (x.title + " " + (x.tags ?? "") + " " + x.assignee).toLowerCase();
-      if (hay.includes(qq)) out.push({ kind: "Task", label: x.title, sub: `${x.status} · ${x.assignee} · ${x.due_date ?? "—"}`, go: () => onNavigate("Tasks") });
+      if (hay.includes(qq)) out.push({ kind: t("kindTask"), label: x.title, sub: `${x.status} · ${x.assignee} · ${x.due_date ?? "—"}`, go: () => onNavigate("Tasks") });
     }
     for (const x of files) {
       const hay = (x.filename + " " + (x.mime_type ?? "") + " " + x.uploader).toLowerCase();
-      if (hay.includes(qq)) out.push({ kind: "File", label: x.filename, sub: `${x.mime_type ?? "—"} · ${x.uploader}`, go: () => onNavigate("Files") });
+      if (hay.includes(qq)) out.push({ kind: t("kindFile"), label: x.filename, sub: `${x.mime_type ?? "—"} · ${x.uploader}`, go: () => onNavigate("Files") });
     }
     for (const x of checklist) {
       const hay = (x.stage + " " + x.label).toLowerCase();
-      if (hay.includes(qq)) out.push({ kind: "Checklist", label: x.label, sub: `${x.stage} · ${x.is_done ? "Done" : "Open"}`, go: () => onNavigate("Tasks") });
+      if (hay.includes(qq)) out.push({ kind: t("kindChecklist"), label: x.label, sub: `${x.stage} · ${x.is_done ? t("checklistDone") : t("checklistOpen")}`, go: () => onNavigate("Tasks") });
     }
     for (const x of timeline) {
       const hay = x.label.toLowerCase();
-      if (hay.includes(qq)) out.push({ kind: "Timeline", label: x.label, sub: `${formatDate(x.start_date)} - ${formatDate(x.end_date)}`, go: () => onNavigate("Timeline") });
+      if (hay.includes(qq)) out.push({ kind: t("kindTimeline"), label: x.label, sub: `${formatDate(x.start_date)} - ${formatDate(x.end_date)}`, go: () => onNavigate("Timeline") });
     }
     return out.slice(0, 24);
   }, [q, tasks, files, checklist, timeline, onNavigate]);
