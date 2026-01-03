@@ -52,7 +52,7 @@ start() {
   source "$VENV_DIR/bin/activate"
 
   echo "Starting backend (uvicorn)..."
-  (cd "$BACKEND_DIR" && uvicorn app.main:app --reload --port 8000) &
+  (cd "$BACKEND_DIR" && uvicorn app.main:app --reload --port 8000 --log-config logging_config.json) &
   BACK_PID=$!
 
   echo "Starting frontend (Vite)..."

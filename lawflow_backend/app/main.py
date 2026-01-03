@@ -1,12 +1,16 @@
 import os
+import logging
 from datetime import datetime
 from sqlalchemy import text
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .db import engine, SessionLocal
 from .models import Base
 from .seed import seed_if_empty
 from .routers import projects, tasks, checklists, timeline, activity, files, templates, calendar, closing_pack
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="LawFlow API", version="0.1.0")
 
@@ -19,6 +23,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Middleware to log client IP addresses
+@app.middleware("http")
+async def log_client_ip(request: Request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    forward_ip = request.headers.get("X-Forwarded-For", "").split(",")[0] if request.headers.get("X-Forwarded-For") else ""
+    actual_ip = forward_ip if forward_ip else client_ip
+    
+    logger.info(f"Request from IP: {actual_ip} - {request.method} {request.url}")
+    
+    response = await call_next(request)
+    logger.info(f"Response to IP: {actual_ip} - {response.status_code} - {request.method} {request.url}")
+    
+    return response
 
 def ensure_bg_color_column():
     # Add the bg_color column on existing SQLite DBs without recreating tables.
