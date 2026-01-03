@@ -105,10 +105,15 @@ export const api2 = {
     if (!res.ok) throw new Error(await res.text());
     return res.json() as Promise<FileItem>;
   },
-  template: (municipality: string, transaction_type: string) =>
-    http<Template>(`/templates?municipality=${encodeURIComponent(municipality)}&transaction_type=${encodeURIComponent(transaction_type)}`),
+  template: (municipality: string, transaction_type: string, lang?: "en" | "es") =>
+    http<Template>(
+      `/templates?municipality=${encodeURIComponent(municipality)}&transaction_type=${encodeURIComponent(transaction_type)}${
+        lang ? `&lang=${encodeURIComponent(lang)}` : ""
+      }`,
+    ),
   calendarIcsUrl: (projectId: number) => `${API_BASE}/calendar/ics?project_id=${projectId}`,
-  closingPackUrl: (projectId: number) => `${API_BASE}/closing-pack/${projectId}`,
+  closingPackUrl: (projectId: number, lang?: "en" | "es") =>
+    `${API_BASE}/closing-pack/${projectId}${lang ? `?lang=${encodeURIComponent(lang)}` : ""}`,
   downloadFileUrl: (fileId: number) => `${API_BASE}/files/download/${fileId}`,
 };
 

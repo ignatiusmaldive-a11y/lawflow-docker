@@ -6,13 +6,32 @@ import { formatProjectLabel, formatClientName, PROJECT_ID_OFFSET } from "../lib/
 type SortField = "title" | "project_number" | "status" | "location" | "risk" | "target_close_date" | "client";
 type SortDirection = "asc" | "desc";
 
-function riskPill(risk: Project["risk"]) {
-  if (risk === "Critical") return <span className="pill bad">Critical</span>;
-  if (risk === "At Risk") return <span className="pill warn">At risk</span>;
-  return <span className="pill ok">Normal</span>;
+function riskPill(risk: Project["risk"], t: ReturnType<typeof useI18n>["t"]) {
+  if (risk === "Critical") return <span className="pill bad">{t("riskCritical")}</span>;
+  if (risk === "At Risk") return <span className="pill warn">{t("riskAtRisk")}</span>;
+  return <span className="pill ok">{t("riskNormal")}</span>;
 }
 
-function statusPill(status: string) {
+function statusLabel(status: string, t: ReturnType<typeof useI18n>["t"]) {
+  switch (status) {
+    case "Intake":
+      return t("statusIntake");
+    case "Due Diligence":
+      return t("statusDueDiligence");
+    case "Contracts":
+      return t("statusContracts");
+    case "Notary":
+      return t("statusNotary");
+    case "Registry":
+      return t("statusRegistry");
+    case "Completed":
+      return t("statusCompleted");
+    default:
+      return status;
+  }
+}
+
+function statusPill(status: string, t: ReturnType<typeof useI18n>["t"]) {
   const colors: Record<string, string> = {
     "Due Diligence": "warn",
     "Contracts": "warn",
@@ -20,7 +39,7 @@ function statusPill(status: string) {
     "Registry": "ok",
     "Completed": "ok"
   };
-  return <span className={`pill ${colors[status] || "neutral"}`}>{status}</span>;
+  return <span className={`pill ${colors[status] || "neutral"}`}>{statusLabel(status, t)}</span>;
 }
 
 function fmtDateShort(d?: string | null) {
@@ -114,13 +133,33 @@ export function GeneralOverviewView({
     return { total, active, completed, highRisk };
   }, [projects]);
 
-  const SortHeader = ({ field, label, width, className }: { field: SortField; label: string; width?: string; className?: string }) => (
+  const SortHeader = ({
+    field,
+    label,
+    width,
+    className,
+    align,
+  }: {
+    field: SortField;
+    label: string;
+    width?: string;
+    className?: string;
+    align?: "left" | "center" | "right";
+  }) => (
     <th 
       onClick={() => handleSort(field)} 
-      style={{ cursor: "pointer", userSelect: "none", width: width }}
+      style={{ cursor: "pointer", userSelect: "none", width: width, textAlign: align }}
       className={`${sortField === field ? "active-sort" : ""} ${className || ""}`}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start",
+          gap: 4,
+          width: "100%",
+        }}
+      >
         {label}
         {sortField === field && (
           <span style={{ fontSize: 10 }}>
@@ -167,7 +206,7 @@ export function GeneralOverviewView({
           placeholder={t("searchProjectsPlaceholder")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          style={{ width: 300 }}
+          style={{ width: 320 }}
         />
 
         <select
@@ -177,15 +216,16 @@ export function GeneralOverviewView({
           style={{ width: 220 }}
         >
           <option value="All">{t("allStatuses")}</option>
-          <option value="Due Diligence">Due Diligence</option>
-          <option value="Contracts">Contracts</option>
-          <option value="Notary">Notary</option>
-          <option value="Registry">Registry</option>
-          <option value="Completed">Completed</option>
+          <option value="Intake">{t("statusIntake")}</option>
+          <option value="Due Diligence">{t("statusDueDiligence")}</option>
+          <option value="Contracts">{t("statusContracts")}</option>
+          <option value="Notary">{t("statusNotary")}</option>
+          <option value="Registry">{t("statusRegistry")}</option>
+          <option value="Completed">{t("statusCompleted")}</option>
         </select>
 
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+        <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
             {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
           </div>
           <button className="btn primary" onClick={onNewProject} style={{ padding: "8px 16px", fontSize: "13px" }}>
@@ -202,9 +242,9 @@ export function GeneralOverviewView({
           <thead>
             <tr>
               <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
-              <SortHeader field="location" label={t("locationTableCol")} className="column-location" />
-              <SortHeader field="status" label={t("statusTableCol")} />
-              <SortHeader field="risk" label={t("riskTableCol")} />
+              <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
+              <SortHeader field="status" label={t("statusTableCol")} align="center" />
+              <SortHeader field="risk" label={t("riskTableCol")} align="center" />
               <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
               <SortHeader field="client" label={t("clientTableCol")} />
             </tr>
@@ -221,14 +261,14 @@ export function GeneralOverviewView({
                   onClick={() => onProjectSelect(p.id)} 
                   style={{ cursor: "pointer" }}
                 >
-                  <td style={{ minWidth: "200px" }}>
+                  <td style={{ minWidth: "140px", whiteSpace: "normal" }}>
                     <div style={{ fontWeight: 800 }}>{formatProjectLabel(p)}</div>
                   </td>
-                  <td>
+                  <td style={{ textAlign: "center" }}>
                     <span className="pill neutral">{p.location}</span>
                   </td>
-                  <td>{statusPill(p.status)}</td>
-                  <td>{riskPill(p.risk)}</td>
+                  <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
+                  <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
                   <td>
                     <div style={{ 
                       fontWeight: isOverdue || isSoon ? 900 : 400,
@@ -238,11 +278,13 @@ export function GeneralOverviewView({
                     </div>
                     {d !== null && (
                       <div style={{ fontSize: 10, color: "var(--muted)" }}>
-                        {isOverdue ? `${Math.abs(d)}d overdue` : `${d}d left`}
+                        {isOverdue
+                          ? t("overdueDays").replace("{count}", String(Math.abs(d)))
+                          : t("daysLeft").replace("{count}", String(d))}
                       </div>
                     )}
                   </td>
-                  <td>{formatClientName(p.client?.name)}</td>
+                  <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
                 </tr>
               );
             })}
@@ -270,7 +312,7 @@ export function GeneralOverviewView({
         }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: '32px',
           maxWidth: '1200px',
           margin: '0 auto',
@@ -290,7 +332,7 @@ export function GeneralOverviewView({
               <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
             </div>
             <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
-              Gestión integral de transacciones inmobiliarias para despachos de abogados especializados en derecho inmobiliario.
+              CRM para abogados especializados en derecho inmobiliario.
             </p>
           </div>
 
@@ -307,7 +349,7 @@ export function GeneralOverviewView({
 
           {/* Legal Links */}
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Operación Polonia</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Agencias Polacas</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Política de Privacidad</a></li>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Términos de Servicio</a></li>

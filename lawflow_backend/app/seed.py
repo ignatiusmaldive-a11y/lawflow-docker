@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from .models import Client, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem
 
 PURCHASE = [
@@ -238,6 +239,19 @@ def seed_if_empty(db: Session):
 
     # Helpers
     def add_task(p, title, status, assignee, due_in, priority="Medium", tags=None, desc=None):
+        status_map = {
+            "Backlog": "Pendiente",
+            "In Progress": "En curso",
+            "Review": "Revisión",
+            "Done": "Hecho",
+        }
+        priority_map = {
+            "Low": "Baja",
+            "Medium": "Media",
+            "High": "Alta",
+        }
+        status = status_map.get(status, status)
+        priority = priority_map.get(priority, priority)
         db.add(
             Task(
                 project_id=p.id,
@@ -460,166 +474,281 @@ def seed_if_empty(db: Session):
         ))
 
     # p1 (Marbella Purchase) - Active project with recent activity
-    add_activity(p1, "Ana López", "Opened matter", "Reviewing DD blockers for Marbella purchase.", 12)
-    add_activity(p1, "Lucía", "Requested", "Nota Simple request sent to Land Registry.", 8)
-    add_activity(p1, "Carlos", "Commented", "Arras draft ready for partner review.", 5)
-    add_activity(p1, "Ana López", "Uploaded file", "Added property photos and HOA statutes.", 3)
-    add_activity(p1, "System", "Task completed", "Spanish bank account guidance email sent.", 2)
-    add_activity(p1, "Carlos", "Updated task", "Arras contract moved to review status.", 1)
+    add_activity(p1, "Ana López", "Asunto abierto", "Revisando bloqueos de diligencia debida para compra en Marbella.", 12)
+    add_activity(p1, "Lucía", "Solicitado", "Solicitud de Nota Simple enviada al Registro de la Propiedad.", 8)
+    add_activity(p1, "Carlos", "Comentado", "Borrador de Arras listo para revisión del socio.", 5)
+    add_activity(p1, "Ana López", "Archivo subido", "Añadidas fotos de la propiedad y estatutos de la comunidad.", 3)
+    add_activity(p1, "System", "Tarea completada", "Enviado email de orientación para cuenta bancaria española.", 2)
+    add_activity(p1, "Carlos", "Tarea actualizada", "Contrato de Arras pasado a estado Revisión.", 1)
 
     # p2 (Marbella Sale) - Mid-project with various activities
-    add_activity(p2, "Ana López", "Collected documents", "Gathered seller ID and address proof.", 18)
-    add_activity(p2, "System", "Deadline", "Energy certificate due today.", 2)
-    add_activity(p2, "Javier", "Contacted bank", "Requested mortgage cancellation balance.", 5)
-    add_activity(p2, "Lucía", "Calculated", "Plusvalía estimate completed for seller.", 3)
-    add_activity(p2, "Ana López", "Uploaded file", "Added energy certificate and tax assessment.", 4)
-    add_activity(p2, "Carlos", "Drafted", "Reservation agreement draft in progress.", 1)
+    add_activity(p2, "Ana López", "Documentos recopilados", "Recopilado DNI/pasaporte del vendedor y justificante de domicilio.", 18)
+    add_activity(p2, "System", "Plazo", "El certificado energético vence hoy.", 2)
+    add_activity(p2, "Javier", "Banco contactado", "Solicitado saldo para cancelación de hipoteca.", 5)
+    add_activity(p2, "Lucía", "Calculado", "Estimación de Plusvalía completada para el vendedor.", 3)
+    add_activity(p2, "Ana López", "Archivo subido", "Añadidos certificado energético y valoración fiscal.", 4)
+    add_activity(p2, "Carlos", "Borrador", "Borrador de contrato de reserva en preparación.", 1)
 
     # p3 (Mijas Purchase) - Critical project with urgent activity
-    add_activity(p3, "System", "Risk escalated", "Notary in 1 week; NIE confirmation overdue.", 3)
-    add_activity(p3, "Ana López", "Chased", "NIE confirmation status follow-up.", 5)
-    add_activity(p3, "Lucía", "Prepared", "Completion statement and funds routing ready.", 2)
-    add_activity(p3, "Javier", "Booked", "Notary slot confirmed for next week.", 1)
-    add_activity(p3, "Carlos", "Reviewed", "Deed draft final review completed.", 4)
-    add_activity(p3, "Ana López", "Uploaded file", "Added NIE application and bank transfer confirmation.", 6)
+    add_activity(p3, "System", "Riesgo escalado", "Notaría en 1 semana; confirmación de NIE vencida.", 3)
+    add_activity(p3, "Ana López", "Seguimiento", "Seguimiento del estado de confirmación del NIE.", 5)
+    add_activity(p3, "Lucía", "Preparado", "Estado de liquidación y ruta de fondos listos.", 2)
+    add_activity(p3, "Javier", "Reservado", "Cita notarial confirmada para la próxima semana.", 1)
+    add_activity(p3, "Carlos", "Revisado", "Revisión final del borrador de escritura completada.", 4)
+    add_activity(p3, "Ana López", "Archivo subido", "Añadidos solicitud de NIE y confirmación de transferencia bancaria.", 6)
 
     # p4 (Estepona New-build) - Handover project
-    add_activity(p4, "Ana López", "Collected", "Client IDs and proof of funds received.", 32)
-    add_activity(p4, "Carlos", "Verified", "Developer guarantee coverage confirmed.", 4)
-    add_activity(p4, "Ana López", "Coordinated", "Snagging inspection date set.", 3)
-    add_activity(p4, "Carlos", "Uploaded file", "Added snagging report and handover checklist.", 2)
-    add_activity(p4, "Lucía", "Prepared", "Utilities transfer letter drafted.", 1)
-    add_activity(p4, "Javier", "Reviewed", "Power of attorney wording approved.", 5)
+    add_activity(p4, "Ana López", "Recopilado", "Recibidos IDs del cliente y prueba de fondos.", 32)
+    add_activity(p4, "Carlos", "Verificado", "Cobertura de garantías del promotor confirmada.", 4)
+    add_activity(p4, "Ana López", "Coordinado", "Fecha de inspección de repasos (snagging) fijada.", 3)
+    add_activity(p4, "Carlos", "Archivo subido", "Añadidos informe de repasos y checklist de entrega.", 2)
+    add_activity(p4, "Lucía", "Preparado", "Carta de cambio de titular de suministros redactada.", 1)
+    add_activity(p4, "Javier", "Revisado", "Redacción del poder notarial aprobada.", 5)
 
     # p5 (Marbella Sale) - Post-completion
-    add_activity(p5, "Lucía", "Submitted", "Deed presented to Land Registry.", 6)
-    add_activity(p5, "Lucía", "Registry", "Registry submission delayed; appointment rescheduled.", 4)
-    add_activity(p5, "Ana López", "Sent", "Client completion email and invoice.", 5)
-    add_activity(p5, "Lucía", "Filed", "Plusvalía municipal tax filed.", 2)
-    add_activity(p5, "Ana López", "Uploaded file", "Added final tax calculation and closing package.", 3)
-    add_activity(p5, "Ana López", "Notified", "HOA and utilities companies updated.", 1)
+    add_activity(p5, "Lucía", "Presentado", "Escritura presentada en el Registro de la Propiedad.", 6)
+    add_activity(p5, "Lucía", "Registro", "Presentación en registro retrasada; cita reprogramada.", 4)
+    add_activity(p5, "Ana López", "Enviado", "Email de cierre al cliente y factura.", 5)
+    add_activity(p5, "Lucía", "Presentado", "Plusvalía municipal presentada.", 2)
+    add_activity(p5, "Ana López", "Archivo subido", "Añadidos cálculo final de impuestos y paquete de cierre.", 3)
+    add_activity(p5, "Ana López", "Notificado", "Actualizadas comunidad y compañías de suministros.", 1)
 
     # Demo files (metadata) — visible in File room without upload
     # p1 (Marbella Purchase) - More comprehensive file set
-    db.add(FileItem(project_id=p1.id, filename="Nota_Simple_Request.pdf", stored_path="seed/Nota_Simple_Request.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p1.id, filename="Arras_Draft_v1.docx", stored_path="seed/Arras_Draft_v1.docx", mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", uploader="Carlos"))
-    db.add(FileItem(project_id=p1.id, filename="Property_Photos.zip", stored_path="seed/Property_Photos.zip", mime_type="application/zip", uploader="Ana López"))
-    db.add(FileItem(project_id=p1.id, filename="HOA_Statutes.pdf", stored_path="seed/HOA_Statutes.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p1.id, filename="Solicitud_Nota_Simple.pdf", stored_path="seed/Nota_Simple_Request.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p1.id, filename="Borrador_Arras_v1.docx", stored_path="seed/Arras_Draft_v1.docx", mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", uploader="Carlos"))
+    db.add(FileItem(project_id=p1.id, filename="Fotos_Propiedad.zip", stored_path="seed/Property_Photos.zip", mime_type="application/zip", uploader="Ana López"))
+    db.add(FileItem(project_id=p1.id, filename="Estatutos_Comunidad.pdf", stored_path="seed/HOA_Statutes.pdf", mime_type="application/pdf", uploader="Ana López"))
 
     # p2 (Marbella Sale) - Enhanced file set
-    db.add(FileItem(project_id=p2.id, filename="Energy_Certificate.pdf", stored_path="seed/Energy_Certificate.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p2.id, filename="Mortgage_Cancellation_Request.pdf", stored_path="seed/Mortgage_Cancellation_Request.pdf", mime_type="application/pdf", uploader="Javier"))
-    db.add(FileItem(project_id=p2.id, filename="Property_Deed_Scan.pdf", stored_path="seed/Property_Deed_Scan.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p2.id, filename="Tax_Assessment_2024.pdf", stored_path="seed/Tax_Assessment_2024.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p2.id, filename="Certificado_Energetico.pdf", stored_path="seed/Energy_Certificate.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p2.id, filename="Solicitud_Cancelacion_Hipoteca.pdf", stored_path="seed/Mortgage_Cancellation_Request.pdf", mime_type="application/pdf", uploader="Javier"))
+    db.add(FileItem(project_id=p2.id, filename="Escritura_Escaneada.pdf", stored_path="seed/Property_Deed_Scan.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p2.id, filename="Valoracion_Fiscal_2024.pdf", stored_path="seed/Tax_Assessment_2024.pdf", mime_type="application/pdf", uploader="Lucía"))
 
     # p3 (Mijas Purchase) - Previously had only 1 file, now comprehensive set
-    db.add(FileItem(project_id=p3.id, filename="Completion_Statement.xlsx", stored_path="seed/Completion_Statement.xlsx", mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", uploader="Lucía"))
-    db.add(FileItem(project_id=p3.id, filename="NIE_Application_Form.pdf", stored_path="seed/NIE_Application_Form.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p3.id, filename="Bank_Transfer_Confirmation.pdf", stored_path="seed/Bank_Transfer_Confirmation.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p3.id, filename="Property_Survey_Report.pdf", stored_path="seed/Property_Survey_Report.pdf", mime_type="application/pdf", uploader="Carlos"))
-    db.add(FileItem(project_id=p3.id, filename="Construction_Permit_Check.pdf", stored_path="seed/Construction_Permit_Check.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p3.id, filename="Estado_Liquidacion.xlsx", stored_path="seed/Completion_Statement.xlsx", mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", uploader="Lucía"))
+    db.add(FileItem(project_id=p3.id, filename="Formulario_Solicitud_NIE.pdf", stored_path="seed/NIE_Application_Form.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p3.id, filename="Confirmacion_Transferencia_Bancaria.pdf", stored_path="seed/Bank_Transfer_Confirmation.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p3.id, filename="Informe_Topografico.pdf", stored_path="seed/Property_Survey_Report.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p3.id, filename="Verificacion_Licencia_Obras.pdf", stored_path="seed/Construction_Permit_Check.pdf", mime_type="application/pdf", uploader="Ana López"))
 
     # p4 (Estepona Purchase) - Previously had only 1 file, now comprehensive set
-    db.add(FileItem(project_id=p4.id, filename="Developer_Guarantee.pdf", stored_path="seed/Developer_Guarantee.pdf", mime_type="application/pdf", uploader="Carlos"))
-    db.add(FileItem(project_id=p4.id, filename="New_Build_Plans.pdf", stored_path="seed/New_Build_Plans.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p4.id, filename="Snagging_Report.xlsx", stored_path="seed/Snagging_Report.xlsx", mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", uploader="Carlos"))
-    db.add(FileItem(project_id=p4.id, filename="Handover_Checklist.docx", stored_path="seed/Handover_Checklist.docx", mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", uploader="Ana López"))
-    db.add(FileItem(project_id=p4.id, filename="Utilities_Contract.pdf", stored_path="seed/Utilities_Contract.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p4.id, filename="Garantia_Promotor.pdf", stored_path="seed/Developer_Guarantee.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p4.id, filename="Planos_Obra_Nueva.pdf", stored_path="seed/New_Build_Plans.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p4.id, filename="Informe_Repasos.xlsx", stored_path="seed/Snagging_Report.xlsx", mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", uploader="Carlos"))
+    db.add(FileItem(project_id=p4.id, filename="Checklist_Entrega.docx", stored_path="seed/Handover_Checklist.docx", mime_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document", uploader="Ana López"))
+    db.add(FileItem(project_id=p4.id, filename="Contrato_Suministros.pdf", stored_path="seed/Utilities_Contract.pdf", mime_type="application/pdf", uploader="Lucía"))
 
     # p5 (Marbella Sale) - Enhanced file set
-    db.add(FileItem(project_id=p5.id, filename="Land_Registry_Submission_Receipt.pdf", stored_path="seed/Land_Registry_Submission_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p5.id, filename="Final_Tax_Calculation.xlsx", stored_path="seed/Final_Tax_Calculation.xlsx", mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", uploader="Lucía"))
-    db.add(FileItem(project_id=p5.id, filename="Client_Closing_Package.pdf", stored_path="seed/Client_Closing_Package.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p5.id, filename="Registry_Confirmation_Letter.pdf", stored_path="seed/Registry_Confirmation_Letter.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p5.id, filename="Justificante_Presentacion_Registro.pdf", stored_path="seed/Land_Registry_Submission_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p5.id, filename="Calculo_Final_Impuestos.xlsx", stored_path="seed/Final_Tax_Calculation.xlsx", mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", uploader="Lucía"))
+    db.add(FileItem(project_id=p5.id, filename="Paquete_Cierre_Cliente.pdf", stored_path="seed/Client_Closing_Package.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p5.id, filename="Carta_Confirmacion_Registro.pdf", stored_path="seed/Registry_Confirmation_Letter.pdf", mime_type="application/pdf", uploader="Lucía"))
 
     # Add activities for additional projects
     # p6 (Marbella Beachfront) - Active DD
-    add_activity(p6, "Ana López", "Opened matter", "Beachfront apartment purchase intake.", 8)
-    add_activity(p6, "Lucía", "Requested", "Coastal property registry check initiated.", 6)
-    add_activity(p6, "Carlos", "Reviewed", "Tourist license status verified.", 3)
-    add_activity(p6, "Ana López", "Uploaded file", "Added beach access agreements.", 2)
+    add_activity(p6, "Ana López", "Asunto abierto", "Inicio de compra de apartamento frente al mar.", 8)
+    add_activity(p6, "Lucía", "Solicitado", "Comprobación registral de propiedad costera iniciada.", 6)
+    add_activity(p6, "Carlos", "Revisado", "Estado de licencia turística verificado.", 3)
+    add_activity(p6, "Ana López", "Archivo subido", "Añadidos acuerdos de acceso a la playa.", 2)
 
     # p7 (Mijas Townhouse Sale) - Contracts, At Risk
-    add_activity(p7, "Ana López", "Opened matter", "Townhouse sale for Mijas Costa property.", 15)
-    add_activity(p7, "System", "Risk escalated", "Energy certificate overdue - impacts closing.", 3)
-    add_activity(p7, "Javier", "Contacted bank", "Mortgage cancellation details requested.", 4)
-    add_activity(p7, "Carlos", "Drafted", "Private purchase agreement in progress.", 1)
+    add_activity(p7, "Ana López", "Asunto abierto", "Venta de adosado en Mijas Costa.", 15)
+    add_activity(p7, "System", "Riesgo escalado", "Certificado energético vencido: impacta el cierre.", 3)
+    add_activity(p7, "Javier", "Banco contactado", "Solicitados detalles de cancelación de hipoteca.", 4)
+    add_activity(p7, "Carlos", "Borrador", "Contrato privado de compraventa en preparación.", 1)
 
     # p8 (Benahavís Villa) - DD
-    add_activity(p8, "Ana López", "Opened matter", "Luxury villa purchase in Benahavís.", 5)
-    add_activity(p8, "Carlos", "Scheduled", "Professional property survey booked.", 3)
-    add_activity(p8, "Lucía", "Verified", "Water rights and well ownership confirmed.", 2)
-    add_activity(p8, "Ana López", "Guided", "NIE application process explained to client.", 4)
+    add_activity(p8, "Ana López", "Asunto abierto", "Compra de villa de lujo en Benahavís.", 5)
+    add_activity(p8, "Carlos", "Programado", "Peritaje profesional de la propiedad reservado.", 3)
+    add_activity(p8, "Lucía", "Verificado", "Derechos de agua y titularidad del pozo confirmados.", 2)
+    add_activity(p8, "Ana López", "Guiado", "Proceso de solicitud de NIE explicado al cliente.", 4)
 
     # p9 (Estepona Marina) - Notary, Critical
-    add_activity(p9, "Ana López", "Opened matter", "Marina apartment sale with berth.", 30)
-    add_activity(p9, "System", "Risk escalated", "Notary slot critical for marina transfer deadline.", 5)
-    add_activity(p9, "Lucía", "Verified", "Marina berth ownership confirmed.", 7)
-    add_activity(p9, "Javier", "Booked", "Notary appointment secured.", 2)
+    add_activity(p9, "Ana López", "Asunto abierto", "Venta de apartamento en marina con amarre.", 30)
+    add_activity(p9, "System", "Riesgo escalado", "Cita notarial crítica para plazo de traspaso del amarre.", 5)
+    add_activity(p9, "Lucía", "Verificado", "Titularidad del amarre confirmada.", 7)
+    add_activity(p9, "Javier", "Reservado", "Cita notarial asegurada.", 2)
 
     # p10 (Guadalmina Penthouse) - Contracts
-    add_activity(p10, "Ana López", "Opened matter", "Penthouse purchase in Guadalmina.", 18)
-    add_activity(p10, "Carlos", "Reviewed", "Elevator maintenance contracts verified.", 5)
-    add_activity(p10, "Lucía", "Confirmed", "Parking space and storage assignment.", 3)
-    add_activity(p10, "Ana López", "Provided", "Banking guidance for Spanish account.", 6)
+    add_activity(p10, "Ana López", "Asunto abierto", "Compra de ático en Guadalmina.", 18)
+    add_activity(p10, "Carlos", "Revisado", "Contratos de mantenimiento del ascensor verificados.", 5)
+    add_activity(p10, "Lucía", "Confirmado", "Asignación de plaza de garaje y trastero.", 3)
+    add_activity(p10, "Ana López", "Aportado", "Orientación bancaria para cuenta española.", 6)
 
     # p11 (Coín Finca) - Registry, completed
-    add_activity(p11, "Lucía", "Filed", "Deed successfully registered.", 10)
-    add_activity(p11, "Lucía", "Filed", "Plusvalía municipal tax completed.", 8)
-    add_activity(p11, "Ana López", "Sent", "Final settlement and documentation.", 9)
-    add_activity(p11, "Carlos", "Completed", "Property handover and keys transfer.", 9)
+    add_activity(p11, "Lucía", "Presentado", "Escritura registrada correctamente.", 10)
+    add_activity(p11, "Lucía", "Presentado", "Plusvalía municipal completada.", 8)
+    add_activity(p11, "Ana López", "Enviado", "Liquidación final y documentación.", 9)
+    add_activity(p11, "Carlos", "Completado", "Entrega de la propiedad y llaves.", 9)
 
     # p12 (Manilva New Dev) - DD, At Risk
-    add_activity(p12, "Ana López", "Opened matter", "Off-plan purchase in new development.", 22)
-    add_activity(p12, "Carlos", "Assessed", "Developer financial stability reviewed.", 5)
-    add_activity(p12, "Ana López", "Reviewed", "Contract terms and cancellation clauses.", 8)
-    add_activity(p12, "Lucía", "Verified", "Bank guarantee coverage confirmed.", 3)
+    add_activity(p12, "Ana López", "Asunto abierto", "Compra sobre plano en nueva promoción.", 22)
+    add_activity(p12, "Carlos", "Evaluado", "Estabilidad financiera del promotor revisada.", 5)
+    add_activity(p12, "Ana López", "Revisado", "Términos del contrato y cláusulas de resolución.", 8)
+    add_activity(p12, "Lucía", "Verificado", "Cobertura de aval bancario confirmada.", 3)
 
     # p13 (Fuengirola Commercial) - Contracts
-    add_activity(p13, "Ana López", "Opened matter", "Commercial property sale.", 12)
-    add_activity(p13, "Lucía", "Verified", "Commercial leases and tenant rights checked.", 5)
-    add_activity(p13, "Carlos", "Obtained", "Independent commercial valuation completed.", 4)
-    add_activity(p13, "Ana López", "Completed", "Business license transfer verified.", 6)
+    add_activity(p13, "Ana López", "Asunto abierto", "Venta de inmueble comercial.", 12)
+    add_activity(p13, "Lucía", "Verificado", "Arrendamientos comerciales y derechos del inquilino verificados.", 5)
+    add_activity(p13, "Carlos", "Obtenido", "Valoración comercial independiente completada.", 4)
+    add_activity(p13, "Ana López", "Completado", "Traspaso de licencia de actividad verificado.", 6)
 
     # p14 (Alhaurín Cortijo) - Notary, Critical
-    add_activity(p14, "Ana López", "Opened matter", "Rural cortijo purchase.", 40)
-    add_activity(p14, "Carlos", "Scheduled", "Boundary survey and access verification.", 7)
-    add_activity(p14, "System", "Risk escalated", "Agricultural classification confirmation overdue.", 3)
-    add_activity(p14, "Lucía", "Verified", "Water extraction rights confirmed.", 5)
+    add_activity(p14, "Ana López", "Asunto abierto", "Compra de cortijo rural.", 40)
+    add_activity(p14, "Carlos", "Programado", "Levantamiento de linderos y verificación de accesos.", 7)
+    add_activity(p14, "System", "Riesgo escalado", "Confirmación de clasificación agrícola vencida.", 3)
+    add_activity(p14, "Lucía", "Verificado", "Derechos de extracción de agua confirmados.", 5)
 
     # p15 (Ojén Luxury Villa) - Registry, completed
-    add_activity(p15, "Ana López", "Completed", "Luxury property disclosures finalized.", 13)
-    add_activity(p15, "Lucía", "Filed", "High-value transfer tax declaration submitted.", 10)
-    add_activity(p15, "Lucía", "Confirmed", "Registry completion received.", 8)
-    add_activity(p15, "Ana López", "Delivered", "Complete transaction documentation.", 7)
+    add_activity(p15, "Ana López", "Completado", "Divulgaciones de propiedad de lujo finalizadas.", 13)
+    add_activity(p15, "Lucía", "Presentado", "Declaración de impuesto de transmisión de alto valor presentada.", 10)
+    add_activity(p15, "Lucía", "Confirmado", "Confirmación de finalización registral recibida.", 8)
+    add_activity(p15, "Ana López", "Entregado", "Documentación completa de la transacción.", 7)
 
     # Add files for additional projects
     # p6-p10 files
-    db.add(FileItem(project_id=p6.id, filename="Coastal_Property_Check.pdf", stored_path="seed/Coastal_Property_Check.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p6.id, filename="Tourist_License_Verification.pdf", stored_path="seed/Tourist_License_Verification.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p7.id, filename="Seller_Disclosures.pdf", stored_path="seed/Seller_Disclosures.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p7.id, filename="Mortgage_Details.pdf", stored_path="seed/Mortgage_Details.pdf", mime_type="application/pdf", uploader="Javier"))
-    db.add(FileItem(project_id=p8.id, filename="Property_Survey_Schedule.pdf", stored_path="seed/Property_Survey_Schedule.pdf", mime_type="application/pdf", uploader="Carlos"))
-    db.add(FileItem(project_id=p8.id, filename="Water_Rights_Document.pdf", stored_path="seed/Water_Rights_Document.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p9.id, filename="Marina_Berth_Docs.pdf", stored_path="seed/Marina_Berth_Docs.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p9.id, filename="Notary_Booking_Confirmation.pdf", stored_path="seed/Notary_Booking_Confirmation.pdf", mime_type="application/pdf", uploader="Javier"))
-    db.add(FileItem(project_id=p10.id, filename="Elevator_Contract.pdf", stored_path="seed/Elevator_Contract.pdf", mime_type="application/pdf", uploader="Carlos"))
-    db.add(FileItem(project_id=p10.id, filename="Parking_Assignment.pdf", stored_path="seed/Parking_Assignment.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p6.id, filename="Verificacion_Propiedad_Costera.pdf", stored_path="seed/Coastal_Property_Check.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p6.id, filename="Verificacion_Licencia_Turistica.pdf", stored_path="seed/Tourist_License_Verification.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p7.id, filename="Divulgaciones_Vendedor.pdf", stored_path="seed/Seller_Disclosures.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p7.id, filename="Detalles_Hipoteca.pdf", stored_path="seed/Mortgage_Details.pdf", mime_type="application/pdf", uploader="Javier"))
+    db.add(FileItem(project_id=p8.id, filename="Agenda_Peritaje_Propiedad.pdf", stored_path="seed/Property_Survey_Schedule.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p8.id, filename="Documento_Derechos_Agua.pdf", stored_path="seed/Water_Rights_Document.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p9.id, filename="Docs_Amarre_Marina.pdf", stored_path="seed/Marina_Berth_Docs.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p9.id, filename="Confirmacion_Reserva_Notaria.pdf", stored_path="seed/Notary_Booking_Confirmation.pdf", mime_type="application/pdf", uploader="Javier"))
+    db.add(FileItem(project_id=p10.id, filename="Contrato_Ascensor.pdf", stored_path="seed/Elevator_Contract.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p10.id, filename="Asignacion_Garaje.pdf", stored_path="seed/Parking_Assignment.pdf", mime_type="application/pdf", uploader="Lucía"))
 
     # p11-p15 files
-    db.add(FileItem(project_id=p11.id, filename="Registry_Confirmation.pdf", stored_path="seed/Registry_Confirmation.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p11.id, filename="Tax_Payment_Receipt.pdf", stored_path="seed/Tax_Payment_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p12.id, filename="Developer_Financials.pdf", stored_path="seed/Developer_Financials.pdf", mime_type="application/pdf", uploader="Carlos"))
-    db.add(FileItem(project_id=p12.id, filename="Bank_Guarantee.pdf", stored_path="seed/Bank_Guarantee.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p13.id, filename="Commercial_Leases.pdf", stored_path="seed/Commercial_Leases.pdf", mime_type="application/pdf", uploader="Lucía"))
-    db.add(FileItem(project_id=p13.id, filename="Business_License.pdf", stored_path="seed/Business_License.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p14.id, filename="Boundary_Survey.pdf", stored_path="seed/Boundary_Survey.pdf", mime_type="application/pdf", uploader="Carlos"))
-    db.add(FileItem(project_id=p14.id, filename="Agricultural_Permit.pdf", stored_path="seed/Agricultural_Permit.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p15.id, filename="Luxury_Disclosures.pdf", stored_path="seed/Luxury_Disclosures.pdf", mime_type="application/pdf", uploader="Ana López"))
-    db.add(FileItem(project_id=p15.id, filename="Transfer_Tax_Receipt.pdf", stored_path="seed/Transfer_Tax_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p11.id, filename="Confirmacion_Registro.pdf", stored_path="seed/Registry_Confirmation.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p11.id, filename="Recibo_Pago_Impuestos.pdf", stored_path="seed/Tax_Payment_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p12.id, filename="Finanzas_Promotor.pdf", stored_path="seed/Developer_Financials.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p12.id, filename="Aval_Bancario.pdf", stored_path="seed/Bank_Guarantee.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p13.id, filename="Arrendamientos_Comerciales.pdf", stored_path="seed/Commercial_Leases.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p13.id, filename="Licencia_Actividad.pdf", stored_path="seed/Business_License.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p14.id, filename="Levantamiento_Linderos.pdf", stored_path="seed/Boundary_Survey.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p14.id, filename="Permiso_Agricola.pdf", stored_path="seed/Agricultural_Permit.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p15.id, filename="Divulgaciones_Lujo.pdf", stored_path="seed/Luxury_Disclosures.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p15.id, filename="Recibo_Impuesto_Transmisiones.pdf", stored_path="seed/Transfer_Tax_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
 
     # Seeded marker events
     for p in projects:
-        add_activity(p, "System", "Seeded demo project", p.title)
+        add_activity(p, "System", "Proyecto demo sembrado", p.title)
 
+    db.commit()
+
+
+def normalize_legacy_demo_data(db: Session) -> None:
+    """
+    Best-effort, idempotent normalization for older demo DBs:
+    - Translate legacy English task statuses/priorities to Spanish (frontend expects ES values)
+    - Translate common activity verbs
+    - Translate seeded file display names (keeps stored_path intact)
+    """
+    status_map = {
+        "Backlog": "Pendiente",
+        "In Progress": "En curso",
+        "Review": "Revisión",
+        "Done": "Hecho",
+    }
+    priority_map = {
+        "Low": "Baja",
+        "Medium": "Media",
+        "High": "Alta",
+    }
+    verb_map = {
+        "Opened matter": "Asunto abierto",
+        "Requested": "Solicitado",
+        "Commented": "Comentado",
+        "Uploaded file": "Archivo subido",
+        "Task completed": "Tarea completada",
+        "Updated task": "Tarea actualizada",
+        "Collected documents": "Documentos recopilados",
+        "Deadline": "Plazo",
+        "Contacted bank": "Banco contactado",
+        "Calculated": "Calculado",
+        "Drafted": "Borrador",
+        "Risk escalated": "Riesgo escalado",
+        "Chased": "Seguimiento",
+        "Prepared": "Preparado",
+        "Booked": "Reservado",
+        "Reviewed": "Revisado",
+        "Collected": "Recopilado",
+        "Coordinated": "Coordinado",
+        "Submitted": "Presentado",
+        "Registry": "Registro",
+        "Sent": "Enviado",
+        "Filed": "Presentado",
+        "Notified": "Notificado",
+        "Scheduled": "Programado",
+        "Guided": "Guiado",
+        "Confirmed": "Confirmado",
+        "Provided": "Aportado",
+        "Completed": "Completado",
+        "Assessed": "Evaluado",
+        "Obtained": "Obtenido",
+        "Delivered": "Entregado",
+        "Seeded demo project": "Proyecto demo sembrado",
+        "Created task": "Tarea creada",
+        "Created project": "Asunto creado",
+        "Updated project": "Asunto actualizado",
+    }
+
+    file_name_by_seed_path = {
+        "seed/Nota_Simple_Request.pdf": "Solicitud_Nota_Simple.pdf",
+        "seed/Arras_Draft_v1.docx": "Borrador_Arras_v1.docx",
+        "seed/Property_Photos.zip": "Fotos_Propiedad.zip",
+        "seed/HOA_Statutes.pdf": "Estatutos_Comunidad.pdf",
+        "seed/Energy_Certificate.pdf": "Certificado_Energetico.pdf",
+        "seed/Mortgage_Cancellation_Request.pdf": "Solicitud_Cancelacion_Hipoteca.pdf",
+        "seed/Property_Deed_Scan.pdf": "Escritura_Escaneada.pdf",
+        "seed/Tax_Assessment_2024.pdf": "Valoracion_Fiscal_2024.pdf",
+        "seed/Completion_Statement.xlsx": "Estado_Liquidacion.xlsx",
+        "seed/NIE_Application_Form.pdf": "Formulario_Solicitud_NIE.pdf",
+        "seed/Bank_Transfer_Confirmation.pdf": "Confirmacion_Transferencia_Bancaria.pdf",
+        "seed/Property_Survey_Report.pdf": "Informe_Topografico.pdf",
+        "seed/Construction_Permit_Check.pdf": "Verificacion_Licencia_Obras.pdf",
+        "seed/Developer_Guarantee.pdf": "Garantia_Promotor.pdf",
+        "seed/New_Build_Plans.pdf": "Planos_Obra_Nueva.pdf",
+        "seed/Snagging_Report.xlsx": "Informe_Repasos.xlsx",
+        "seed/Handover_Checklist.docx": "Checklist_Entrega.docx",
+        "seed/Utilities_Contract.pdf": "Contrato_Suministros.pdf",
+        "seed/Land_Registry_Submission_Receipt.pdf": "Justificante_Presentacion_Registro.pdf",
+        "seed/Final_Tax_Calculation.xlsx": "Calculo_Final_Impuestos.xlsx",
+        "seed/Client_Closing_Package.pdf": "Paquete_Cierre_Cliente.pdf",
+        "seed/Registry_Confirmation_Letter.pdf": "Carta_Confirmacion_Registro.pdf",
+        "seed/Coastal_Property_Check.pdf": "Verificacion_Propiedad_Costera.pdf",
+        "seed/Tourist_License_Verification.pdf": "Verificacion_Licencia_Turistica.pdf",
+        "seed/Seller_Disclosures.pdf": "Divulgaciones_Vendedor.pdf",
+        "seed/Mortgage_Details.pdf": "Detalles_Hipoteca.pdf",
+        "seed/Property_Survey_Schedule.pdf": "Agenda_Peritaje_Propiedad.pdf",
+        "seed/Water_Rights_Document.pdf": "Documento_Derechos_Agua.pdf",
+        "seed/Marina_Berth_Docs.pdf": "Docs_Amarre_Marina.pdf",
+        "seed/Notary_Booking_Confirmation.pdf": "Confirmacion_Reserva_Notaria.pdf",
+        "seed/Elevator_Contract.pdf": "Contrato_Ascensor.pdf",
+        "seed/Parking_Assignment.pdf": "Asignacion_Garaje.pdf",
+        "seed/Registry_Confirmation.pdf": "Confirmacion_Registro.pdf",
+        "seed/Tax_Payment_Receipt.pdf": "Recibo_Pago_Impuestos.pdf",
+        "seed/Developer_Financials.pdf": "Finanzas_Promotor.pdf",
+        "seed/Bank_Guarantee.pdf": "Aval_Bancario.pdf",
+        "seed/Commercial_Leases.pdf": "Arrendamientos_Comerciales.pdf",
+        "seed/Business_License.pdf": "Licencia_Actividad.pdf",
+        "seed/Boundary_Survey.pdf": "Levantamiento_Linderos.pdf",
+        "seed/Agricultural_Permit.pdf": "Permiso_Agricola.pdf",
+        "seed/Luxury_Disclosures.pdf": "Divulgaciones_Lujo.pdf",
+        "seed/Transfer_Tax_Receipt.pdf": "Recibo_Impuesto_Transmisiones.pdf",
+    }
+
+    for old, new in status_map.items():
+        db.execute(text("UPDATE tasks SET status = :new WHERE status = :old"), {"new": new, "old": old})
+    for old, new in priority_map.items():
+        db.execute(text("UPDATE tasks SET priority = :new WHERE priority = :old"), {"new": new, "old": old})
+    for old, new in verb_map.items():
+        db.execute(text("UPDATE activities SET verb = :new WHERE verb = :old"), {"new": new, "old": old})
+    for stored_path, filename in file_name_by_seed_path.items():
+        db.execute(
+            text("UPDATE files SET filename = :filename WHERE stored_path = :stored_path"),
+            {"filename": filename, "stored_path": stored_path},
+        )
     db.commit()

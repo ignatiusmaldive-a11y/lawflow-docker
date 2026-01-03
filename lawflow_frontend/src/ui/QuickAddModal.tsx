@@ -20,7 +20,7 @@ export function QuickAddModal({
   const [title, setTitle] = useState("Confirmar agenda con notaría");
   const [assignee, setAssignee] = useState("Ana López");
   const [due, setDue] = useState<string>("");
-  const [priority, setPriority] = useState("High");
+  const [priority, setPriority] = useState("Alta");
   const [tags, setTags] = useState("Notaría");
   const [saving, setSaving] = useState(false);
 
@@ -33,7 +33,7 @@ export function QuickAddModal({
       due_date: due ? due : null,
       priority,
       tags,
-      status: "Backlog",
+      status: "Pendiente",
     };
   }, [projectId, title, assignee, due, priority, tags]);
 
@@ -58,9 +58,9 @@ export function QuickAddModal({
           <div>
             <div className="small" style={{ marginBottom: 4 }}>Prioridad</div>
             <select className="select" style={{ width: "100%" }} value={priority} onChange={(e) => setPriority(e.target.value)}>
-              <option value="Low">Baja</option>
-              <option value="Medium">Media</option>
-              <option value="High">Alta</option>
+              <option value="Baja">Baja</option>
+              <option value="Media">Media</option>
+              <option value="Alta">Alta</option>
             </select>
           </div>
           <div>

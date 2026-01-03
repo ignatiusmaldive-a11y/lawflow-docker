@@ -29,11 +29,11 @@ export function TasksTable({
       <tbody>
         {rows.map((t) => (
           <tr key={t.id}>
-            <td style={{ fontWeight: 950 }}>{t.title}</td>
+            <td style={{ fontWeight: 950, whiteSpace: "normal", minWidth: "140px" }}>{t.title}</td>
             <td>
               <select
                 className="select"
-                style={{ width: '120px' }}
+                style={{ minWidth: '130px' }}
                 value={t.status}
                 onChange={(e) => onEdit(t.id, { status: e.target.value as any })}
               >
@@ -53,10 +53,11 @@ export function TasksTable({
                 type="date"
                 value={t.due_date ?? ""}
                 onChange={(e) => onEdit(t.id, { due_date: e.target.value || null })}
+                style={{ maxWidth: '130px' }}
               />
             </td>
             <td>
-              <select className="select" style={{ width: '120px' }} value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>
+              <select className="select" style={{ minWidth: '80px' }} value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>
                 {PRIORITIES.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -64,7 +65,7 @@ export function TasksTable({
                 ))}
               </select>
             </td>
-            <td>
+            <td style={{ whiteSpace: "normal", minWidth: "120px" }}>
               <div>
                 <div>{t.tags ?? ""}</div>
                 {t.status === "Hecho" ? (

@@ -17,11 +17,11 @@ def list_tasks(project_id: int | None = None, db: Session = Depends(get_db)):
 def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)):
     t = db.get(Task, task_id)
     if not t:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
     data = payload.model_dump(exclude_unset=True)
     for k, v in data.items():
         setattr(t, k, v)
-    db.add(Activity(project_id=t.project_id, actor="Ana López", verb="Updated task", detail=t.title))
+    db.add(Activity(project_id=t.project_id, actor="Ana López", verb="Tarea actualizada", detail=t.title))
     db.commit()
     db.refresh(t)
     return t
@@ -30,7 +30,7 @@ def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)
 def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
     t = Task(**payload.model_dump())
     db.add(t)
-    db.add(Activity(project_id=t.project_id, actor=payload.assignee, verb="Created task", detail=t.title))
+    db.add(Activity(project_id=t.project_id, actor=payload.assignee, verb="Tarea creada", detail=t.title))
     db.commit()
     db.refresh(t)
     return t

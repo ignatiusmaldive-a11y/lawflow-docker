@@ -37,7 +37,7 @@ export function FilesRoom({ projectId }: { projectId: number }) {
 
       <div className="card cardPad">
         <div className="table-container">
-          <table className="table">
+          <table className="table filesTable">
             <thead>
               <tr>
                 <th>{t("filename")}</th>
@@ -49,7 +49,12 @@ export function FilesRoom({ projectId }: { projectId: number }) {
             <tbody>
               {filtered.map((f) => (
                 <tr key={f.id} onClick={()=>{ setSelected(f); setPreviewError(null); }} style={{ cursor: 'pointer' }}>
-                  <td style={{ fontWeight: 950 }}>{f.filename}</td>
+                  <td className="fileNameCell">
+                    <div className="fileName">{f.filename}</div>
+                    <div className="fileMetaMobile small">
+                      {(f.mime_type ?? "—") + " · " + f.uploader + " · " + new Date(f.uploaded_at).toLocaleDateString()}
+                    </div>
+                  </td>
                   <td className="small">{f.mime_type ?? "—"}</td>
                   <td>{f.uploader}</td>
                   <td className="small">{new Date(f.uploaded_at).toLocaleString()}</td>

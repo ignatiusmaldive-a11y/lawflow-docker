@@ -28,14 +28,14 @@ export function Checklist({
           </div>
           {stageItems.map((it) => (
             <div className="chkItem" key={it.id}>
-              <div className="chkLeft">
-                <input type="checkbox" checked={it.is_done} onChange={(e) => onToggle(it.id, e.target.checked)} />
-                <div>
-                  <div className="chkLabel">{it.label}</div>
-                  <div className="small">Template: {stage} · Costa del Sol conveyancing</div>
+              <div className="chkLeft" style={{ minWidth: 0, flex: 1 }}>
+                <input type="checkbox" checked={it.is_done} onChange={(e) => onToggle(it.id, e.target.checked)} style={{ flexShrink: 0 }} />
+                <div style={{ minWidth: 0 }}>
+                  <div className="chkLabel" style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{it.label}</div>
+                  <div className="small" style={{ whiteSpace: "normal" }}>Template: {stage} · Costa del Sol conveyancing</div>
                 </div>
               </div>
-              <div className="chkDue">{it.due_date ?? ""}</div>
+              <div className="chkDue" style={{ flexShrink: 0, marginLeft: 10 }}>{it.due_date ?? ""}</div>
             </div>
           ))}
         </div>

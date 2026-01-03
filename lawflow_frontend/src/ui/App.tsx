@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useI18n } from "../lib/i18n";
 import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem } from "../lib/api";
 import { api2, api3 } from "../lib/api";
-import { formatProjectLabel, PROJECT_ID_OFFSET, daysUntil } from "../lib/formatting";
+import { formatProjectLabel, PROJECT_ID_OFFSET, daysUntil, formatTransactionType } from "../lib/formatting";
 import { Board } from "./Board";
 import { TasksTable } from "./TasksTable";
 import { Timeline } from "./Cronograma";
@@ -119,10 +119,10 @@ function saveDismissedDeadlines(projectId: number, stats: { overdue: number; due
 }
 
 
-function riskPill(risk: Project["risk"]) {
-  if (risk === "Critical") return <span className="pill bad">Critical</span>;
-  if (risk === "At Risk") return <span className="pill warn">At risk</span>;
-  return <span className="pill ok">Normal</span>;
+function riskPill(risk: Project["risk"], t: (k: any) => string) {
+  if (risk === "Critical") return <span className="pill bad">{t("riskCritical")}</span>;
+  if (risk === "At Risk") return <span className="pill warn">{t("riskAtRisk")}</span>;
+  return <span className="pill ok">{t("riskNormal")}</span>;
 }
 
 function fmtDateShort(d?: string | null) {
@@ -131,9 +131,22 @@ function fmtDateShort(d?: string | null) {
   return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
 }
 
+function projectStatusLabel(status: string | null | undefined, t: (k: any) => string) {
+  if (!status) return "—";
+  switch (status) {
+    case "Intake": return t("statusIntake");
+    case "Due Diligence": return t("statusDueDiligence");
+    case "Contracts": return t("statusContracts");
+    case "Notary": return t("statusNotary");
+    case "Registry": return t("statusRegistry");
+    case "Completed": return t("statusCompleted");
+    default: return status;
+  }
+}
+
 function breadcrumbParts(p?: Project | null) {
   if (!p) return ["Workspace", "Matters"];
-  return QColorSafe(["Workspace", "Matters", `${p.location}`, p.title.replace(/^Purchase – |^Sale – /, "")]);
+  return QColorSafe(["Workspace", "Matters", `${p.location}`, p.title.replace(/^(Purchase|Sale) – |^(Compra|Venta) – /, "")]);
 }
 
 // Avoid weird characters in breadcrumb rendering; simple passthrough with trimming
@@ -345,16 +358,16 @@ useEffect(() => {
             >
               {projects.map((p) => (
                 <option value={p.id} key={p.id}>
-                  {formatProjectLabel(p)}
+                  {formatProjectLabel(p, { lang })}
                 </option>
               ))}
             </select>
             <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
               <div className="small" style={{ fontWeight: 900 }}>
-                <b>Status</b>: {activeProject?.status ?? "—"}
+                <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {activeProject ? riskPill(activeProject.risk) : null}
+                {activeProject ? riskPill(activeProject.risk, t) : null}
                 <button
                   className="btn ghost"
                   onClick={(e) => {
@@ -362,7 +375,7 @@ useEffect(() => {
                     if (!activeProject) return;
                     setPinnedIds(togglePin(activeProject.id));
                   }}
-                  title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
+                  title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
                   style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
                 >
                   {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
@@ -383,7 +396,7 @@ useEffect(() => {
           title={p.title}
         >
           <span className="chipDot" />
-          <span className="chipText">{formatProjectLabel(p)}</span>
+          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
         </button>
       ))}
     </div>
@@ -402,7 +415,7 @@ useEffect(() => {
           title={p.title}
         >
           <span className="chipDot muted" />
-          <span className="chipText">{formatProjectLabel(p)}</span>
+          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
         </button>
       ))}
     </div>
@@ -419,31 +432,32 @@ useEffect(() => {
               <div className="small">Legal Ops</div>
             </div>
           </div>
-          <button className="btn ghost" title="Settings" onClick={() => setView("Matter Settings")}>⚙</button>
+          <button className="btn ghost" title={t("settings")} onClick={() => setView("Matter Settings")}>⚙</button>
         </div>
       </aside>
 
       <main className="main">
         <header className="topbar">
-          <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
+          <div className="topbar-container">
+            <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <p className="h1">
                 {view === "General Overview" ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div className="brandMark">◆</div>
                     <div>
                       <div className="brandName">AMA-CRM</div>
-                      <div className="small">Transacciones inmobiliarias</div>
+                      <div className="small">Listado General</div>
                     </div>
                   </div>
-                ) : (activeProject ? formatProjectLabel(activeProject) : "LawFlow")}
+                ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
               </p>
               {view !== "General Overview" && activeProject && (
                 <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
                   <div className="small" style={{ fontWeight: 900 }}>
-                    <b>{t("status")}</b>: {activeProject?.status ?? "—"}
+                    <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
                   </div>
-                  {riskPill(activeProject.risk)}
+                  {riskPill(activeProject.risk, t)}
                   <button
                     className="btn ghost"
                     onClick={(e) => {
@@ -451,7 +465,7 @@ useEffect(() => {
                       if (!activeProject) return;
                       setPinnedIds(togglePin(activeProject.id));
                     }}
-                    title={pinnedIds.includes(activeProject?.id ?? -1) ? "Unpin matter" : "Pin matter"}
+                    title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
                     style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
                   >
                     {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
@@ -476,7 +490,7 @@ useEffect(() => {
                   <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
                   <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
                   <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>Closing Pack</button>
+                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
                 </>
               )}
             </div>
@@ -486,14 +500,15 @@ useEffect(() => {
             <button
               className="hamburger"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              title="Toggle sidebar"
+              title={t("toggleSidebar")}
             >
               ☰
             </button>
 
             {view !== "General Overview" && (
-              <button className="btn" onClick={() => setQuickAddOpen(true)} title="Quick add a task to the active matter">{t("quickAdd")}</button>
+              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
             )}
+          </div>
           </div>
         </header>
 
@@ -632,18 +647,18 @@ useEffect(() => {
     <div style={{ display: "grid", gap: 12 }}>
       <FilesRoom projectId={activeProjectId} />
       <div className="card cardPad" style={{ padding: 12 }}>
-        <div className="sectionTitle" style={{ marginBottom: 0 }}>
-          <h2>{t("municipality")}</h2>
-          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
-              {MUNICIPALITIES_LIST.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-            <span className="pill">{activeProject?.transaction_type ?? "—"}</span>
+            <div className="sectionTitle" style={{ marginBottom: 0 }}>
+              <h2>{t("municipality")}</h2>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
+                  {MUNICIPALITIES_LIST.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+            <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
       <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
     </div>
   )}
@@ -729,3 +744,4 @@ useEffect(() => {
     </div>
   );
 }
+ 

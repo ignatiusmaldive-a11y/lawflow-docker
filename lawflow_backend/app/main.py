@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .db import engine, SessionLocal
 from .models import Base
-from .seed import seed_if_empty
+from .seed import seed_if_empty, normalize_legacy_demo_data
 from .routers import projects, tasks, checklists, timeline, activity, files, templates, calendar, closing_pack
 
 # Configure logging
@@ -56,6 +56,7 @@ def on_startup():
     db = SessionLocal()
     try:
         seed_if_empty(db)
+        normalize_legacy_demo_data(db)
     finally:
         db.close()
 

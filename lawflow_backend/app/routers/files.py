@@ -24,7 +24,7 @@ def upload_file(
     db: Session = Depends(get_db),
 ):
     if not file.filename:
-        raise HTTPException(status_code=400, detail="Missing filename")
+        raise HTTPException(status_code=400, detail="Falta el nombre de archivo")
     safe_name = file.filename.replace("/", "_").replace("\\", "_")
     dest = UPLOAD_DIR / f"{project_id}__{safe_name}"
     with dest.open("wb") as f:
@@ -38,7 +38,7 @@ def upload_file(
         uploader=uploader,
     )
     db.add(item)
-    db.add(Activity(project_id=project_id, actor=uploader, verb="Uploaded file", detail=safe_name))
+    db.add(Activity(project_id=project_id, actor=uploader, verb="Archivo subido", detail=safe_name))
     db.commit()
     db.refresh(item)
     return item
@@ -47,8 +47,8 @@ def upload_file(
 def download(file_id: int, db: Session = Depends(get_db)):
     item = db.get(FileItem, file_id)
     if not item:
-        raise HTTPException(status_code=404, detail="File not found")
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
     path = Path(item.stored_path)
     if not path.exists():
-        raise HTTPException(status_code=404, detail="File content not available (seed metadata only). Upload a real file to preview/download.")
+        raise HTTPException(status_code=404, detail="Contenido no disponible (solo metadatos de demo). Sube un archivo real para previsualizar/descargar.")
     return FileResponse(path, filename=item.filename, media_type=item.mime_type or "application/octet-stream")
