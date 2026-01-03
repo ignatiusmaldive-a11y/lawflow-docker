@@ -321,6 +321,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Agencias Polacas: responsive (avoid horizontal scroll) */
+.agenciasTableWrap{ display:block; }
+.agenciasCards{ display:none; }
+.agenciasTable{ table-layout: fixed; }
+.agenciasTable th, .agenciasTable td{
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+@media (max-width: 840px){
+  .agenciasTableWrap{ display:none; }
+  .agenciasCards{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+}
+
 /* Hide scrollbar but allow scrolling */
 .table-container::-webkit-scrollbar {
   height: 6px;

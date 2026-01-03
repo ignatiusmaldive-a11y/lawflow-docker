@@ -19,10 +19,19 @@ import { QuickAddModal } from "./QuickAddModal";
 import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { InformesSectorialesView } from "./InformesSectorialesView";
+import { AgenciasPolacasView } from "./AgenciasPolacasView";
 import { Callout } from "./components/Callout";
 import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
-type View = "Tasks" | "Timeline" | "Files" | "Closing Pack" | "Matter Settings" | "General Overview" | "Informes Sectoriales";
+type View =
+  | "Tasks"
+  | "Timeline"
+  | "Files"
+  | "Closing Pack"
+  | "Matter Settings"
+  | "General Overview"
+  | "Informes Sectoriales"
+  | "Agencias Polacas";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -244,6 +253,8 @@ const activeProject = useMemo(
         setView("General Overview");
       } else if (window.location.pathname === "/informes-sectoriales") {
         setView("Informes Sectoriales");
+      } else if (window.location.pathname === "/agencias-polacas") {
+        setView("Agencias Polacas");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else {
@@ -260,6 +271,8 @@ const activeProject = useMemo(
         setView("General Overview");
       } else if (window.location.pathname === "/informes-sectoriales") {
         setView("Informes Sectoriales");
+      } else if (window.location.pathname === "/agencias-polacas") {
+        setView("Agencias Polacas");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else {
@@ -280,6 +293,10 @@ const activeProject = useMemo(
     } else if (view === "Informes Sectoriales") {
       if (window.location.pathname !== "/informes-sectoriales") {
         window.history.pushState(null, "", "/informes-sectoriales");
+      }
+    } else if (view === "Agencias Polacas") {
+      if (window.location.pathname !== "/agencias-polacas") {
+        window.history.pushState(null, "", "/agencias-polacas");
       }
     } else {
       if (window.location.pathname !== "/project") {
@@ -340,9 +357,21 @@ useEffect(() => {
   }, [tasks]);
 
   return (
-    <div className="shell" style={{ background: view === "General Overview" || view === "Informes Sectoriales" ? defaultBg : (activeProject?.bg_color ?? defaultBg) }}>
+    <div
+      className="shell"
+      style={{
+        background:
+          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
+            ? defaultBg
+            : (activeProject?.bg_color ?? defaultBg),
+      }}
+    >
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`sidebar ${view === "General Overview" || view === "Informes Sectoriales" ? "hide-content" : ""}`}>
+      <aside
+        className={`sidebar ${
+          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
+        }`}
+      >
         <div className="brand">
           <div className="brandMark">◆</div>
           <div>
@@ -450,14 +479,32 @@ useEffect(() => {
       </aside>
 
 	      <main className="main">
-	        <header className={"topbar" + (view === "General Overview" || view === "Informes Sectoriales" ? " landingTopbar" : "")}>
+	        <header
+	          className={
+	            "topbar" + (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? " landingTopbar" : "")
+	          }
+	        >
 	          <div className="topbar-container">
-		            <div className="titleRow" style={view === "General Overview" || view === "Informes Sectoriales" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
+		            <div
+		              className="titleRow"
+		              style={
+		                view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
+		                  ? { minHeight: "80px", justifyContent: "center" }
+		                  : undefined
+		              }
+		            >
 		            {view === "Informes Sectoriales" ? (
 		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
 		                <div style={{ textAlign: "left" }}>
 		                  <div className="brandName">Informes Sectoriales</div>
 		                  <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
+		                </div>
+		              </div>
+		            ) : view === "Agencias Polacas" ? (
+		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+		                <div style={{ textAlign: "left" }}>
+		                  <div className="brandName">Agencias Polacas</div>
+		                  <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
 		                </div>
 		              </div>
 		            ) : (
@@ -506,8 +553,14 @@ useEffect(() => {
   )}
 	</span>
 	            </p> */}
-	            <div className="topNav" style={{ minHeight: 42, display: view === "General Overview" || view === "Informes Sectoriales" ? "none" : "block" }}>
-	              {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && (
+	            <div
+	              className="topNav"
+	              style={{
+	                minHeight: 42,
+	                display: view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "none" : "block",
+	              }}
+	            >
+	              {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
 	                <>
 	                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
 	                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
@@ -527,7 +580,7 @@ useEffect(() => {
               ☰
             </button>
 
-	            {view !== "General Overview" && view !== "Informes Sectoriales" && (
+	            {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
 	              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
 	            )}
 	          </div>
@@ -551,6 +604,8 @@ useEffect(() => {
              />
           ) : view === "Informes Sectoriales" ? (
              <InformesSectorialesView />
+          ) : view === "Agencias Polacas" ? (
+             <AgenciasPolacasView />
           ) : (
           <div className="contentGrid">
             <div className="leftColumn">
