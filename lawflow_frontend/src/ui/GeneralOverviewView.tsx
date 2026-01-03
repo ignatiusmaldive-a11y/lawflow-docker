@@ -340,10 +340,8 @@ export function GeneralOverviewView({
           <div>
             <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Características</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Precios</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Integraciones</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>API</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
             </ul>
           </div>
 
@@ -353,8 +351,6 @@ export function GeneralOverviewView({
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Política de Privacidad</a></li>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Términos de Servicio</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Cookies</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>RGPD</a></li>
             </ul>
           </div>
 
@@ -364,8 +360,6 @@ export function GeneralOverviewView({
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Centro de Ayuda</a></li>
               <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Contacto</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Estado del Sistema</a></li>
-              <li><a href="mailto:soporte@ama-crm.com" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>soporte@ama-crm.com</a></li>
             </ul>
           </div>
         </div>

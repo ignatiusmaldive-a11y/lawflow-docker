@@ -97,6 +97,10 @@ button, input, select { font: inherit; }
   align-self: flex-start;
   margin-top: 2px;
 }
+.topbar.landingTopbar .actions{
+  align-self: center;
+  margin-top: 0;
+}
 .hamburger{
   display: none;
   padding: 8px 12px;
@@ -805,6 +809,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Large screens - constrain main table width */
 @media (min-width: 1200px) {
   .table-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .topbar.landingTopbar .topbar-container{
     max-width: 1200px;
     margin: 0 auto;
   }

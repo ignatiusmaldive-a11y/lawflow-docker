@@ -18,9 +18,10 @@ import { NewProjectModal } from "./NewProjectModal";
 import { QuickAddModal } from "./QuickAddModal";
 import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
+import { InformesSectorialesView } from "./InformesSectorialesView";
 import { Callout } from "./components/Callout";
 
-type View = "Tasks" | "Timeline" | "Files" | "Closing Pack" | "Matter Settings" | "General Overview";
+type View = "Tasks" | "Timeline" | "Files" | "Closing Pack" | "Matter Settings" | "General Overview" | "Informes Sectoriales";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -233,10 +234,12 @@ const activeProject = useMemo(
     (async () => {
       const ps = await api.projects();
       setProjects(ps);
-      
+
       // Default to General Overview
       if (window.location.pathname === "/" || window.location.pathname === "/overview") {
         setView("General Overview");
+      } else if (window.location.pathname === "/informes-sectoriales") {
+        setView("Informes Sectoriales");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else {
@@ -251,6 +254,8 @@ const activeProject = useMemo(
     const handlePopState = () => {
       if (window.location.pathname === "/" || window.location.pathname === "/overview") {
         setView("General Overview");
+      } else if (window.location.pathname === "/informes-sectoriales") {
+        setView("Informes Sectoriales");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else {
@@ -267,6 +272,10 @@ const activeProject = useMemo(
     if (view === "General Overview") {
       if (window.location.pathname !== "/" && window.location.pathname !== "/overview") {
         window.history.pushState(null, "", "/");
+      }
+    } else if (view === "Informes Sectoriales") {
+      if (window.location.pathname !== "/informes-sectoriales") {
+        window.history.pushState(null, "", "/informes-sectoriales");
       }
     } else {
       if (window.location.pathname !== "/project") {
@@ -327,9 +336,9 @@ useEffect(() => {
   }, [tasks]);
 
   return (
-    <div className="shell" style={{ background: view === "General Overview" ? defaultBg : (activeProject?.bg_color ?? defaultBg) }}>
+    <div className="shell" style={{ background: view === "General Overview" || view === "Informes Sectoriales" ? defaultBg : (activeProject?.bg_color ?? defaultBg) }}>
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`sidebar ${view === "General Overview" ? "hide-content" : ""}`}>
+      <aside className={`sidebar ${view === "General Overview" || view === "Informes Sectoriales" ? "hide-content" : ""}`}>
         <div className="brand">
           <div className="brandMark">◆</div>
           <div>
@@ -437,9 +446,9 @@ useEffect(() => {
       </aside>
 
       <main className="main">
-        <header className="topbar">
+        <header className={"topbar" + (view === "General Overview" || view === "Informes Sectoriales" ? " landingTopbar" : "")}>
           <div className="topbar-container">
-            <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
+            <div className="titleRow" style={view === "General Overview" || view === "Informes Sectoriales" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               <p className="h1">
                 {view === "General Overview" ? (
@@ -527,6 +536,8 @@ useEffect(() => {
                  window.scrollTo(0, 0); // Reset scroll position to top when selecting project
                }}
              />
+          ) : view === "Informes Sectoriales" ? (
+             <InformesSectorialesView />
           ) : (
           <div className="contentGrid">
             <div className="leftColumn">
@@ -744,4 +755,3 @@ useEffect(() => {
     </div>
   );
 }
- 
