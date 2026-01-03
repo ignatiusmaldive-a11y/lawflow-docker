@@ -32,14 +32,7 @@ function statusLabel(status: string, t: ReturnType<typeof useI18n>["t"]) {
 }
 
 function statusPill(status: string, t: ReturnType<typeof useI18n>["t"]) {
-  const colors: Record<string, string> = {
-    "Due Diligence": "warn",
-    "Contracts": "warn",
-    "Notary": "bad",
-    "Registry": "ok",
-    "Completed": "ok"
-  };
-  return <span className={`pill ${colors[status] || "neutral"}`}>{statusLabel(status, t)}</span>;
+  return <span className="pill neutral">{statusLabel(status, t)}</span>;
 }
 
 function fmtDateShort(d?: string | null) {
@@ -237,16 +230,16 @@ export function GeneralOverviewView({
 
       {/* Main Table */}
       <div className="table-container">
-        <div className="card" style={{ overflowX: "auto" }}>
-          <table className="table" style={{ width: "100%" }}>
+        <div className="card" style={{ overflowX: "hidden" }}>
+          <table className="table mattersTable" style={{ width: "100%" }}>
           <thead>
             <tr>
               <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
-              <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
               <SortHeader field="status" label={t("statusTableCol")} align="center" />
               <SortHeader field="risk" label={t("riskTableCol")} align="center" />
               <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
               <SortHeader field="client" label={t("clientTableCol")} />
+              <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
             </tr>
           </thead>
           <tbody>
@@ -254,6 +247,7 @@ export function GeneralOverviewView({
               const d = daysUntil(p.target_close_date);
               const isOverdue = d !== null && d < 0;
               const isSoon = d !== null && d <= 7 && d >= 0;
+              const matterLabel = formatProjectLabel(p);
 
               return (
                 <tr 
@@ -261,11 +255,10 @@ export function GeneralOverviewView({
                   onClick={() => onProjectSelect(p.id)} 
                   style={{ cursor: "pointer" }}
                 >
-                  <td style={{ minWidth: "140px", whiteSpace: "normal" }}>
-                    <div style={{ fontWeight: 800 }}>{formatProjectLabel(p)}</div>
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    <span className="pill neutral">{p.location}</span>
+                  <td className="matterCell">
+                    <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
+                      {matterLabel}
+                    </div>
                   </td>
                   <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
                   <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
@@ -285,6 +278,9 @@ export function GeneralOverviewView({
                     )}
                   </td>
                   <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
+                  <td style={{ textAlign: "center" }}>
+                    <span className="pill neutral">{p.location}</span>
+                  </td>
                 </tr>
               );
             })}
@@ -340,32 +336,38 @@ export function GeneralOverviewView({
           <div>
             <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Características</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Precios</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Integraciones</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>API</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
             </ul>
           </div>
 
           {/* Legal Links */}
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Agencias Polacas</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.history.pushState(null, "", "/agencias-polacas");
+                  window.dispatchEvent(new PopStateEvent("popstate"));
+                }}
+                style={{ color: "var(--text)", textDecoration: "none" }}
+              >
+                Agencias Polacas
+              </a>
+            </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Política de Privacidad</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Términos de Servicio</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Cookies</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>RGPD</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Directorio</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Criterios de selección</a></li>
             </ul>
           </div>
 
           {/* Contact & Support */}
           <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Agente Inteligente</h4>
+            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Asistente IA</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Centro de Ayuda</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Contacto</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Estado del Sistema</a></li>
-              <li><a href="mailto:soporte@ama-crm.com" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>soporte@ama-crm.com</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Chat</a></li>
+              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Investigación</a></li>
             </ul>
           </div>
         </div>

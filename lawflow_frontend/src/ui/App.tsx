@@ -18,9 +18,20 @@ import { NewProjectModal } from "./NewProjectModal";
 import { QuickAddModal } from "./QuickAddModal";
 import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
+import { InformesSectorialesView } from "./InformesSectorialesView";
+import { AgenciasPolacasView } from "./AgenciasPolacasView";
 import { Callout } from "./components/Callout";
+import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
-type View = "Tasks" | "Timeline" | "Files" | "Closing Pack" | "Matter Settings" | "General Overview";
+type View =
+  | "Tasks"
+  | "Timeline"
+  | "Files"
+  | "Closing Pack"
+  | "Matter Settings"
+  | "General Overview"
+  | "Informes Sectoriales"
+  | "Agencias Polacas";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -170,6 +181,9 @@ export function App() {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [defaultBg, setDefaultBg] = useState<string>(() => (typeof window !== 'undefined' ? loadPlatformDefaultBg() : '#0b1220'));
+  const [uxPrefs, setUxPrefs] = useState<UxPrefs>(() =>
+    typeof window !== "undefined" ? loadUxPrefs() : { tipsEnabled: false, calendarAlertsEnabled: false }
+  );
 
 
   const [view, setView] = useState<View>("General Overview");
@@ -233,10 +247,14 @@ const activeProject = useMemo(
     (async () => {
       const ps = await api.projects();
       setProjects(ps);
-      
+
       // Default to General Overview
       if (window.location.pathname === "/" || window.location.pathname === "/overview") {
         setView("General Overview");
+      } else if (window.location.pathname === "/informes-sectoriales") {
+        setView("Informes Sectoriales");
+      } else if (window.location.pathname === "/agencias-polacas") {
+        setView("Agencias Polacas");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else {
@@ -251,6 +269,10 @@ const activeProject = useMemo(
     const handlePopState = () => {
       if (window.location.pathname === "/" || window.location.pathname === "/overview") {
         setView("General Overview");
+      } else if (window.location.pathname === "/informes-sectoriales") {
+        setView("Informes Sectoriales");
+      } else if (window.location.pathname === "/agencias-polacas") {
+        setView("Agencias Polacas");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else {
@@ -267,6 +289,14 @@ const activeProject = useMemo(
     if (view === "General Overview") {
       if (window.location.pathname !== "/" && window.location.pathname !== "/overview") {
         window.history.pushState(null, "", "/");
+      }
+    } else if (view === "Informes Sectoriales") {
+      if (window.location.pathname !== "/informes-sectoriales") {
+        window.history.pushState(null, "", "/informes-sectoriales");
+      }
+    } else if (view === "Agencias Polacas") {
+      if (window.location.pathname !== "/agencias-polacas") {
+        window.history.pushState(null, "", "/agencias-polacas");
       }
     } else {
       if (window.location.pathname !== "/project") {
@@ -327,9 +357,21 @@ useEffect(() => {
   }, [tasks]);
 
   return (
-    <div className="shell" style={{ background: view === "General Overview" ? defaultBg : (activeProject?.bg_color ?? defaultBg) }}>
+    <div
+      className="shell"
+      style={{
+        background:
+          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
+            ? defaultBg
+            : (activeProject?.bg_color ?? defaultBg),
+      }}
+    >
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`sidebar ${view === "General Overview" ? "hide-content" : ""}`}>
+      <aside
+        className={`sidebar ${
+          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
+        }`}
+      >
         <div className="brand">
           <div className="brandMark">◆</div>
           <div>
@@ -436,67 +478,100 @@ useEffect(() => {
         </div>
       </aside>
 
-      <main className="main">
-        <header className="topbar">
-          <div className="topbar-container">
-            <div className="titleRow" style={view === "General Overview" ? { minHeight: "80px", justifyContent: "center" } : undefined}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-              <p className="h1">
-                {view === "General Overview" ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div className="brandMark">◆</div>
-                    <div>
-                      <div className="brandName">AMA-CRM</div>
-                      <div className="small">Listado General</div>
-                    </div>
-                  </div>
-                ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
-              </p>
-              {view !== "General Overview" && activeProject && (
-                <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
-                  <div className="small" style={{ fontWeight: 900 }}>
-                    <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
-                  </div>
-                  {riskPill(activeProject.risk, t)}
-                  <button
-                    className="btn ghost"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (!activeProject) return;
-                      setPinnedIds(togglePin(activeProject.id));
-                    }}
-                    title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-                    style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-                  >
-                    {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-                  </button>
-                </div>
-              )}
-            </div>
-            {/* <p className="subtitle">
-              <span className="crumbs">
-  {view === "General Overview" ? (
+	      <main className="main">
+	        <header
+	          className={
+	            "topbar" + (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? " landingTopbar" : "")
+	          }
+	        >
+	          <div className="topbar-container">
+		            <div
+		              className="titleRow"
+		              style={
+		                view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
+		                  ? { minHeight: "80px", justifyContent: "center" }
+		                  : undefined
+		              }
+		            >
+		            {view === "Informes Sectoriales" ? (
+		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+		                <div style={{ textAlign: "left" }}>
+		                  <div className="brandName">Informes Sectoriales</div>
+		                  <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
+		                </div>
+		              </div>
+		            ) : view === "Agencias Polacas" ? (
+		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+		                <div style={{ textAlign: "left" }}>
+		                  <div className="brandName">Agencias Polacas</div>
+		                  <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
+		                </div>
+		              </div>
+		            ) : (
+	              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+	                <p className="h1">
+	                  {view === "General Overview" ? (
+	                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+	                      <div className="brandMark">◆</div>
+	                      <div>
+	                        <div className="brandName">AMA-CRM</div>
+	                        <div className="small">Listado General</div>
+	                      </div>
+	                    </div>
+	                  ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
+	                </p>
+	                {view !== "General Overview" && activeProject && (
+	                  <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: "32px" }}>
+	                    <div className="small" style={{ fontWeight: 900 }}>
+	                      <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
+	                    </div>
+	                    {riskPill(activeProject.risk, t)}
+	                    <button
+	                      className="btn ghost"
+	                      onClick={(e) => {
+	                        e.preventDefault();
+	                        if (!activeProject) return;
+	                        setPinnedIds(togglePin(activeProject.id));
+	                      }}
+	                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+	                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+	                    >
+	                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+	                    </button>
+	                  </div>
+	                )}
+	              </div>
+	            )}
+	            {/* <p className="subtitle">
+	              <span className="crumbs">
+	  {view === "General Overview" ? (
      <span className="crumb">Portfolio Overview</span>
   ) : (
      breadcrumbParts(activeProject).map((c, idx) => (
        <span key={idx} className="crumb">{c}</span>
      ))
   )}
-</span>
-            </p> */}
-            <div className="topNav" style={{ minHeight: 42, display: view === "General Overview" ? "none" : "block" }}>
-              {activeProjectId && view !== "General Overview" && (
-                <>
-                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
-                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
-                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
-                </>
-              )}
-            </div>
-            {view !== "General Overview" && null}
-          </div>
-          <div className="actions">
+	</span>
+	            </p> */}
+	            <div
+	              className="topNav"
+	              style={{
+	                minHeight: 42,
+	                display: view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "none" : "block",
+	              }}
+	            >
+	              {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
+	                <>
+	                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
+	                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
+	                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
+	                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
+	                </>
+	              )}
+	            </div>
+	            {view !== "General Overview" && null}
+	          </div>
+	          <div className="actions">
             <button
               className="hamburger"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -505,10 +580,10 @@ useEffect(() => {
               ☰
             </button>
 
-            {view !== "General Overview" && (
-              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
-            )}
-          </div>
+	            {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
+	              <button className="btn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>{t("quickAdd")}</button>
+	            )}
+	          </div>
           </div>
         </header>
 
@@ -527,10 +602,14 @@ useEffect(() => {
                  window.scrollTo(0, 0); // Reset scroll position to top when selecting project
                }}
              />
+          ) : view === "Informes Sectoriales" ? (
+             <InformesSectorialesView />
+          ) : view === "Agencias Polacas" ? (
+             <AgenciasPolacasView />
           ) : (
           <div className="contentGrid">
             <div className="leftColumn">
-              {!tipsDismissed && tipsTimerReady ? (
+              {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
@@ -542,7 +621,7 @@ useEffect(() => {
                   />
               ) : null}
 
-              {(kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
+              {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
                 <div className="deadlineBanner">
                   <div style={{ fontWeight: 950 }}>
                     {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
@@ -669,6 +748,8 @@ useEffect(() => {
       onProjectUpdated={(p) => {
         setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
       }}
+      uxPrefs={uxPrefs}
+      onUxPrefsChange={setUxPrefs}
       onClose={() => setView("Tasks")} // Go back to Board view after closing settings
     />
   )}
@@ -744,4 +825,3 @@ useEffect(() => {
     </div>
   );
 }
- 
