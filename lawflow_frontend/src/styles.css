@@ -168,14 +168,20 @@ button, input, select { font: inherit; }
 
 .pill{
   display: inline-block;
-  font-size: 12px; padding: 4px 10px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 150px; /* Prevent pills from being too wide */
 }
-.pill.warn{ border-color: color-mix(in oklab, var(--warn) 55%, var(--line)); color: color-mix(in oklab, var(--warn) 85%, white); }
-.pill.ok{ border-color: color-mix(in oklab, var(--brand2) 55%, var(--line)); color: color-mix(in oklab, var(--brand2) 85%, white); }
-.pill.bad{ border-color: color-mix(in oklab, var(--danger) 55%, var(--line)); color: color-mix(in oklab, var(--danger) 85%, white); }
+.pill.neutral{ color: var(--muted); }
+.pill.warn{ color: color-mix(in oklab, var(--warn) 85%, white); }
+.pill.ok{ color: color-mix(in oklab, var(--brand2) 85%, white); }
+.pill.bad{ color: color-mix(in oklab, var(--danger) 85%, white); }
 
 .select{
   width: 100%;
@@ -282,17 +288,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .mattersTable th, .mattersTable td{
   overflow: hidden;
 }
-.mattersTable th:nth-child(1){ width: 34%; }
-.mattersTable th:nth-child(2){ width: 12%; }
-.mattersTable th:nth-child(3){ width: 12%; }
-.mattersTable th:nth-child(4){ width: 10%; }
-.mattersTable th:nth-child(5){ width: 14%; }
-.mattersTable th:nth-child(6){ width: 18%; }
+.mattersTable th:nth-child(1){ width: 36%; } /* Asunto */
+.mattersTable th:nth-child(2){ width: 12%; } /* Estado */
+.mattersTable th:nth-child(3){ width: 10%; } /* Riesgo */
+.mattersTable th:nth-child(4){ width: 14%; } /* Fecha límite */
+.mattersTable th:nth-child(5){ width: 18%; } /* Cliente */
+.mattersTable th:nth-child(6){ width: 10%; } /* Ubicación */
 .mattersTable th:last-child, .mattersTable td:last-child{ padding-right: 8px; }
 
 @media (max-width: 1200px){
-  .mattersTable th:nth-child(1){ width: 36%; }
-  .mattersTable th:nth-child(6){ width: 16%; }
+  .mattersTable th:nth-child(1){ width: 38%; }
+  .mattersTable th:nth-child(5){ width: 16%; }
+  .mattersTable th:nth-child(6){ width: 10%; }
 }
 
 /* Files table: allow long filenames to wrap + mobile-friendly columns */
@@ -761,7 +768,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   .pill{
     font-size: 11px;
-    padding: 3px 8px;
+    padding: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -32,14 +32,7 @@ function statusLabel(status: string, t: ReturnType<typeof useI18n>["t"]) {
 }
 
 function statusPill(status: string, t: ReturnType<typeof useI18n>["t"]) {
-  const colors: Record<string, string> = {
-    "Due Diligence": "warn",
-    "Contracts": "warn",
-    "Notary": "bad",
-    "Registry": "ok",
-    "Completed": "ok"
-  };
-  return <span className={`pill ${colors[status] || "neutral"}`}>{statusLabel(status, t)}</span>;
+  return <span className="pill neutral">{statusLabel(status, t)}</span>;
 }
 
 function fmtDateShort(d?: string | null) {
@@ -242,11 +235,11 @@ export function GeneralOverviewView({
           <thead>
             <tr>
               <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
-              <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
               <SortHeader field="status" label={t("statusTableCol")} align="center" />
               <SortHeader field="risk" label={t("riskTableCol")} align="center" />
               <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
               <SortHeader field="client" label={t("clientTableCol")} />
+              <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
             </tr>
           </thead>
           <tbody>
@@ -267,9 +260,6 @@ export function GeneralOverviewView({
                       {matterLabel}
                     </div>
                   </td>
-                  <td style={{ textAlign: "center" }}>
-                    <span className="pill neutral">{p.location}</span>
-                  </td>
                   <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
                   <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
                   <td>
@@ -288,6 +278,9 @@ export function GeneralOverviewView({
                     )}
                   </td>
                   <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
+                  <td style={{ textAlign: "center" }}>
+                    <span className="pill neutral">{p.location}</span>
+                  </td>
                 </tr>
               );
             })}

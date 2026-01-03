@@ -20,6 +20,7 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { InformesSectorialesView } from "./InformesSectorialesView";
 import { Callout } from "./components/Callout";
+import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
 type View = "Tasks" | "Timeline" | "Files" | "Closing Pack" | "Matter Settings" | "General Overview" | "Informes Sectoriales";
 
@@ -171,6 +172,9 @@ export function App() {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [defaultBg, setDefaultBg] = useState<string>(() => (typeof window !== 'undefined' ? loadPlatformDefaultBg() : '#0b1220'));
+  const [uxPrefs, setUxPrefs] = useState<UxPrefs>(() =>
+    typeof window !== "undefined" ? loadUxPrefs() : { tipsEnabled: false, calendarAlertsEnabled: false }
+  );
 
 
   const [view, setView] = useState<View>("General Overview");
@@ -550,7 +554,7 @@ useEffect(() => {
           ) : (
           <div className="contentGrid">
             <div className="leftColumn">
-              {!tipsDismissed && tipsTimerReady ? (
+              {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
@@ -562,7 +566,7 @@ useEffect(() => {
                   />
               ) : null}
 
-              {(kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
+              {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
                 <div className="deadlineBanner">
                   <div style={{ fontWeight: 950 }}>
                     {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
@@ -689,6 +693,8 @@ useEffect(() => {
       onProjectUpdated={(p) => {
         setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
       }}
+      uxPrefs={uxPrefs}
+      onUxPrefsChange={setUxPrefs}
       onClose={() => setView("Tasks")} // Go back to Board view after closing settings
     />
   )}
