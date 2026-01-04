@@ -4,7 +4,7 @@ import { useI18n } from "../lib/i18n";
 
 function fmt(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleString();
+  return d.toLocaleString("es-ES");
 }
 
 export function ActivityFeed({ items }: { items: Activity[] }) {

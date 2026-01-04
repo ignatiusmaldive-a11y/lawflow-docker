@@ -28,6 +28,14 @@ const EN: Dict = {
   downloadIcs: "Download ICS",
   fileRoom: "File room",
   upload: "Upload",
+  searchFilesTitle: "Search",
+  searchFilesHint: "Find documents by filename, type, or uploader.",
+  searchFilesPlaceholder: "Search files…",
+  uploadFilesTitle: "Upload",
+  uploadFilesHint: "Drag & drop into the area below, or choose a file.",
+  chooseFile: "Choose file",
+  uploading: "Uploading…",
+  uploadFailed: "Upload failed. Try again.",
   dragDrop: "Drag & drop files here to upload",
   preview: "Preview",
   noFiles: "No files yet. Upload something to see preview + search working.",
@@ -157,7 +165,7 @@ const EN: Dict = {
 };
 
 const ES: Dict = {
-  tagline: "Transacciones inmobiliarias",
+  tagline: "Derecho inmobiliario",
   activeMatter: "Asunto activo",
   tasks: "Tareas",
   timeline: "Cronograma",
@@ -175,10 +183,18 @@ const ES: Dict = {
   completed: "Completadas",
   work: "Trabajo",
   spanishChecklist: "Checklist de compraventa (España)",
-  activity: "Actividad",
+  activity: "Últimos eventos",
   downloadIcs: "Descargar ICS",
   fileRoom: "Sala de archivos",
   upload: "Subir",
+  searchFilesTitle: "Buscar",
+  searchFilesHint: "Encuentra documentos por nombre, tipo o quién lo subió.",
+  searchFilesPlaceholder: "Buscar archivos…",
+  uploadFilesTitle: "Subir",
+  uploadFilesHint: "Arrastra y suelta en el área de abajo, o elige un archivo.",
+  chooseFile: "Elegir archivo",
+  uploading: "Subiendo…",
+  uploadFailed: "No se pudo subir. Inténtalo de nuevo.",
   dragDrop: "Arrastra y suelta archivos aquí para subirlos",
   preview: "Vista previa",
   noFiles: "Aún no hay archivos. Sube alguno para ver la vista previa + búsqueda.",
@@ -296,7 +312,7 @@ const ES: Dict = {
   filePreviewTip: "Consejo: sube un PDF o imagen para ver vista previa integrada.",
 
   // Templates section
-  templatesDescription: "Estas son reglas de plantillas de demostración (Costa del Sol). Las firmas reales suelen mantenerlas como checklists editables + plantillas de documentos.",
+  templatesDescription: "Plantillas de demostración (Costa del Sol).",
   checklistOverrides: "Anulaciones del checklist",
   appliesTo: "Aplica a",
   template: "Plantilla",
@@ -318,7 +334,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       // If no language is stored, or it's not 'en'/'es', default to 'es'
       if (raw === "en") setLangState("en");
       else setLangState("es"); // Default to Spanish
-    } catch {}
+    } catch { }
   }, []);
 
   // setLang is no longer needed as there's no UI to change language

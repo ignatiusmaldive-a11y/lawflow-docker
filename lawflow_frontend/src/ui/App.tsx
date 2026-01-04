@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../lib/i18n";
 import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem } from "../lib/api";
 import { api2, api3 } from "../lib/api";
@@ -20,6 +20,13 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { InformesSectorialesView } from "./InformesSectorialesView";
 import { AgenciasPolacasView } from "./AgenciasPolacasView";
+import { PuertoBanusReportView } from "./PuertoBanusReportView";
+import { SectorialReportView } from "./SectorialReportView";
+import { REPORTS_DATA } from "../lib/reportData";
+import { NEWS_REPORTS_DATA } from "../lib/newsReportData";
+import { NewsReportView } from "./NewsReportView";
+import { ChatView } from "./ChatView";
+import { CustomReportModal } from "./CustomReportModal";
 import { Callout } from "./components/Callout";
 import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
@@ -31,7 +38,11 @@ type View =
   | "Matter Settings"
   | "General Overview"
   | "Informes Sectoriales"
-  | "Agencias Polacas";
+  | "Agencias Polacas"
+  | "Puerto Banus Report"
+  | "Chat"
+  | "Sectorial Report"
+  | "News Report";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -90,7 +101,7 @@ function loadIds(key: string): number[] {
 function saveIds(key: string, ids: number[]) {
   try {
     localStorage.setItem(key, JSON.stringify(ids.slice(0, 12)));
-  } catch {}
+  } catch { }
 }
 
 function upsertRecent(projectId: number) {
@@ -114,7 +125,7 @@ function loadDismissedTips(projectId: number) {
 }
 
 function saveDismissedTips(projectId: number) {
-  try { localStorage.setItem(`lawflow.dismissed.tips.${projectId}`, "1"); } catch {}
+  try { localStorage.setItem(`lawflow.dismissed.tips.${projectId}`, "1"); } catch { }
 }
 
 function loadDismissedDeadlines(projectId: number) {
@@ -126,7 +137,7 @@ function loadDismissedDeadlines(projectId: number) {
 }
 
 function saveDismissedDeadlines(projectId: number, stats: { overdue: number; dueSoon: number }) {
-  try { localStorage.setItem(`lawflow.dismissed.deadlines.${projectId}`, JSON.stringify(stats)); } catch {}
+  try { localStorage.setItem(`lawflow.dismissed.deadlines.${projectId}`, JSON.stringify(stats)); } catch { }
 }
 
 
@@ -196,32 +207,41 @@ export function App() {
   const [deadlineDismissedStats, setDeadlineDismissedStats] = useState<{ overdue: number; dueSoon: number }>({ overdue: -1, dueSoon: -1 });
   const [tipsDismissed, setTipsDismissed] = useState(false);
   const [tipsTimerReady, setTipsTimerReady] = useState(false);
+  const [customReportOpen, setCustomReportOpen] = useState(false);
+  const [selectedReportSlug, setSelectedReportSlug] = useState<string | null>(null);
+  const [selectedNewsSlug, setSelectedNewsSlug] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const scrollMainToTop = () => {
+    contentRef.current?.scrollTo({ top: 0, left: 0 });
+    window.scrollTo(0, 0);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setTipsTimerReady(true), 4 * 60 * 1000); // 4 minutes
     return () => clearTimeout(timer);
   }, []);
 
-const pinnedProjects = useMemo(() => {
-  const set = new Set(pinnedIds);
-  return projects.filter((p) => set.has(p.id));
-}, [projects, pinnedIds]);
+  const pinnedProjects = useMemo(() => {
+    const set = new Set(pinnedIds);
+    return projects.filter((p) => set.has(p.id));
+  }, [projects, pinnedIds]);
 
-const recentProjects = useMemo(() => {
-  const map = new Map(projects.map((p) => [p.id, p] as const));
-  const projectsFromRecentIds = recentIds.map((id) => map.get(id)).filter(Boolean) as Project[];
-  
-  // Sort by project number strictly
-  projectsFromRecentIds.sort((a, b) => {
-    const aProjectNumber = a.id + PROJECT_ID_OFFSET;
-    const bProjectNumber = b.id + PROJECT_ID_OFFSET;
-    return aProjectNumber - bProjectNumber;
-  });
+  const recentProjects = useMemo(() => {
+    const map = new Map(projects.map((p) => [p.id, p] as const));
+    const projectsFromRecentIds = recentIds.map((id) => map.get(id)).filter(Boolean) as Project[];
 
-  return projectsFromRecentIds;
-}, [projects, recentIds]);
+    // Sort by project number strictly
+    projectsFromRecentIds.sort((a, b) => {
+      const aProjectNumber = a.id + PROJECT_ID_OFFSET;
+      const bProjectNumber = b.id + PROJECT_ID_OFFSET;
+      return aProjectNumber - bProjectNumber;
+    });
 
-const activeProject = useMemo(
+    return projectsFromRecentIds;
+  }, [projects, recentIds]);
+
+  const activeProject = useMemo(
 
     () => projects.find((p) => p.id === activeProjectId) ?? null,
     [projects, activeProjectId]
@@ -255,8 +275,25 @@ const activeProject = useMemo(
         setView("Informes Sectoriales");
       } else if (window.location.pathname === "/agencias-polacas") {
         setView("Agencias Polacas");
+      } else if (window.location.pathname === "/chat") {
+        setView("Chat");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
+      } else if (window.location.pathname === "/informes-sectoriales/puerto-banus-2025") {
+        setView("Puerto Banus Report");
+      } else if (window.location.pathname.startsWith("/informes-sectoriales/")) {
+        const slug = window.location.pathname.split("/").pop() || "";
+        if (REPORTS_DATA[slug]) {
+          setSelectedReportSlug(slug);
+          setSelectedNewsSlug(null);
+          setView("Sectorial Report");
+        } else if (NEWS_REPORTS_DATA[slug]) {
+          setSelectedNewsSlug(slug);
+          setSelectedReportSlug(null);
+          setView("News Report");
+        } else {
+          setView("Informes Sectoriales");
+        }
       } else {
         setView("General Overview");
       }
@@ -273,8 +310,25 @@ const activeProject = useMemo(
         setView("Informes Sectoriales");
       } else if (window.location.pathname === "/agencias-polacas") {
         setView("Agencias Polacas");
+      } else if (window.location.pathname === "/chat") {
+        setView("Chat");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
+      } else if (window.location.pathname === "/informes-sectoriales/puerto-banus-2025") {
+        setView("Puerto Banus Report");
+      } else if (window.location.pathname.startsWith("/informes-sectoriales/")) {
+        const slug = window.location.pathname.split("/").pop() || "";
+        if (REPORTS_DATA[slug]) {
+          setSelectedReportSlug(slug);
+          setSelectedNewsSlug(null);
+          setView("Sectorial Report");
+        } else if (NEWS_REPORTS_DATA[slug]) {
+          setSelectedNewsSlug(slug);
+          setSelectedReportSlug(null);
+          setView("News Report");
+        } else {
+          setView("Informes Sectoriales");
+        }
       } else {
         setView("General Overview");
       }
@@ -298,40 +352,60 @@ const activeProject = useMemo(
       if (window.location.pathname !== "/agencias-polacas") {
         window.history.pushState(null, "", "/agencias-polacas");
       }
+    } else if (view === "Puerto Banus Report") {
+      if (window.location.pathname !== "/informes-sectoriales/puerto-banus-2025") {
+        window.history.pushState(null, "", "/informes-sectoriales/puerto-banus-2025");
+      }
+    } else if (view === "Chat") {
+      if (window.location.pathname !== "/chat") {
+        window.history.pushState(null, "", "/chat");
+      }
+    } else if (view === "Sectorial Report") {
+      if (selectedReportSlug && window.location.pathname !== `/informes-sectoriales/${selectedReportSlug}`) {
+        window.history.pushState(null, "", `/informes-sectoriales/${selectedReportSlug}`);
+      }
+    } else if (view === "News Report") {
+      if (selectedNewsSlug && window.location.pathname !== `/informes-sectoriales/${selectedNewsSlug}`) {
+        window.history.pushState(null, "", `/informes-sectoriales/${selectedNewsSlug}`);
+      }
     } else {
       if (window.location.pathname !== "/project") {
         window.history.pushState(null, "", "/project");
       }
     }
-  }, [view]);
+  }, [view, selectedReportSlug, selectedNewsSlug]);
 
-useEffect(() => {
-  function onKey(e: KeyboardEvent) {
-    const k = e.key.toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && k === "k") {
-      e.preventDefault();
-      setGlobalSearchOpen(true);
+  useEffect(() => {
+    scrollMainToTop();
+  }, [view, activeProjectId, selectedReportSlug, selectedNewsSlug]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const k = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && k === "k") {
+        e.preventDefault();
+        setGlobalSearchOpen(true);
+      }
     }
-  }
-  window.addEventListener("keydown", onKey);
-  return () => window.removeEventListener("keydown", onKey);
-}, []);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
 
-useEffect(() => {
-  if (!activeProjectId) return;
-  // keep 'recent matters' in localStorage
-  setRecentIds(upsertRecent(activeProjectId));
-  
-  // Load persistent UI states
-  setTipsDismissed(loadDismissedTips(activeProjectId));
-  setDeadlineDismissedStats(loadDismissedDeadlines(activeProjectId));
+  useEffect(() => {
+    if (!activeProjectId) return;
+    // keep 'recent matters' in localStorage
+    setRecentIds(upsertRecent(activeProjectId));
 
-  // Clear tasks momentarily to avoid showing previous project's stats/banner
-  setTasks([]);
+    // Load persistent UI states
+    setTipsDismissed(loadDismissedTips(activeProjectId));
+    setDeadlineDismissedStats(loadDismissedDeadlines(activeProjectId));
 
-  refreshAll(activeProjectId).catch(console.error);
-}, [activeProjectId]);
+    // Clear tasks momentarily to avoid showing previous project's stats/banner
+    setTasks([]);
+
+    refreshAll(activeProjectId).catch(console.error);
+  }, [activeProjectId]);
 
 
   const filteredTasks = useMemo(() => {
@@ -356,9 +430,45 @@ useEffect(() => {
     return { open, dueSoon, overdue, done };
   }, [tasks]);
 
+  const shellRef = useRef<HTMLDivElement>(null);
+  const topbarRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const shellEl = shellRef.current;
+    const topbarEl = topbarRef.current;
+    if (!shellEl || !topbarEl) return;
+
+    const update = () => {
+      const height = Math.round(topbarEl.getBoundingClientRect().height);
+      shellEl.style.setProperty("--topbar-height", `${height}px`);
+    };
+
+    update();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(topbarEl);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1401px)");
+    const onChange = () => {
+      if (mql.matches) setSidebarOpen(false);
+    };
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <div
       className="shell"
+      ref={shellRef}
       style={{
         background:
           view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
@@ -367,170 +477,257 @@ useEffect(() => {
       }}
     >
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
-      <aside
-        className={`sidebar ${
-          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
-        }`}
-      >
-        <div className="brand">
-          <div className="brandMark">◆</div>
-          <div>
-            <div className="brandName">AMA - CRM</div>
-            <div className="small">{t("tagline")}</div>
-          </div>
-        </div>
-
-        <nav className="nav">
-          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview"); if (sidebarOpen) setSidebarOpen(false);}}>{t("overviewLink")}</a>
-        </nav>
-
-        <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
-
-        <div className="card cardPad">
-          <div className="active-matter-group">
-            <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
-            <select
-              className="select"
-              value={activeProjectId ?? undefined}
-              onChange={(e) => {
-                setActiveProjectId(Number(e.target.value));
-                if (view === "General Overview") setView("Tasks");
-                if (sidebarOpen) setSidebarOpen(false); // Close sidebar on selection
-              }}
-            >
-              {projects.map((p) => (
-                <option value={p.id} key={p.id}>
-                  {formatProjectLabel(p, { lang })}
-                </option>
-              ))}
-            </select>
-            <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-              <div className="small" style={{ fontWeight: 900 }}>
-                <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {activeProject ? riskPill(activeProject.risk, t) : null}
-                <button
-                  className="btn ghost"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (!activeProject) return;
-                    setPinnedIds(togglePin(activeProject.id));
-                  }}
-                  title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-                  style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-                >
-                  {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-<div className="pinned-recent-group">
-{pinnedProjects.length > 0 && (
-      <div style={{ marginTop: 12 }}>
-        <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
-      {pinnedProjects.slice(0, 4).map((p) => (
-        <button
-          key={p.id}
-          className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-          title={p.title}
-        >
-          <span className="chipDot" />
-          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-)}
-
-{recentProjects.length > 0 && (
-  <div style={{ marginTop: 12 }}>
-    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
-    <div style={{ display: "grid", gap: 6 }}>
-      {recentProjects.slice(0, 5).map((p) => (
-        <button
-          key={p.id}
-          className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-          title={p.title}
-        >
-          <span className="chipDot muted" />
-          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-)}
-</div>
-</div>
-
-        <div className="sidebarFooter">
-          <div className="userchip">
-            <div className="avatar">A</div>
+      <div className={`sidebarWrap${sidebarOpen ? " open" : ""}`}>
+        <div className="sidebarTop">
+          <a
+            className="brand brandLink"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveProjectId(null);
+              setView("General Overview");
+              if (sidebarOpen) setSidebarOpen(false);
+              window.scrollTo(0, 0);
+            }}
+            aria-label={t("home")}
+          >
+            <div className="brandMark">◆</div>
             <div>
-              <div style={{ fontWeight: 900, fontSize: 13 }}>Ana López</div>
-              <div className="small">Legal Ops</div>
+              <div className="brandName">AMA - CRM</div>
+              <div className="small">{t("tagline")}</div>
+            </div>
+          </a>
+        </div>
+
+        <aside
+          className={`sidebar ${view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
+            }`}
+        >
+          <div className="sidebarScroll">
+            <div className="card cardPad">
+              <div className="active-matter-group">
+                <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
+                <select
+                  className="select"
+                  value={activeProjectId ?? undefined}
+                  onChange={(e) => {
+                    setActiveProjectId(Number(e.target.value));
+                    if (view === "General Overview") setView("Tasks");
+                    if (sidebarOpen) setSidebarOpen(false); // Close sidebar on selection
+                  }}
+                >
+                  {projects.map((p) => (
+                    <option value={p.id} key={p.id}>
+                      {formatProjectLabel(p, { lang })}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
+                  <div className="small" style={{ fontWeight: 900 }}>
+                    <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    {activeProject ? riskPill(activeProject.risk, t) : null}
+                    <button
+                      className="btn ghost"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!activeProject) return;
+                        setPinnedIds(togglePin(activeProject.id));
+                      }}
+                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+                    >
+                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pinned-recent-group">
+                {pinnedProjects.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
+                      {pinnedProjects.slice(0, 4).map((p) => (
+                        <button
+                          key={p.id}
+                          className="chipRow"
+                          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                          title={p.title}
+                        >
+                          <span className="chipDot" />
+                          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {recentProjects.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
+                    <div style={{ display: "grid", gap: 6 }}>
+                      {recentProjects.slice(0, 5).map((p) => (
+                        <button
+                          key={p.id}
+                          className="chipRow"
+                          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                          title={p.title}
+                        >
+                          <span className="chipDot muted" />
+                          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <button className="btn ghost" title={t("settings")} onClick={() => setView("Matter Settings")}>⚙</button>
-        </div>
-      </aside>
 
-	      <main className="main">
-	        <header
-	          className={
-	            "topbar" + (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? " landingTopbar" : "")
-	          }
-	        >
-	          <div className="topbar-container">
-		            <div
-		              className="titleRow"
-		              style={
-		                view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
-		                  ? { minHeight: "80px", justifyContent: "center" }
-		                  : undefined
-		              }
-		            >
-		            {view === "Informes Sectoriales" ? (
-		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
-		                <div style={{ textAlign: "left" }}>
-		                  <div className="brandName">Informes Sectoriales</div>
-		                  <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
-		                </div>
-		              </div>
-		            ) : view === "Agencias Polacas" ? (
-		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
-		                <div style={{ textAlign: "left" }}>
-		                  <div className="brandName">Agencias Polacas</div>
-		                  <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
-		                </div>
-		              </div>
-		            ) : (
-	              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
-	                <p className="h1">
-	                  {view === "General Overview" ? (
-	                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-	                      <div className="brandMark">◆</div>
-	                      <div>
-	                        <div className="brandName">AMA-CRM</div>
-	                        <div className="small">Listado General</div>
-	                      </div>
-	                    </div>
-	                  ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
-	                </p>
-	                {view !== "General Overview" && activeProject && (
-	                  <div className="projectMetaInline">
-	                    <div className="small">
-	                      {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
-	                    </div>
-	                    {riskPill(activeProject.risk, t)}
-	                  </div>
-	                )}
-	              </div>
-	            )}
-	            {/* <p className="subtitle">
+          <div className="sidebarFooter">
+            <div className="userchip">
+              <div className="avatar">A</div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 13 }}>Ana López</div>
+                <div className="small">Legal Ops</div>
+              </div>
+            </div>
+            <button className="btn ghost" title={t("settings")} onClick={() => setView("Matter Settings")}>⚙</button>
+          </div>
+        </aside>
+      </div>
+
+        <header
+          ref={topbarRef}
+          className={
+            "topbar" +
+            (view === "General Overview" ||
+            view === "Informes Sectoriales" ||
+            view === "Agencias Polacas" ||
+            view === "Puerto Banus Report" ||
+            view === "Sectorial Report" ||
+            view === "News Report"
+              ? " landingTopbar"
+              : "")
+          }
+        >
+          <div className="topbar-container">
+            <div
+              className="titleRow"
+              style={
+                view === "General Overview" ||
+                view === "Informes Sectoriales" ||
+                view === "Agencias Polacas" ||
+                view === "Puerto Banus Report" ||
+                view === "Sectorial Report" ||
+                view === "News Report"
+                  ? { minHeight: "80px", justifyContent: "center" }
+                  : undefined
+              }
+            >
+              {view === "Puerto Banus Report" ||
+              (view === "Sectorial Report" && selectedReportSlug) ||
+              (view === "News Report" && selectedNewsSlug) ? (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">
+                      {view === "Puerto Banus Report"
+                        ? "Estudio Puerto Banús 2025"
+                        : view === "News Report"
+                          ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.title
+                          : REPORTS_DATA[selectedReportSlug!]?.title}
+                    </div>
+                    <div className="small">
+                      {view === "Puerto Banus Report"
+                        ? "Análisis detallado del mercado de lujo"
+                        : view === "News Report"
+                          ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.subtitle
+                          : REPORTS_DATA[selectedReportSlug!]?.subtitle}
+                    </div>
+                  </div>
+                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setView("Informes Sectoriales")}
+                    >
+                      Informes Sectoriales
+                    </span>
+                    <span style={{ opacity: 0.5 }}>/</span>
+                    <span style={{ color: "var(--text)" }}>
+                      {view === "Puerto Banus Report"
+                        ? "Puerto Banús 2025"
+                        : view === "News Report"
+                          ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.location
+                          : REPORTS_DATA[selectedReportSlug!]?.location}
+                    </span>
+                  </nav>
+                </div>
+              ) : view === "Informes Sectoriales" ? (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">Informes Sectoriales</div>
+                    <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
+                  </div>
+                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setView("General Overview")}
+                    >
+                      AMA-CRM
+                    </span>
+                    <span style={{ opacity: 0.5 }}>/</span>
+                    <span style={{ color: "var(--text)" }}>Informes Sectoriales</span>
+                  </nav>
+                </div>
+              ) : view === "Agencias Polacas" ? (
+                <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">Agencias Polacas</div>
+                    <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
+                  </div>
+                </div>
+              ) : view === "Chat" ? (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">{t("aiAssistant")}</div>
+                    <div className="small">Tu compañero inteligente para la gestión legal e inmobiliaria</div>
+                  </div>
+                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setView("General Overview")}
+                    >
+                      AMA-CRM
+                    </span>
+                    <span style={{ opacity: 0.5 }}>/</span>
+                    <span style={{ color: "var(--text)" }}>{t("aiAssistant")}</span>
+                  </nav>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
+                  <div className="h1">
+                    {view === "General Overview" ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="brandMark">◆</div>
+                        <div>
+                          <div className="brandName">AMA-CRM</div>
+                          <div className="small">Listado General</div>
+                        </div>
+                      </div>
+                    ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
+                  </div>
+                  {view !== "General Overview" && activeProject && (
+                    <div className="projectMetaInline">
+                      <div className="small">
+                        {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
+                      </div>
+                      {riskPill(activeProject.risk, t)}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* <p className="subtitle">
 	              <span className="crumbs">
 	  {view === "General Overview" ? (
      <span className="crumb">Portfolio Overview</span>
@@ -541,107 +738,141 @@ useEffect(() => {
   )}
 	</span>
 	            </p> */}
-	            <div
-	              className="topNav"
-	              style={{
-	                minHeight: 42,
-	                display: view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "none" : "block",
-	              }}
-	            >
-	              {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
-	                <>
-	                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
-	                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
-	                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-	                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
-	                </>
-	              )}
-	            </div>
-	            {view !== "General Overview" && null}
-	          </div>
-	          <div className="actions">
-	            {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" ? (
-	              <div className="projectHeaderActions">
-	                <button className="btn quickAddBtn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>
-	                  {t("quickAdd")}
-	                </button>
-	                <div className="headerIconRow">
-	                  <button
-	                    className="hamburger headerIconBtn"
-	                    onClick={() => setSidebarOpen(!sidebarOpen)}
-	                    title={t("toggleSidebar")}
-	                  >
-	                    ☰
-	                  </button>
+              <div
+                className="topNav"
+                style={{
+                  minHeight: 42,
+                  display:
+                    view === "General Overview" ||
+                      view === "Informes Sectoriales" ||
+                      view === "Agencias Polacas" ||
+                      view === "Puerto Banus Report" ||
+                      view === "Sectorial Report" ||
+                      view === "News Report" ||
+                      view === "Chat"
+                      ? "none"
+                      : "block",
+                }}
+              >
+                {activeProjectId &&
+                  view !== "General Overview" &&
+                  view !== "Informes Sectoriales" &&
+                  view !== "Agencias Polacas" &&
+                  view !== "Puerto Banus Report" &&
+                  view !== "Sectorial Report" &&
+                  view !== "News Report" && (
+                  <>
+                    <button className={"topNavItem" + (view === "Tasks" ? " active" : "")} onClick={() => setView("Tasks")}>{t("tasks")}</button>
+                    <button className={"topNavItem" + (view === "Timeline" ? " active" : "")} onClick={() => setView("Timeline")}>{t("timeline")}</button>
+                    <button className={"topNavItem" + (view === "Files" ? " active" : "")} onClick={() => setView("Files")}>{t("files")}</button>
+                    <button className={"topNavItem" + (view === "Closing Pack" ? " active" : "")} onClick={() => setView("Closing Pack")}>{t("closingPack")}</button>
+                  </>
+                )}
+              </div>
+              {view !== "General Overview" && null}
+            </div>
+            <div className="actions">
+              <div className="projectHeaderActions">
+                {/* Action Button: Only on matter views (never on landing/report pages) */}
+                {activeProjectId &&
+                  view !== "Chat" &&
+                  view !== "General Overview" &&
+                  view !== "Agencias Polacas" &&
+                  view !== "Informes Sectoriales" &&
+                  view !== "Puerto Banus Report" &&
+                  view !== "Sectorial Report" &&
+                  view !== "News Report" && (
+                  <button
+                    className="btn quickAddBtn"
+                    onClick={() => {
+                      setQuickAddOpen(true);
+                    }}
+                    title={t("quickAdd")}
+                  >
+                    {t("quickAdd")}
+                  </button>
+                )}
 
-	                  <button
-	                    className="iconSquare homeBtn headerIconBtn"
-	                    onClick={() => {
-	                      setActiveProjectId(null);
-	                      setView("General Overview");
-	                      setSidebarOpen(false);
-	                      window.scrollTo(0, 0);
-	                    }}
-	                    title={t("home")}
-	                  >
-	                    <span className="iconSquareGlyph">⌂</span>
-	                  </button>
+                <div className="headerIconRow">
+                  <button
+                    className="hamburger headerIconBtn"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    title={t("toggleSidebar")}
+                  >
+                    ☰
+                  </button>
 
-	                  {activeProject && (
-	                    <button
-	                      className="iconSquare headerIconBtn"
-	                      onClick={(e) => {
-	                        e.preventDefault();
-	                        if (!activeProject) return;
-	                        setPinnedIds(togglePin(activeProject.id));
-	                      }}
-	                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-	                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-	                    >
-	                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-	                    </button>
-	                  )}
-	                </div>
-	              </div>
-	            ) : (
-	              <div className="actionsRow">
-	                <button
-	                  className="hamburger"
-	                  onClick={() => setSidebarOpen(!sidebarOpen)}
-	                  title={t("toggleSidebar")}
-	                >
-	                  ☰
-	                </button>
-	              </div>
-	            )}
+                  {view !== "General Overview" && (
+                    <button
+                      className="iconSquare homeBtn headerIconBtn"
+                      onClick={() => {
+                        setActiveProjectId(null);
+                        setView("General Overview");
+                        setSidebarOpen(false);
+                        window.scrollTo(0, 0);
+                      }}
+                      title={t("home")}
+                    >
+                      <span className="iconSquareGlyph">⌂</span>
+                    </button>
+                  )}
 
-	          </div>
+                  {view !== "General Overview" &&
+                    view !== "Informes Sectoriales" &&
+                    view !== "Agencias Polacas" &&
+                    view !== "Puerto Banus Report" &&
+                    view !== "Sectorial Report" &&
+                    view !== "News Report" &&
+                    view !== "Chat" &&
+                    activeProject && (
+                    <button
+                      className="iconSquare headerIconBtn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!activeProject) return;
+                        setPinnedIds(togglePin(activeProject.id));
+                      }}
+                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+                    >
+                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+            </div>
           </div>
         </header>
 
-
-
-
-
-        <div className="content">
+      <main className="main">
+        <div className="content" ref={contentRef}>
           {view === "General Overview" ? (
-             <GeneralOverviewView
-               projects={projects}
-               onNewProject={() => setNewProjectOpen(true)}
-               onProjectSelect={(id) => {
-                 setActiveProjectId(id);
-                 setView("Tasks");
-                 window.scrollTo(0, 0); // Reset scroll position to top when selecting project
-               }}
-             />
+            <GeneralOverviewView
+              projects={projects}
+              onNewProject={() => setNewProjectOpen(true)}
+              onProjectSelect={(id) => {
+                setActiveProjectId(id);
+                setView("Tasks");
+                scrollMainToTop();
+              }}
+            />
           ) : view === "Informes Sectoriales" ? (
-             <InformesSectorialesView />
+            <InformesSectorialesView />
           ) : view === "Agencias Polacas" ? (
-             <AgenciasPolacasView />
+            <AgenciasPolacasView />
+          ) : view === "Puerto Banus Report" ? (
+            <PuertoBanusReportView />
+          ) : view === "Sectorial Report" && selectedReportSlug && REPORTS_DATA[selectedReportSlug] ? (
+            <SectorialReportView data={REPORTS_DATA[selectedReportSlug]} />
+          ) : view === "News Report" && selectedNewsSlug && NEWS_REPORTS_DATA[selectedNewsSlug] ? (
+            <NewsReportView data={NEWS_REPORTS_DATA[selectedNewsSlug]} />
+          ) : view === "Chat" ? (
+            <ChatView />
           ) : (
-          <div className="contentGrid">
-            <div className="leftColumn">
-              {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
+            <div className="contentGrid">
+              <div className="leftColumn">
+                {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
@@ -651,23 +882,23 @@ useEffect(() => {
                       setTipsDismissed(true);
                     }}
                   />
-              ) : null}
+                ) : null}
 
-              {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
-                <div className="deadlineBanner">
-                  <div style={{ fontWeight: 950 }}>
-                    {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
+                {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
+                  <div className="deadlineBanner">
+                    <div style={{ fontWeight: 950 }}>
+                      {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
+                    </div>
+                    <button className="btn" onClick={() => {
+                      if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
+                      setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
+                    }}>{t("close")}</button>
                   </div>
-                  <button className="btn" onClick={() => { 
-                    if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
-                    setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
-                  }}>{t("close")}</button>
-                </div>
-              ) : null}
+                ) : null}
 
-              {view === "Tasks" && (
-                <>
-                  {/*
+                {view === "Tasks" && (
+                  <>
+                    {/*
                   <div className="card cardPad" style={{ marginBottom: 20 }}>
                     <div className="grid4" style={{ display: "flex", justifyContent: "space-around", width: "100%", alignItems: "flex-start" }}>
                       <div className="card cardPad" style={{ flex: 1, textAlign: "center", padding: "4px 0", border: "none", boxShadow: "none", background: "transparent" }}>
@@ -702,7 +933,7 @@ useEffect(() => {
                   </div>
                   */}
 
-                  {/*
+                    {/*
                   <div style={{ display: "flex", justifyContent: "flex-start", gap: 20, marginBottom: 20 }}>
                     <div style={{ textAlign: "center" }}>
                       <div className="small">{t("openTasks")}</div>
@@ -714,32 +945,32 @@ useEffect(() => {
                     </div>
                   </div>
                   */}
-                </>
-              )}
+                  </>
+                )}
 
 
 
-              <div className="card cardPad" style={{ marginTop: 12 }}>
-                {activeProjectId && view === "Tasks" && (
-                  <>
-                    <div className="table-container">
-                      <TasksTable
-                        tasks={filteredTasks}
-                        onEdit={async (taskId, patch) => {
-                          // Optimistically update local state for immediate UI feedback
-                          setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
-                          try {
-                            await api.updateTask(taskId, patch);
-                            await refreshAll(activeProjectId);
-                          } catch (error) {
-                            // Revert on error
-                            console.error('Failed to update task:', error);
-                            await refreshAll(activeProjectId);
-                          }
-                        }}
-                      />
-                    </div>
-                    {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
+                <div className="card cardPad" style={{ marginTop: 12 }}>
+                  {activeProjectId && view === "Tasks" && (
+                    <>
+                      <div className="table-container">
+                        <TasksTable
+                          tasks={filteredTasks}
+                          onEdit={async (taskId, patch) => {
+                            // Optimistically update local state for immediate UI feedback
+                            setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
+                            try {
+                              await api.updateTask(taskId, patch);
+                              await refreshAll(activeProjectId);
+                            } catch (error) {
+                              // Revert on error
+                              console.error('Failed to update task:', error);
+                              await refreshAll(activeProjectId);
+                            }
+                          }}
+                        />
+                      </div>
+                      {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
                     <Board
                       tasks={filteredTasks}
                       onMove={async (taskId, nextStatus) => {
@@ -747,113 +978,134 @@ useEffect(() => {
                         await refreshAll(activeProjectId);
                       }}
                     /> */}
-                  </>
-                )}
+                    </>
+                  )}
 
-                {activeProjectId && view === "Timeline" && (
-                  <Timeline projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
-                )}
+                  {activeProjectId && view === "Timeline" && (
+                    <Timeline projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
+                  )}
 
-  {activeProjectId && view === "Files" && (
-    <div style={{ display: "grid", gap: 12 }}>
-      <FilesRoom projectId={activeProjectId} />
-      <div className="card cardPad" style={{ padding: 12 }}>
-            <div className="sectionTitle" style={{ marginBottom: 0 }}>
-              <h2>{t("municipality")}</h2>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
-                  {MUNICIPALITIES_LIST.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-            <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
-              </div>
-            </div>
-          </div>
-      <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
-    </div>
-  )}
+                  {activeProjectId && view === "Files" && (
+                    <div style={{ display: "grid", gap: 12 }}>
+                      <div className="card cardPad">
+                        <div className="sectionTitle">
+                          <h2>{t("files")}</h2>
+                        </div>
+                        <FilesRoom projectId={activeProjectId} embedded />
+                      </div>
 
-  {view === "Matter Settings" && activeProjectId && (
-    <MatterSettingsView
-      activeProject={activeProject}
-      onProjectUpdated={(p) => {
-        setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
-      }}
-      uxPrefs={uxPrefs}
-      onUxPrefsChange={setUxPrefs}
-      onClose={() => setView("Tasks")} // Go back to Board view after closing settings
-    />
-  )}
+                      <div className="card cardPad">
+                        <div className="cardSections">
+                          <div className="cardSection">
+                            <div className="sectionTitle" style={{ marginBottom: 0 }}>
+                              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                                <h2>{t("templates")}</h2>
+                                <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
+                              </div>
+                              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                                <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e) => setMunicipality(e.target.value)}>
+                                  {MUNICIPALITIES_LIST.map((m) => (
+                                    <option key={m} value={m}>{m}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                            <div className="small">{t("templatesDescription")}</div>
+                          </div>
 
-  {activeProjectId && view === "Closing Pack" && (
-    <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
-  )}
+                          <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} embedded />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-              </div>
-            </div>
+                  {view === "Matter Settings" && activeProjectId && (
+                    <MatterSettingsView
+                      activeProject={activeProject}
+                      onProjectUpdated={(p) => {
+                        setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
+                      }}
+                      uxPrefs={uxPrefs}
+                      onUxPrefsChange={setUxPrefs}
+                      onClose={() => setView("Tasks")} // Go back to Board view after closing settings
+                    />
+                  )}
 
-            <div className="rightColumn">
-              <div className="card cardPad">
-                <div className="sectionTitle">
-                  <h2>{t("spanishChecklist")}</h2>
-                  <span className="pill">{checklist.filter(c=>c.is_done).length}/{checklist.length}</span>
+                  {activeProjectId && view === "Closing Pack" && (
+                    <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
+                  )}
+
                 </div>
-                {activeProjectId && (
-                  <Checklist
-                    items={checklist}
-                    onToggle={async (itemId, is_done) => {
-                      await api.toggleChecklist(itemId, is_done);
-                      await refreshAll(activeProjectId);
-                    }}
-                  />
-                )}
               </div>
 
-              <div className="card cardPad">
-                <div className="sectionTitle">
-                  <h2>{t("activity")}</h2>
-                  <span className="pill">{activity.length}</span>
+              <div className="rightColumn">
+                {!["Timeline", "Files", "Closing Pack"].includes(view) && (
+                  <div className="card cardPad">
+                    <div className="sectionTitle">
+                      <h2>{t("spanishChecklist")}</h2>
+                      <span className="pill">{checklist.filter(c => c.is_done).length}/{checklist.length}</span>
+                    </div>
+                    {activeProjectId && (
+                      <Checklist
+                        items={checklist}
+                        onToggle={async (itemId, is_done) => {
+                          await api.toggleChecklist(itemId, is_done);
+                          await refreshAll(activeProjectId);
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <div className="card cardPad">
+                  <div className="sectionTitle">
+                    <h2>{t("activity")}</h2>
+                    <span className="pill">{activity.length}</span>
+                  </div>
+                  <ActivityFeed items={activity} />
                 </div>
-                <ActivityFeed items={activity} />
               </div>
             </div>
-          </div>
           )}
         </div>
-              <NewProjectModal
-  open={newProjectOpen}
-  onClose={() => {
-    setDefaultBg(loadPlatformDefaultBg());
-    setNewProjectOpen(false);
-  }}
-  clientIdFallback={projects[0]?.client_id ?? 1}
-  defaultBg={defaultBg}
-  onCreated={(p) => {
-    setProjects((prev) => [p, ...prev]);
-    setActiveProjectId(p.id);
-    setView("Tasks");
-  }}
-/>
+        <NewProjectModal
+          open={newProjectOpen}
+          onClose={() => {
+            setDefaultBg(loadPlatformDefaultBg());
+            setNewProjectOpen(false);
+          }}
+          clientIdFallback={projects[0]?.client_id ?? 1}
+          defaultBg={defaultBg}
+          onCreated={(p) => {
+            setProjects((prev) => [p, ...prev]);
+            setActiveProjectId(p.id);
+            setView("Tasks");
+          }}
+        />
 
-<QuickAddModal
-  open={quickAddOpen}
-  onClose={() => setQuickAddOpen(false)}
-  projectId={activeProjectId ?? null}
-  onCreated={(t) => {
-    setTasks((prev) => [t, ...prev]);
-  }}
-/>
+        <QuickAddModal
+          open={quickAddOpen}
+          onClose={() => setQuickAddOpen(false)}
+          projectId={activeProjectId ?? null}
+          onCreated={(t) => {
+            setTasks((prev) => [t, ...prev]);
+          }}
+        />
 
-          <GlobalSearchModal
-            open={globalSearchOpen}
-            onClose={() => setGlobalSearchOpen(false)}
-            tasks={tasks}
-            files={files as any}
-            checklist={checklist}
-            timeline={timeline}
-            onNavigate={(v) => setView(v)}
-          />      </main>
+        <GlobalSearchModal
+          open={globalSearchOpen}
+          onClose={() => setGlobalSearchOpen(false)}
+          tasks={tasks}
+          files={files as any}
+          checklist={checklist}
+          timeline={timeline}
+          onNavigate={(v) => setView(v)}
+        />
+        <CustomReportModal
+          open={customReportOpen}
+          onClose={() => setCustomReportOpen(false)}
+        />
+      </main>
     </div>
   );
 }

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .db import engine, SessionLocal
 from .models import Base
 from .seed import seed_if_empty, normalize_legacy_demo_data
-from .routers import projects, tasks, checklists, timeline, activity, files, templates, calendar, closing_pack
+from .routers import projects, tasks, checklists, timeline, activity, files, templates, calendar, closing_pack, chat
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -69,6 +69,7 @@ app.include_router(files.router)
 app.include_router(templates.router)
 app.include_router(calendar.router)
 app.include_router(closing_pack.router)
+app.include_router(chat.router)
 
 @app.get("/health")
 def health():

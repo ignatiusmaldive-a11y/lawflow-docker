@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ChecklistItem, Project, Task } from "../lib/api";
 import { api2 } from "../lib/api";
+import { formatProjectLabel } from "../lib/formatting";
 import { useI18n } from "../lib/i18n";
 import { Callout } from "./components/Callout";
 
@@ -78,7 +79,7 @@ export function ClosingPackWizard({ projectId, project, tasks, checklist }: { pr
           </div>
         </div>
         <div className="small">
-          <b>{t("matterLabel")}:</b> {project?.title ?? "—"} · <b>{t("targetLabel")}:</b> {project?.target_close_date ?? "—"} · <b>{t("riskLabel")}:</b>{" "}
+          <b>{t("matterLabel")}:</b> {formatProjectLabel(project, { lang })} · <b>{t("targetLabel")}:</b> {project?.target_close_date ?? "—"} · <b>{t("riskLabel")}:</b>{" "}
           {project?.risk === "Critical" ? t("riskCritical") : project?.risk === "At Risk" ? t("riskAtRisk") : project?.risk === "Normal" ? t("riskNormal") : (project?.risk ?? "—")}
         </div>
         <div className="small" style={{ marginTop: 6 }}>

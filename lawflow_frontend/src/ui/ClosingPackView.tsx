@@ -1,6 +1,7 @@
 import React from "react";
 import { Project, Task, ChecklistItem } from "../lib/api";
 import { api2 } from "../lib/api";
+import { formatProjectLabel } from "../lib/formatting";
 import { useI18n } from "../lib/i18n";
 
 export function ClosingPackView({ projectId, project, tasks, checklist }: {
@@ -34,7 +35,7 @@ export function ClosingPackView({ projectId, project, tasks, checklist }: {
           <h2>{t("readiness")}</h2>
           <span className={"pill " + (openTasks.length ? "warn" : "ok")}>{openTasks.length ? t("notReady") : t("ready")}</span>
         </div>
-        <div className="small"><b>{t("matterLabel")}:</b> {project?.title ?? "—"}</div>
+        <div className="small"><b>{t("matterLabel")}:</b> {formatProjectLabel(project, { lang })}</div>
         <div className="small"><b>Checklist:</b> {done}/{checklist.length} {lang === "en" ? "complete" : "completado"}</div>
         <div className="small"><b>{t("openTasks")}:</b> {openTasks.length}</div>
       </div>

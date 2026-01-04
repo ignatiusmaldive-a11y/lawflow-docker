@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useI18n } from "../lib/i18n";
+import { Footer } from "./components/Footer";
 
 type SortField = "title" | "type" | "location" | "last_updated";
 type SortDirection = "asc" | "desc";
@@ -7,7 +8,7 @@ type SortDirection = "asc" | "desc";
 interface BusinessReport {
   id: number;
   title: string;
-  type: "Local" | "Nacional";
+  type: "Local" | "Nacional" | "Noticias 2025";
   location?: string;
   description: string;
   last_updated: string;
@@ -18,76 +19,117 @@ interface BusinessReport {
 const SAMPLE_REPORTS: BusinessReport[] = [
   {
     id: 1,
-    title: "Análisis del Mercado Inmobiliario de Marbella 2024",
+    title: "Análisis del Mercado Inmobiliario de Marbella 2025",
     type: "Local",
     location: "Marbella",
     description: "Estudio completo del mercado inmobiliario local incluyendo tendencias de precios, demanda y oferta.",
-    last_updated: "2024-01-15",
+    last_updated: "2025-01-15",
     sample_data: {}
   },
   {
     id: 2,
-    title: "Tendencias del Mercado Residencial en Costa del Sol",
+    title: "Tendencias del Mercado Residencial en Costa del Sol 2025",
     type: "Local",
     location: "Costa del Sol",
     description: "Análisis regional de las tendencias residenciales y comportamiento del comprador.",
-    last_updated: "2024-01-12",
+    last_updated: "2025-01-12",
     sample_data: {}
   },
   {
     id: 3,
-    title: "Informe Nacional: Evolución de Precios Inmobiliarios",
+    title: "Informe Nacional: Evolución de Precios Inmobiliarios 2025",
     type: "Nacional",
     description: "Panorama nacional de la evolución de precios inmobiliarios por comunidades autónomas.",
-    last_updated: "2024-01-10",
+    last_updated: "2025-01-10",
     sample_data: {}
   },
   {
     id: 4,
-    title: "Análisis del Mercado de Alquiler en Málaga Capital",
+    title: "Análisis del Mercado de Alquiler en Málaga Capital 2025",
     type: "Local",
     location: "Málaga",
     description: "Estudio detallado del mercado de alquiler en la capital malagueña.",
-    last_updated: "2024-01-08",
+    last_updated: "2025-01-08",
     sample_data: {}
   },
   {
     id: 5,
-    title: "Informe Nacional: Impacto de las Hipotecas Variables",
+    title: "Informe Nacional: Impacto de las Hipotecas Variables 2025",
     type: "Nacional",
     description: "Análisis del impacto de las condiciones hipotecarias en el mercado inmobiliario nacional.",
-    last_updated: "2024-01-05",
+    last_updated: "2025-01-05",
     sample_data: {}
   },
   {
     id: 6,
-    title: "Estudio del Mercado de Lujo en Puerto Banús",
+    title: "Estudio del Mercado de Lujo en Puerto Banús 2025",
     type: "Local",
     location: "Puerto Banús",
     description: "Análisis especializado del segmento de lujo en una de las zonas más exclusivas.",
-    last_updated: "2024-01-03",
+    last_updated: "2025-01-03",
     sample_data: {}
   },
   {
     id: 7,
-    title: "Tendencias Nacionales de Inversión Inmobiliaria 2024",
+    title: "Tendencias Nacionales de Inversión Inmobiliaria 2025",
     type: "Nacional",
     description: "Perspectivas de inversión y oportunidades en el mercado inmobiliario español.",
-    last_updated: "2024-01-01",
+    last_updated: "2025-01-01",
     sample_data: {}
   },
   {
     id: 8,
-    title: "Análisis del Mercado Turístico en Torremolinos",
+    title: "Análisis del Mercado Turístico en Torremolinos 2024",
     type: "Local",
     location: "Torremolinos",
     description: "Estudio del impacto del turismo en el mercado inmobiliario local.",
-    last_updated: "2023-12-28",
+    last_updated: "2024-12-28",
+    sample_data: {}
+  },
+  {
+    id: 1001,
+    title: "Cambios Regulatorios Clave en Alquileres Turísticos (VFT) en la Costa del Sol para 2025",
+    type: "Noticias 2025",
+    location: "Costa del Sol",
+    description:
+      "Resumen de los cambios (LPH/LO 1/2025), requisitos VFT y acciones recomendadas para propietarios y gestores.",
+    last_updated: "2025",
+    sample_data: {}
+  },
+  {
+    id: 1002,
+    title: "Fin del Golden Visa Inmobiliario y su Impacto en el Mercado de Lujo de la Costa del Sol",
+    type: "Noticias 2025",
+    location: "Costa del Sol",
+    description:
+      "Impacto del fin de la residencia por inversión inmobiliaria (abril 2025) y recomendaciones para inversores no UE.",
+    last_updated: "2025",
+    sample_data: {}
+  },
+  {
+    id: 1003,
+    title: "Estadísticas y Tendencias del Mercado Inmobiliario en Costa del Sol 2025",
+    type: "Noticias 2025",
+    location: "Costa del Sol",
+    description:
+      "Datos y tabla clave (INE/Registradores/Idealista) con precios, variación anual y compras extranjeras; proyección 2026.",
+    last_updated: "2025",
+    sample_data: {}
+  },
+  {
+    id: 1004,
+    title: "Avances en el Plan General de Marbella y Aspectos Fiscales Relevantes 2025",
+    type: "Noticias 2025",
+    location: "Marbella",
+    description:
+      "Estado del PGOM/POU (LISTA) y resumen de impuestos clave en Andalucía 2025 (ISD, plusvalía, IBI, IRNR).",
+    last_updated: "2025",
     sample_data: {}
   }
 ];
 
 function fmtDateShort(d: string) {
+  if (/^\d{4}$/.test(d)) return d;
   const dt = new Date(d + "T00:00:00");
   return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
 }
@@ -99,9 +141,9 @@ export function InformesSectorialesView() {
   const [filter, setFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("All");
 
-  const { localReports, nacionalReports, totalCount } = useMemo(() => {
+  const { localReports, news2025Reports, totalCount } = useMemo(() => {
     const textQuery = filter.trim().toLowerCase();
-    let filtered = SAMPLE_REPORTS.filter((r) => {
+    let filtered = SAMPLE_REPORTS.filter((r) => r.type !== "Nacional").filter((r) => {
       const matchesText =
         !textQuery ||
         r.title.toLowerCase().includes(textQuery) ||
@@ -117,8 +159,9 @@ export function InformesSectorialesView() {
       let bVal: any;
 
       if (sortField === "last_updated") {
-        aVal = new Date(a[sortField]).getTime();
-        bVal = new Date(b[sortField]).getTime();
+        const parse = (raw: string) => (/^\d{4}$/.test(raw) ? new Date(`${raw}-01-01`).getTime() : new Date(raw).getTime());
+        aVal = parse(a[sortField]);
+        bVal = parse(b[sortField]);
       } else {
         aVal = a[sortField];
         bVal = b[sortField];
@@ -135,8 +178,8 @@ export function InformesSectorialesView() {
     });
 
     const localReports = filtered.filter((r) => r.type === "Local");
-    const nacionalReports = filtered.filter((r) => r.type === "Nacional");
-    return { localReports, nacionalReports, totalCount: filtered.length };
+    const news2025Reports = filtered.filter((r) => r.type === "Noticias 2025");
+    return { localReports, news2025Reports, totalCount: filtered.length };
   }, [sortField, sortDirection, filter, typeFilter]);
 
   const handleSort = (field: SortField) => {
@@ -195,9 +238,11 @@ export function InformesSectorialesView() {
     <div className="table-container">
       <div className="card" style={{ overflowX: "auto" }}>
         <div className="cardPad" style={{ paddingBottom: 10 }}>
-          <div style={{ fontWeight: 900, color: "var(--text)" }}>{title}</div>
-          <div style={{ marginTop: 2, fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-            {reports.length} informes
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontWeight: 900, color: "var(--text)" }}>{title}</div>
+            <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, textAlign: "right", whiteSpace: "nowrap" }}>
+              {reports.length} informes
+            </div>
           </div>
         </div>
         <table className="table" style={{ width: "100%" }}>
@@ -206,7 +251,7 @@ export function InformesSectorialesView() {
               <SortHeader field="title" label="Título del Informe" className="column-title" />
               <SortHeader field="type" label="Tipo" align="center" />
               <SortHeader field="location" label="Ubicación" align="center" />
-              <SortHeader field="last_updated" label="Última Actualización" />
+              <SortHeader field="last_updated" label="Fecha" />
             </tr>
           </thead>
           <tbody>
@@ -215,7 +260,31 @@ export function InformesSectorialesView() {
                 key={report.id}
                 style={{ cursor: "pointer" }}
                 onClick={() => {
-                  alert(`Informes completos disponibles próximamente. Este es un ejemplo del informe: "${report.title}"`);
+                  const slugMap: Record<string, string> = {
+                    "Análisis del Mercado Inmobiliario de Marbella 2025": "marbella-2025",
+                    "Tendencias del Mercado Residencial en Costa del Sol 2025": "costa-del-sol-2025",
+                    "Informe Nacional: Evolución de Precios Inmobiliarios 2025": "evolucion-precios-nacional",
+                    "Análisis del Mercado de Alquiler en Málaga Capital 2025": "alquiler-malaga-2025",
+                    "Informe Nacional: Impacto de las Hipotecas Variables 2025": "impacto-hipotecas-2025",
+                    "Estudio del Mercado de Lujo en Puerto Banús 2025": "puerto-banus-2025",
+                    "Tendencias Nacionales de Inversión Inmobiliaria 2025": "inversion-nacional-2025",
+                    "Análisis del Mercado Turístico en Torremolinos 2024": "turistico-torremolinos-2024",
+                    "Cambios Regulatorios Clave en Alquileres Turísticos (VFT) en la Costa del Sol para 2025":
+                      "cambios-regulatorios-vft-2025",
+                    "Fin del Golden Visa Inmobiliario y su Impacto en el Mercado de Lujo de la Costa del Sol":
+                      "fin-golden-visa-2025",
+                    "Estadísticas y Tendencias del Mercado Inmobiliario en Costa del Sol 2025":
+                      "estadisticas-tendencias-costa-del-sol-2025",
+                    "Avances en el Plan General de Marbella y Aspectos Fiscales Relevantes 2025":
+                      "pgom-marbella-fiscalidad-2025",
+                  };
+                  const slug = slugMap[report.title];
+                  if (slug) {
+                    window.history.pushState(null, "", `/informes-sectoriales/${slug}`);
+                    window.dispatchEvent(new PopStateEvent("popstate"));
+                  } else {
+                    alert(`Informes completos disponibles próximamente. Este es un ejemplo del informe: "${report.title}"`);
+                  }
                 }}
               >
                 <td style={{ minWidth: "300px", whiteSpace: "normal" }}>
@@ -225,7 +294,9 @@ export function InformesSectorialesView() {
                   </div>
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  <span className={`pill ${report.type === "Local" ? "neutral" : "ok"}`}>
+                  <span
+                    className={`pill ${report.type === "Local" ? "neutral" : "warn"}`}
+                  >
                     {report.type}
                   </span>
                 </td>
@@ -261,30 +332,30 @@ export function InformesSectorialesView() {
       {/* Filters & Actions */}
       <div className="table-container">
         <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <input
-          className="search"
-          placeholder="Buscar informes..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ width: 320 }}
-        />
+          <input
+            className="search"
+            placeholder="Buscar informes..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={{ width: 320 }}
+          />
 
-        <select
-          className="select"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          style={{ width: 180 }}
-        >
-          <option value="All">Todos los tipos</option>
-          <option value="Local">Local</option>
-          <option value="Nacional">Nacional</option>
-        </select>
+          <select
+            className="select"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            style={{ width: 180 }}
+          >
+            <option value="All">Todos los tipos</option>
+            <option value="Local">Local</option>
+            <option value="Noticias 2025">Noticias 2025</option>
+          </select>
 
-        <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-            {totalCount} informes disponibles
+          <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+              {totalCount} informes disponibles
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
@@ -297,114 +368,17 @@ export function InformesSectorialesView() {
         </div>
       ) : (
         <>
+          {(typeFilter === "Noticias 2025" || (typeFilter === "All" && news2025Reports.length > 0)) && (
+            <ReportsSection title="Noticias 2025" reports={news2025Reports} />
+          )}
           {(typeFilter === "Local" || (typeFilter === "All" && localReports.length > 0)) && (
             <ReportsSection title="Local" reports={localReports} />
-          )}
-          {(typeFilter === "Nacional" || (typeFilter === "All" && nacionalReports.length > 0)) && (
-            <ReportsSection title="Nacional" reports={nacionalReports} />
           )}
         </>
       )}
 
-      {/* Footer */}
       <div className="table-container">
-        <footer style={{
-          marginTop: 'auto',
-          padding: '40px 0 20px',
-          borderTop: '1px solid var(--line)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px'
-        }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: '32px',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%'
-        }}>
-          {/* Company Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                display: 'grid',
-                placeItems: 'center',
-                background: 'linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.65))'
-              }}>◆</div>
-              <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
-            </div>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
-              CRM para abogados especializados en derecho inmobiliario.
-            </p>
-          </div>
-
-          {/* Product Links */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.history.pushState(null, "", "/agencias-polacas");
-                  window.dispatchEvent(new PopStateEvent("popstate"));
-                }}
-                style={{ color: "var(--text)", textDecoration: "none" }}
-              >
-                Agencias Polacas
-              </a>
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Directorio</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Criterios de selección</a></li>
-            </ul>
-          </div>
-
-          {/* Contact & Support */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Asistente IA</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Chat</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Investigación</a></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div style={{
-          borderTop: '1px solid var(--line)',
-          paddingTop: '20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0 }}>
-            © 2026 AMA - CRM. Todos los derechos reservados.
-          </p>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Twitter</a>
-            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>LinkedIn</a>
-            <span style={{ color: 'var(--muted)', fontSize: '13px' }}>Made with ❤️ in Marbella</span>
-          </div>
-        </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   );

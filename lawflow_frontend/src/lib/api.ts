@@ -107,8 +107,7 @@ export const api2 = {
   },
   template: (municipality: string, transaction_type: string, lang?: "en" | "es") =>
     http<Template>(
-      `/templates?municipality=${encodeURIComponent(municipality)}&transaction_type=${encodeURIComponent(transaction_type)}${
-        lang ? `&lang=${encodeURIComponent(lang)}` : ""
+      `/templates?municipality=${encodeURIComponent(municipality)}&transaction_type=${encodeURIComponent(transaction_type)}${lang ? `&lang=${encodeURIComponent(lang)}` : ""
       }`,
     ),
   calendarIcsUrl: (projectId: number) => `${API_BASE}/calendar/ics?project_id=${projectId}`,
@@ -168,4 +167,16 @@ export const api3 = {
     if (!res.ok) throw new Error(await res.text());
     return (await res.json()) as Task;
   },
+};
+
+export type ChatResponse = {
+  response: string;
+};
+
+export const api4 = {
+  chat: (message: string) =>
+    http<ChatResponse>(`/chat`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    }),
 };

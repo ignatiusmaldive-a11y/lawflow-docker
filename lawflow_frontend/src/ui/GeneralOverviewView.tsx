@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Project } from "../lib/api";
 import { useI18n } from "../lib/i18n";
 import { formatProjectLabel, formatClientName, PROJECT_ID_OFFSET } from "../lib/formatting";
+import { Footer } from "./components/Footer";
 
 type SortField = "title" | "project_number" | "status" | "location" | "risk" | "target_close_date" | "client";
 type SortDirection = "asc" | "desc";
@@ -38,7 +39,7 @@ function statusPill(status: string, t: ReturnType<typeof useI18n>["t"]) {
 function fmtDateShort(d?: string | null) {
   if (!d) return "—";
   const dt = new Date(d + "T00:00:00");
-  return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  return dt.toLocaleDateString("es-ES", { year: "numeric", month: "short", day: "2-digit" });
 }
 
 function daysUntil(dateStr?: string | null) {
@@ -59,7 +60,7 @@ export function GeneralOverviewView({
   onNewProject: () => void;
 }) {
   const { t } = useI18n();
-  const [sortField, setSortField] = useState<SortField>("target_close_date");
+  const [sortField, setSortField] = useState<SortField>("project_number");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -71,9 +72,9 @@ export function GeneralOverviewView({
         p.location.toLowerCase().includes(filter.toLowerCase()) ||
         (formatClientName(p.client?.name) || "").toLowerCase().includes(filter.toLowerCase()) ||
         (p.client?.name || "").toLowerCase().includes(filter.toLowerCase());
-      
+
       const matchesStatus = statusFilter === "All" || p.status === statusFilter;
-      
+
       return matchesText && matchesStatus;
     });
 
@@ -139,8 +140,8 @@ export function GeneralOverviewView({
     className?: string;
     align?: "left" | "center" | "right";
   }) => (
-    <th 
-      onClick={() => handleSort(field)} 
+    <th
+      onClick={() => handleSort(field)}
       style={{ cursor: "pointer", userSelect: "none", width: width, textAlign: align }}
       className={`${sortField === field ? "active-sort" : ""} ${className || ""}`}
     >
@@ -194,37 +195,37 @@ export function GeneralOverviewView({
       {/* Filters & Actions */}
       <div className="table-container">
         <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <input
-          className="search"
-          placeholder={t("searchProjectsPlaceholder")}
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ width: 320 }}
-        />
+          <input
+            className="search"
+            placeholder={t("searchProjectsPlaceholder")}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={{ width: 320 }}
+          />
 
-        <select
-          className="select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ width: 220 }}
-        >
-          <option value="All">{t("allStatuses")}</option>
-          <option value="Intake">{t("statusIntake")}</option>
-          <option value="Due Diligence">{t("statusDueDiligence")}</option>
-          <option value="Contracts">{t("statusContracts")}</option>
-          <option value="Notary">{t("statusNotary")}</option>
-          <option value="Registry">{t("statusRegistry")}</option>
-          <option value="Completed">{t("statusCompleted")}</option>
-        </select>
+          <select
+            className="select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ width: 220 }}
+          >
+            <option value="All">{t("allStatuses")}</option>
+            <option value="Intake">{t("statusIntake")}</option>
+            <option value="Due Diligence">{t("statusDueDiligence")}</option>
+            <option value="Contracts">{t("statusContracts")}</option>
+            <option value="Notary">{t("statusNotary")}</option>
+            <option value="Registry">{t("statusRegistry")}</option>
+            <option value="Completed">{t("statusCompleted")}</option>
+          </select>
 
-        <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-            {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
+          <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+              {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
+            </div>
+            <button className="btn primary" onClick={onNewProject} style={{ padding: "8px 16px", fontSize: "13px" }}>
+              {t("newProject")}
+            </button>
           </div>
-          <button className="btn primary" onClick={onNewProject} style={{ padding: "8px 16px", fontSize: "13px" }}>
-            {t("newProject")}
-          </button>
-        </div>
         </div>
       </div>
 
@@ -232,169 +233,56 @@ export function GeneralOverviewView({
       <div className="table-container">
         <div className="card" style={{ overflowX: "hidden" }}>
           <table className="table mattersTable" style={{ width: "100%" }}>
-          <thead>
-            <tr>
-              <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
-              <SortHeader field="status" label={t("statusTableCol")} align="center" />
-              <SortHeader field="risk" label={t("riskTableCol")} align="center" />
-              <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
-              <SortHeader field="client" label={t("clientTableCol")} />
-              <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
-            </tr>
-          </thead>
-          <tbody>
-            {sortedAndFilteredProjects.map((p) => {
-              const d = daysUntil(p.target_close_date);
-              const isOverdue = d !== null && d < 0;
-              const isSoon = d !== null && d <= 7 && d >= 0;
-              const matterLabel = formatProjectLabel(p);
+            <thead>
+              <tr>
+                <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
+                <SortHeader field="status" label={t("statusTableCol")} align="center" />
+                <SortHeader field="risk" label={t("riskTableCol")} align="center" />
+                <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
+                <SortHeader field="client" label={t("clientTableCol")} />
+                <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
+              </tr>
+            </thead>
+            <tbody>
+              {sortedAndFilteredProjects.map((p) => {
+                const d = daysUntil(p.target_close_date);
+                const isOverdue = d !== null && d < 0;
+                const isSoon = d !== null && d <= 7 && d >= 0;
+                const matterLabel = formatProjectLabel(p);
 
-              return (
-                <tr 
-                  key={p.id} 
-                  onClick={() => onProjectSelect(p.id)} 
-                  style={{ cursor: "pointer" }}
-                >
-                  <td className="matterCell">
-                    <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
-                      {matterLabel}
-                    </div>
-                  </td>
-                  <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
-                  <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
-                  <td>
-                    <div style={{ 
-                      fontWeight: isOverdue || isSoon ? 900 : 400,
-                      color: isOverdue ? "var(--danger)" : isSoon ? "var(--warn)" : "inherit"
-                    }}>
-                      {fmtDateShort(p.target_close_date)}
-                    </div>
-                    {d !== null && (
-                      <div style={{ fontSize: 10, color: "var(--muted)" }}>
-                        {isOverdue
-                          ? t("overdueDays").replace("{count}", String(Math.abs(d)))
-                          : t("daysLeft").replace("{count}", String(d))}
+                return (
+                  <tr
+                    key={p.id}
+                    onClick={() => onProjectSelect(p.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <td className="matterCell">
+                      <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
+                        {matterLabel}
                       </div>
-                    )}
-                  </td>
-                  <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
-                  <td style={{ textAlign: "center" }}>
-                    <span className="pill neutral">{p.location}</span>
+                    </td>
+                    <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
+                    <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
+                    <td><div>{fmtDateShort(p.target_close_date)}</div></td>
+                    <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
+                    <td style={{ textAlign: "center" }}><span className="pill neutral">{p.location}</span></td>
+                  </tr>
+                );
+              })}
+              {sortedAndFilteredProjects.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
+                    {t("noProjectsMatch")}
                   </td>
                 </tr>
-              );
-            })}
-            {sortedAndFilteredProjects.length === 0 && (
-              <tr>
-                <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
-                  {t("noProjectsMatch")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Footer */}
       <div className="table-container">
-        <footer style={{
-          marginTop: 'auto',
-          padding: '40px 0 20px',
-          borderTop: '1px solid var(--line)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px'
-        }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: '32px',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%'
-        }}>
-          {/* Company Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                display: 'grid',
-                placeItems: 'center',
-                background: 'linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.65))'
-              }}>◆</div>
-              <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
-            </div>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
-              CRM para abogados especializados en derecho inmobiliario.
-            </p>
-          </div>
-
-          {/* Product Links */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.history.pushState(null, "", "/agencias-polacas");
-                  window.dispatchEvent(new PopStateEvent("popstate"));
-                }}
-                style={{ color: "var(--text)", textDecoration: "none" }}
-              >
-                Agencias Polacas
-              </a>
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Directorio</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Criterios de selección</a></li>
-            </ul>
-          </div>
-
-          {/* Contact & Support */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Asistente IA</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Chat</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Investigación</a></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div style={{
-          borderTop: '1px solid var(--line)',
-          paddingTop: '20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0 }}>
-            © 2026 AMA - CRM. Todos los derechos reservados.
-          </p>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Twitter</a>
-            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>LinkedIn</a>
-            <span style={{ color: 'var(--muted)', fontSize: '13px' }}>Made with ❤️ in Marbella</span>
-          </div>
-        </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   );

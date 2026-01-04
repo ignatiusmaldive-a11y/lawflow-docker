@@ -8,6 +8,22 @@ function daysBetween(a: Date, b: Date) {
   return Math.round(ms / (1000 * 60 * 60 * 24));
 }
 
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function parseDate(dateStr?: string | null) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + "T00:00:00");
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function addDays(d: Date, days: number) {
+  const next = new Date(d);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
 function daysUntil(dateStr?: string | null) {
   if (!dateStr) return null;
   const d = new Date(dateStr + "T00:00:00");
@@ -19,44 +35,66 @@ function daysUntil(dateStr?: string | null) {
 export function Timeline({ projectId, items, tasks }: { projectId: number; items: TimelineItem[]; tasks: Task[] }) {
   const { t } = useI18n();
 
-  const { start, end, rows, todayOffset, dateHeaders } = useMemo(() => {
-    if (items.length === 0) return { start: new Date(), end: new Date(), rows: [] as TimelineItem[], todayOffset: 0, dateHeaders: [] };
-    
-    // Calculate start and end dates for the timeline
-    const allDates = items.flatMap((i) => [new Date(i.start_date + "T00:00:00"), new Date(i.end_date + "T00:00:00")]);
-    const minDate = new Date(Math.min(...allDates.map((d) => d.getTime())));
-    const maxDate = new Date(Math.max(...allDates.map((d) => d.getTime())));
-
-    // Add some buffer around the min/max dates
-    const startBuffer = new Date(minDate);
-    startBuffer.setDate(minDate.getDate() - 7); // 7 days before the first item
-    const endBuffer = new Date(maxDate);
-    endBuffer.setDate(maxDate.getDate() + 14); // 14 days after the last item
-
-    const start = startBuffer;
-    const end = endBuffer;
-
-    const now = new Date();
-    const todayOffset = daysBetween(start, now);
-
-    // Generate date headers (e.g., month names)
-    const headers = [];
-    let currentDate = new Date(start);
-    while (currentDate <= end) {
-      if (currentDate.getDate() === 1 || headers.length === 0) { // Start of month or first header
-        headers.push({
-          label: currentDate.toLocaleString('default', { month: 'short', year: 'numeric' }),
-          offset: daysBetween(start, currentDate),
-        });
-      }
-      currentDate.setDate(currentDate.getDate() + 1);
+  const { start, end, rows, showToday, todayPct, dateHeaders, rangeMs } = useMemo(() => {
+    if (items.length === 0) {
+      const now = new Date();
+      return {
+        start: now,
+        end: now,
+        rows: [] as TimelineItem[],
+        showToday: true,
+        todayPct: 0,
+        dateHeaders: [] as { label: string; leftPct: number; widthPct: number }[],
+        rangeMs: 1,
+      };
     }
 
-    return { start, end, rows: items, todayOffset, dateHeaders: headers };
-  }, [items]);
+    const allDates: Date[] = [];
+    for (const it of items) {
+      const s = parseDate(it.start_date);
+      const e = parseDate(it.end_date);
+      if (s) allDates.push(s);
+      if (e) allDates.push(e);
+    }
+    for (const task of tasks) {
+      const d = parseDate(task.due_date);
+      if (d) allDates.push(d);
+    }
 
-  const totalDays = Math.max(1, daysBetween(start, end) + 1);
-  const todayPosition = (todayOffset / totalDays) * 100;
+    const minDate = new Date(Math.min(...allDates.map((d) => d.getTime())));
+    const maxDate = new Date(Math.max(...allDates.map((d) => d.getTime())));
+    const spanDays = Math.max(1, daysBetween(minDate, maxDate) + 1);
+    const padDays = clamp(Math.round(spanDays * 0.08), 3, 30);
+
+    let start = addDays(minDate, -padDays);
+    let end = addDays(maxDate, padDays);
+    if (end.getTime() <= start.getTime()) end = addDays(start, 1);
+    const rangeMs = Math.max(1, end.getTime() - start.getTime());
+
+    const now = new Date();
+    const todayRaw = ((now.getTime() - start.getTime()) / rangeMs) * 100;
+    const showToday = todayRaw >= 0 && todayRaw <= 100;
+    const todayPct = clamp(todayRaw, 0, 100);
+
+    const headers: { label: string; leftPct: number; widthPct: number }[] = [];
+    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
+    while (cursor <= endLimit) {
+      const segStart = cursor < start ? start : cursor;
+      const nextMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+      const segEnd = nextMonth > end ? end : nextMonth;
+      const leftPct = clamp(((segStart.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
+      const widthPct = clamp(((segEnd.getTime() - segStart.getTime()) / rangeMs) * 100, 0, 100);
+      headers.push({
+        label: cursor.toLocaleString("es-ES", { month: "short", year: "numeric" }),
+        leftPct,
+        widthPct,
+      });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return { start, end, rows: items, showToday, todayPct, dateHeaders: headers, rangeMs };
+  }, [items, tasks]);
 
   const upcoming = useMemo(() => {
     return [...tasks]
@@ -75,23 +113,12 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
         <div className="timeline">
           {/* Timeline Headers */}
           <div className="timelineLabels" style={{ visibility: "hidden" }}></div> {/* Placeholder for label column */}
-          <div className="timelineGrid dateHeaders" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(15px, 1fr))`, paddingLeft: 0, borderLeft: 'none' }}>
+          <div className="timelineHeader">
             {dateHeaders.map((header, idx) => (
               <div
                 key={idx}
-                style={{
-                  gridColumnStart: header.offset + 1,
-                  gridColumnEnd: `span ${idx + 1 < dateHeaders.length ? dateHeaders[idx + 1].offset - header.offset : totalDays - header.offset}`,
-                  textAlign: 'left',
-                  fontWeight: 900,
-                  fontSize: '12px',
-                  color: 'var(--muted)',
-                  borderBottom: '1px solid var(--line)',
-                  paddingBottom: '4px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
+                className="timelineHeaderItem"
+                style={{ left: `${header.leftPct}%`, width: `${header.widthPct}%` }}
               >
                 {header.label}
               </div>
@@ -115,30 +142,35 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
             ))}
           </div>
 
-          <div className="timelineGrid" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(15px, 1fr))` }}>
-            {todayOffset >= 0 && todayOffset <= totalDays && (
-              <div className="todayLine" style={{ left: `${todayPosition}%` }}></div>
+          <div className="timelineGrid">
+            {showToday && rangeMs > 0 && (
+              <div className="todayLine" style={{ left: `${todayPct}%` }}></div>
             )}
             {rows.map((r) => {
-              const s = new Date(r.start_date + "T00:00:00");
-              const e = new Date(r.end_date + "T00:00:00");
-              const startOffset = Math.max(0, daysBetween(start, s));
-              const endOffset = Math.min(totalDays, daysBetween(start, e) + 1);
-              const cssStart = startOffset + 1;
-              const cssEnd = endOffset + 1;
+              const s = parseDate(r.start_date) ?? start;
+              const e = parseDate(r.end_date) ?? s;
+              const eInc = addDays(e, 1); // match prior "inclusive day" rendering
+              const startPct = clamp(((s.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
+              const endPct = clamp(((eInc.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
+              const widthPct = Math.max(0, endPct - startPct);
 
               return (
-                <div key={r.id} className="barRow" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(15px, 1fr))` }}>
+                <div key={r.id} className="barRow">
                   {r.kind === 'Milestone' ? (
                     <div
                       className="milestoneDiamond"
                       style={{
-                        gridColumnStart: cssEnd -1, // Position at the end of the milestone day
-                        gridColumnEnd: cssEnd,
+                        ["--x" as any]: `${endPct}%`,
                       }}
                     />
                   ) : (
-                    <div className="bar" style={{ ["--start" as any]: cssStart, ["--end" as any]: cssEnd }} />
+                    <div
+                      className="bar"
+                      style={{
+                        ["--start" as any]: `${startPct}%`,
+                        ["--width" as any]: `${widthPct}%`,
+                      }}
+                    />
                   )}
                 </div>
               );

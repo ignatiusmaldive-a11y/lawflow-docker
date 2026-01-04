@@ -122,3 +122,9 @@ class TaskCreate(BaseModel):
     priority: str = "Medium"
     tags: Optional[str] = None
     description: Optional[str] = None
+
+class ChatIn(BaseModel):
+    message: str
+
+class ChatOut(BaseModel):
+    response: str
