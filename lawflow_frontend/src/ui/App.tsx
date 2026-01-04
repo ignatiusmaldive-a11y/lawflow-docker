@@ -651,7 +651,7 @@ export function App() {
             <div className="actions">
               <div className="projectHeaderActions">
                 {/* Action Button: Conditional Label & Logic */}
-                {view !== "Chat" && (
+                {view !== "Chat" && view !== "General Overview" && (
                   <button
                     className="btn quickAddBtn"
                     onClick={() => {
@@ -676,18 +676,20 @@ export function App() {
                     ☰
                   </button>
 
-                  <button
-                    className="iconSquare homeBtn headerIconBtn"
-                    onClick={() => {
-                      setActiveProjectId(null);
-                      setView("General Overview");
-                      setSidebarOpen(false);
-                      window.scrollTo(0, 0);
-                    }}
-                    title={t("home")}
-                  >
-                    <span className="iconSquareGlyph">⌂</span>
-                  </button>
+                  {view !== "General Overview" && (
+                    <button
+                      className="iconSquare homeBtn headerIconBtn"
+                      onClick={() => {
+                        setActiveProjectId(null);
+                        setView("General Overview");
+                        setSidebarOpen(false);
+                        window.scrollTo(0, 0);
+                      }}
+                      title={t("home")}
+                    >
+                      <span className="iconSquareGlyph">⌂</span>
+                    </button>
+                  )}
 
                   {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && view !== "Puerto Banus Report" && view !== "Sectorial Report" && view !== "Chat" && activeProject && (
                     <button
