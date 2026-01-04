@@ -45,7 +45,7 @@ export function Timeline({ projectId, items, tasks }: { projectId: number; items
     while (currentDate <= end) {
       if (currentDate.getDate() === 1 || headers.length === 0) { // Start of month or first header
         headers.push({
-          label: currentDate.toLocaleString('default', { month: 'short', year: 'numeric' }),
+          label: currentDate.toLocaleString('es-ES', { month: 'short', year: 'numeric' }),
           offset: daysBetween(start, currentDate),
         });
       }

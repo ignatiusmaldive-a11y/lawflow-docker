@@ -20,6 +20,10 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { InformesSectorialesView } from "./InformesSectorialesView";
 import { AgenciasPolacasView } from "./AgenciasPolacasView";
+import { PuertoBanusReportView } from "./PuertoBanusReportView";
+import { SectorialReportView } from "./SectorialReportView";
+import { REPORTS_DATA } from "../lib/reportData";
+import { CustomReportModal } from "./CustomReportModal";
 import { Callout } from "./components/Callout";
 import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
@@ -31,7 +35,9 @@ type View =
   | "Matter Settings"
   | "General Overview"
   | "Informes Sectoriales"
-  | "Agencias Polacas";
+  | "Agencias Polacas"
+  | "Puerto Banus Report"
+  | "Sectorial Report";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -90,7 +96,7 @@ function loadIds(key: string): number[] {
 function saveIds(key: string, ids: number[]) {
   try {
     localStorage.setItem(key, JSON.stringify(ids.slice(0, 12)));
-  } catch {}
+  } catch { }
 }
 
 function upsertRecent(projectId: number) {
@@ -114,7 +120,7 @@ function loadDismissedTips(projectId: number) {
 }
 
 function saveDismissedTips(projectId: number) {
-  try { localStorage.setItem(`lawflow.dismissed.tips.${projectId}`, "1"); } catch {}
+  try { localStorage.setItem(`lawflow.dismissed.tips.${projectId}`, "1"); } catch { }
 }
 
 function loadDismissedDeadlines(projectId: number) {
@@ -126,7 +132,7 @@ function loadDismissedDeadlines(projectId: number) {
 }
 
 function saveDismissedDeadlines(projectId: number, stats: { overdue: number; dueSoon: number }) {
-  try { localStorage.setItem(`lawflow.dismissed.deadlines.${projectId}`, JSON.stringify(stats)); } catch {}
+  try { localStorage.setItem(`lawflow.dismissed.deadlines.${projectId}`, JSON.stringify(stats)); } catch { }
 }
 
 
@@ -196,32 +202,34 @@ export function App() {
   const [deadlineDismissedStats, setDeadlineDismissedStats] = useState<{ overdue: number; dueSoon: number }>({ overdue: -1, dueSoon: -1 });
   const [tipsDismissed, setTipsDismissed] = useState(false);
   const [tipsTimerReady, setTipsTimerReady] = useState(false);
+  const [customReportOpen, setCustomReportOpen] = useState(false);
+  const [selectedReportSlug, setSelectedReportSlug] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setTipsTimerReady(true), 4 * 60 * 1000); // 4 minutes
     return () => clearTimeout(timer);
   }, []);
 
-const pinnedProjects = useMemo(() => {
-  const set = new Set(pinnedIds);
-  return projects.filter((p) => set.has(p.id));
-}, [projects, pinnedIds]);
+  const pinnedProjects = useMemo(() => {
+    const set = new Set(pinnedIds);
+    return projects.filter((p) => set.has(p.id));
+  }, [projects, pinnedIds]);
 
-const recentProjects = useMemo(() => {
-  const map = new Map(projects.map((p) => [p.id, p] as const));
-  const projectsFromRecentIds = recentIds.map((id) => map.get(id)).filter(Boolean) as Project[];
-  
-  // Sort by project number strictly
-  projectsFromRecentIds.sort((a, b) => {
-    const aProjectNumber = a.id + PROJECT_ID_OFFSET;
-    const bProjectNumber = b.id + PROJECT_ID_OFFSET;
-    return aProjectNumber - bProjectNumber;
-  });
+  const recentProjects = useMemo(() => {
+    const map = new Map(projects.map((p) => [p.id, p] as const));
+    const projectsFromRecentIds = recentIds.map((id) => map.get(id)).filter(Boolean) as Project[];
 
-  return projectsFromRecentIds;
-}, [projects, recentIds]);
+    // Sort by project number strictly
+    projectsFromRecentIds.sort((a, b) => {
+      const aProjectNumber = a.id + PROJECT_ID_OFFSET;
+      const bProjectNumber = b.id + PROJECT_ID_OFFSET;
+      return aProjectNumber - bProjectNumber;
+    });
 
-const activeProject = useMemo(
+    return projectsFromRecentIds;
+  }, [projects, recentIds]);
+
+  const activeProject = useMemo(
 
     () => projects.find((p) => p.id === activeProjectId) ?? null,
     [projects, activeProjectId]
@@ -257,6 +265,16 @@ const activeProject = useMemo(
         setView("Agencias Polacas");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
+      } else if (window.location.pathname === "/informes-sectoriales/puerto-banus-2025") {
+        setView("Puerto Banus Report");
+      } else if (window.location.pathname.startsWith("/informes-sectoriales/")) {
+        const slug = window.location.pathname.split("/").pop() || "";
+        if (REPORTS_DATA[slug]) {
+          setSelectedReportSlug(slug);
+          setView("Sectorial Report");
+        } else {
+          setView("Informes Sectoriales");
+        }
       } else {
         setView("General Overview");
       }
@@ -275,6 +293,16 @@ const activeProject = useMemo(
         setView("Agencias Polacas");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
+      } else if (window.location.pathname === "/informes-sectoriales/puerto-banus-2025") {
+        setView("Puerto Banus Report");
+      } else if (window.location.pathname.startsWith("/informes-sectoriales/")) {
+        const slug = window.location.pathname.split("/").pop() || "";
+        if (REPORTS_DATA[slug]) {
+          setSelectedReportSlug(slug);
+          setView("Sectorial Report");
+        } else {
+          setView("Informes Sectoriales");
+        }
       } else {
         setView("General Overview");
       }
@@ -298,6 +326,14 @@ const activeProject = useMemo(
       if (window.location.pathname !== "/agencias-polacas") {
         window.history.pushState(null, "", "/agencias-polacas");
       }
+    } else if (view === "Puerto Banus Report") {
+      if (window.location.pathname !== "/informes-sectoriales/puerto-banus-2025") {
+        window.history.pushState(null, "", "/informes-sectoriales/puerto-banus-2025");
+      }
+    } else if (view === "Sectorial Report") {
+      if (selectedReportSlug && window.location.pathname !== `/informes-sectoriales/${selectedReportSlug}`) {
+        window.history.pushState(null, "", `/informes-sectoriales/${selectedReportSlug}`);
+      }
     } else {
       if (window.location.pathname !== "/project") {
         window.history.pushState(null, "", "/project");
@@ -305,33 +341,33 @@ const activeProject = useMemo(
     }
   }, [view]);
 
-useEffect(() => {
-  function onKey(e: KeyboardEvent) {
-    const k = e.key.toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && k === "k") {
-      e.preventDefault();
-      setGlobalSearchOpen(true);
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const k = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && k === "k") {
+        e.preventDefault();
+        setGlobalSearchOpen(true);
+      }
     }
-  }
-  window.addEventListener("keydown", onKey);
-  return () => window.removeEventListener("keydown", onKey);
-}, []);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
 
-useEffect(() => {
-  if (!activeProjectId) return;
-  // keep 'recent matters' in localStorage
-  setRecentIds(upsertRecent(activeProjectId));
-  
-  // Load persistent UI states
-  setTipsDismissed(loadDismissedTips(activeProjectId));
-  setDeadlineDismissedStats(loadDismissedDeadlines(activeProjectId));
+  useEffect(() => {
+    if (!activeProjectId) return;
+    // keep 'recent matters' in localStorage
+    setRecentIds(upsertRecent(activeProjectId));
 
-  // Clear tasks momentarily to avoid showing previous project's stats/banner
-  setTasks([]);
+    // Load persistent UI states
+    setTipsDismissed(loadDismissedTips(activeProjectId));
+    setDeadlineDismissedStats(loadDismissedDeadlines(activeProjectId));
 
-  refreshAll(activeProjectId).catch(console.error);
-}, [activeProjectId]);
+    // Clear tasks momentarily to avoid showing previous project's stats/banner
+    setTasks([]);
+
+    refreshAll(activeProjectId).catch(console.error);
+  }, [activeProjectId]);
 
 
   const filteredTasks = useMemo(() => {
@@ -368,9 +404,8 @@ useEffect(() => {
     >
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
       <aside
-        className={`sidebar ${
-          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
-        }`}
+        className={`sidebar ${view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
+          }`}
       >
         <div className="brand">
           <div className="brandMark">◆</div>
@@ -381,7 +416,7 @@ useEffect(() => {
         </div>
 
         <nav className="nav">
-          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e)=>{e.preventDefault(); setView("General Overview"); if (sidebarOpen) setSidebarOpen(false);}}>{t("overviewLink")}</a>
+          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e) => { e.preventDefault(); setView("General Overview"); if (sidebarOpen) setSidebarOpen(false); }}>{t("overviewLink")}</a>
         </nav>
 
         <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
@@ -426,45 +461,45 @@ useEffect(() => {
             </div>
           </div>
 
-<div className="pinned-recent-group">
-{pinnedProjects.length > 0 && (
-      <div style={{ marginTop: 12 }}>
-        <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
-      {pinnedProjects.slice(0, 4).map((p) => (
-        <button
-          key={p.id}
-          className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-          title={p.title}
-        >
-          <span className="chipDot" />
-          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-)}
+          <div className="pinned-recent-group">
+            {pinnedProjects.length > 0 && (
+              <div style={{ marginTop: 12 }}>
+                <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
+                  {pinnedProjects.slice(0, 4).map((p) => (
+                    <button
+                      key={p.id}
+                      className="chipRow"
+                      onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                      title={p.title}
+                    >
+                      <span className="chipDot" />
+                      <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-{recentProjects.length > 0 && (
-  <div style={{ marginTop: 12 }}>
-    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
-    <div style={{ display: "grid", gap: 6 }}>
-      {recentProjects.slice(0, 5).map((p) => (
-        <button
-          key={p.id}
-          className="chipRow"
-          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-          title={p.title}
-        >
-          <span className="chipDot muted" />
-          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-)}
-</div>
-</div>
+            {recentProjects.length > 0 && (
+              <div style={{ marginTop: 12 }}>
+                <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
+                <div style={{ display: "grid", gap: 6 }}>
+                  {recentProjects.slice(0, 5).map((p) => (
+                    <button
+                      key={p.id}
+                      className="chipRow"
+                      onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                      title={p.title}
+                    >
+                      <span className="chipDot muted" />
+                      <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="sidebarFooter">
           <div className="userchip">
@@ -478,59 +513,86 @@ useEffect(() => {
         </div>
       </aside>
 
-	      <main className="main">
-	        <header
-	          className={
-	            "topbar" + (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? " landingTopbar" : "")
-	          }
-	        >
-	          <div className="topbar-container">
-		            <div
-		              className="titleRow"
-		              style={
-		                view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
-		                  ? { minHeight: "80px", justifyContent: "center" }
-		                  : undefined
-		              }
-		            >
-		            {view === "Informes Sectoriales" ? (
-		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
-		                <div style={{ textAlign: "left" }}>
-		                  <div className="brandName">Informes Sectoriales</div>
-		                  <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
-		                </div>
-		              </div>
-		            ) : view === "Agencias Polacas" ? (
-		              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
-		                <div style={{ textAlign: "left" }}>
-		                  <div className="brandName">Agencias Polacas</div>
-		                  <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
-		                </div>
-		              </div>
-		            ) : (
-	              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
-	                <p className="h1">
-	                  {view === "General Overview" ? (
-	                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-	                      <div className="brandMark">◆</div>
-	                      <div>
-	                        <div className="brandName">AMA-CRM</div>
-	                        <div className="small">Listado General</div>
-	                      </div>
-	                    </div>
-	                  ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
-	                </p>
-	                {view !== "General Overview" && activeProject && (
-	                  <div className="projectMetaInline">
-	                    <div className="small">
-	                      {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
-	                    </div>
-	                    {riskPill(activeProject.risk, t)}
-	                  </div>
-	                )}
-	              </div>
-	            )}
-	            {/* <p className="subtitle">
+      <main className="main">
+        <header
+          className={
+            "topbar" + (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" || view === "Puerto Banus Report" ? " landingTopbar" : "")
+          }
+        >
+          <div className="topbar-container">
+            <div
+              className="titleRow"
+              style={
+                view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" || view === "Puerto Banus Report" || view === "Sectorial Report"
+                  ? { minHeight: "80px", justifyContent: "center" }
+                  : undefined
+              }
+            >
+              {view === "Puerto Banus Report" || (view === "Sectorial Report" && selectedReportSlug) ? (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">{view === "Puerto Banus Report" ? "Estudio Puerto Banús 2025" : REPORTS_DATA[selectedReportSlug!]?.title}</div>
+                    <div className="small">{view === "Puerto Banus Report" ? "Análisis detallado del mercado de lujo" : REPORTS_DATA[selectedReportSlug!]?.subtitle}</div>
+                  </div>
+                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setView("Informes Sectoriales")}
+                    >
+                      Informes Sectoriales
+                    </span>
+                    <span style={{ opacity: 0.5 }}>/</span>
+                    <span style={{ color: "var(--text)" }}>{view === "Puerto Banus Report" ? "Puerto Banús 2025" : REPORTS_DATA[selectedReportSlug!]?.location}</span>
+                  </nav>
+                </div>
+              ) : view === "Informes Sectoriales" ? (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">Informes Sectoriales</div>
+                    <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
+                  </div>
+                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setView("General Overview")}
+                    >
+                      AMA-CRM
+                    </span>
+                    <span style={{ opacity: 0.5 }}>/</span>
+                    <span style={{ color: "var(--text)" }}>Informes Sectoriales</span>
+                  </nav>
+                </div>
+              ) : view === "Agencias Polacas" ? (
+                <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">Agencias Polacas</div>
+                    <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
+                  <p className="h1">
+                    {view === "General Overview" ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="brandMark">◆</div>
+                        <div>
+                          <div className="brandName">AMA-CRM</div>
+                          <div className="small">Listado General</div>
+                        </div>
+                      </div>
+                    ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
+                  </p>
+                  {view !== "General Overview" && activeProject && (
+                    <div className="projectMetaInline">
+                      <div className="small">
+                        {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
+                      </div>
+                      {riskPill(activeProject.risk, t)}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* <p className="subtitle">
 	              <span className="crumbs">
 	  {view === "General Overview" ? (
      <span className="crumb">Portfolio Overview</span>
@@ -541,81 +603,81 @@ useEffect(() => {
   )}
 	</span>
 	            </p> */}
-	            <div
-	              className="topNav"
-	              style={{
-	                minHeight: 42,
-	                display: view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "none" : "block",
-	              }}
-	            >
-	              {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && (
-	                <>
-	                  <button className={"topNavItem" + (view==="Tasks"?" active":"")} onClick={()=>setView("Tasks")}>{t("tasks")}</button>
-	                  <button className={"topNavItem" + (view==="Timeline"?" active":"")} onClick={()=>setView("Timeline")}>{t("timeline")}</button>
-	                  <button className={"topNavItem" + (view==="Files"?" active":"")} onClick={()=>setView("Files")}>{t("files")}</button>
-	                  <button className={"topNavItem" + (view==="Closing Pack"?" active":"")} onClick={()=>setView("Closing Pack")}>{t("closingPack")}</button>
-	                </>
-	              )}
-	            </div>
-	            {view !== "General Overview" && null}
-	          </div>
-	          <div className="actions">
-	            {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" ? (
-	              <div className="projectHeaderActions">
-	                <button className="btn quickAddBtn" onClick={() => setQuickAddOpen(true)} title={t("quickAdd")}>
-	                  {t("quickAdd")}
-	                </button>
-	                <div className="headerIconRow">
-	                  <button
-	                    className="hamburger headerIconBtn"
-	                    onClick={() => setSidebarOpen(!sidebarOpen)}
-	                    title={t("toggleSidebar")}
-	                  >
-	                    ☰
-	                  </button>
+              <div
+                className="topNav"
+                style={{
+                  minHeight: 42,
+                  display: (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" || view === "Puerto Banus Report") ? "none" : "block",
+                }}
+              >
+                {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && view !== "Puerto Banus Report" && (
+                  <>
+                    <button className={"topNavItem" + (view === "Tasks" ? " active" : "")} onClick={() => setView("Tasks")}>{t("tasks")}</button>
+                    <button className={"topNavItem" + (view === "Timeline" ? " active" : "")} onClick={() => setView("Timeline")}>{t("timeline")}</button>
+                    <button className={"topNavItem" + (view === "Files" ? " active" : "")} onClick={() => setView("Files")}>{t("files")}</button>
+                    <button className={"topNavItem" + (view === "Closing Pack" ? " active" : "")} onClick={() => setView("Closing Pack")}>{t("closingPack")}</button>
+                  </>
+                )}
+              </div>
+              {view !== "General Overview" && null}
+            </div>
+            <div className="actions">
+              <div className="projectHeaderActions">
+                {/* Action Button: Conditional Label & Logic */}
+                <button
+                  className="btn quickAddBtn"
+                  onClick={() => {
+                    if (view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report") {
+                      setCustomReportOpen(true);
+                    } else {
+                      setQuickAddOpen(true);
+                    }
+                  }}
+                  title={view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report" ? "Crear Informe" : t("quickAdd")}
+                >
+                  {view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report" ? "Crear Informe" : t("quickAdd")}
+                </button>
 
-	                  <button
-	                    className="iconSquare homeBtn headerIconBtn"
-	                    onClick={() => {
-	                      setActiveProjectId(null);
-	                      setView("General Overview");
-	                      setSidebarOpen(false);
-	                      window.scrollTo(0, 0);
-	                    }}
-	                    title={t("home")}
-	                  >
-	                    <span className="iconSquareGlyph">⌂</span>
-	                  </button>
+                <div className="headerIconRow">
+                  <button
+                    className="hamburger headerIconBtn"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    title={t("toggleSidebar")}
+                  >
+                    ☰
+                  </button>
 
-	                  {activeProject && (
-	                    <button
-	                      className="iconSquare headerIconBtn"
-	                      onClick={(e) => {
-	                        e.preventDefault();
-	                        if (!activeProject) return;
-	                        setPinnedIds(togglePin(activeProject.id));
-	                      }}
-	                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-	                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-	                    >
-	                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-	                    </button>
-	                  )}
-	                </div>
-	              </div>
-	            ) : (
-	              <div className="actionsRow">
-	                <button
-	                  className="hamburger"
-	                  onClick={() => setSidebarOpen(!sidebarOpen)}
-	                  title={t("toggleSidebar")}
-	                >
-	                  ☰
-	                </button>
-	              </div>
-	            )}
+                  <button
+                    className="iconSquare homeBtn headerIconBtn"
+                    onClick={() => {
+                      setActiveProjectId(null);
+                      setView("General Overview");
+                      setSidebarOpen(false);
+                      window.scrollTo(0, 0);
+                    }}
+                    title={t("home")}
+                  >
+                    <span className="iconSquareGlyph">⌂</span>
+                  </button>
 
-	          </div>
+                  {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && view !== "Puerto Banus Report" && view !== "Sectorial Report" && activeProject && (
+                    <button
+                      className="iconSquare headerIconBtn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!activeProject) return;
+                        setPinnedIds(togglePin(activeProject.id));
+                      }}
+                      title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+                      style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+                    >
+                      {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+            </div>
           </div>
         </header>
 
@@ -625,23 +687,27 @@ useEffect(() => {
 
         <div className="content">
           {view === "General Overview" ? (
-             <GeneralOverviewView
-               projects={projects}
-               onNewProject={() => setNewProjectOpen(true)}
-               onProjectSelect={(id) => {
-                 setActiveProjectId(id);
-                 setView("Tasks");
-                 window.scrollTo(0, 0); // Reset scroll position to top when selecting project
-               }}
-             />
+            <GeneralOverviewView
+              projects={projects}
+              onNewProject={() => setNewProjectOpen(true)}
+              onProjectSelect={(id) => {
+                setActiveProjectId(id);
+                setView("Tasks");
+                window.scrollTo(0, 0); // Reset scroll position to top when selecting project
+              }}
+            />
           ) : view === "Informes Sectoriales" ? (
-             <InformesSectorialesView />
+            <InformesSectorialesView />
           ) : view === "Agencias Polacas" ? (
-             <AgenciasPolacasView />
+            <AgenciasPolacasView />
+          ) : view === "Puerto Banus Report" ? (
+            <PuertoBanusReportView />
+          ) : view === "Sectorial Report" && selectedReportSlug && REPORTS_DATA[selectedReportSlug] ? (
+            <SectorialReportView data={REPORTS_DATA[selectedReportSlug]} />
           ) : (
-          <div className="contentGrid">
-            <div className="leftColumn">
-              {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
+            <div className="contentGrid">
+              <div className="leftColumn">
+                {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
@@ -651,23 +717,23 @@ useEffect(() => {
                       setTipsDismissed(true);
                     }}
                   />
-              ) : null}
+                ) : null}
 
-              {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
-                <div className="deadlineBanner">
-                  <div style={{ fontWeight: 950 }}>
-                    {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
+                {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
+                  <div className="deadlineBanner">
+                    <div style={{ fontWeight: 950 }}>
+                      {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
+                    </div>
+                    <button className="btn" onClick={() => {
+                      if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
+                      setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
+                    }}>{t("close")}</button>
                   </div>
-                  <button className="btn" onClick={() => { 
-                    if (activeProjectId) saveDismissedDeadlines(activeProjectId, { overdue: kpis.overdue, dueSoon: kpis.dueSoon });
-                    setDeadlineDismissedStats({ overdue: kpis.overdue, dueSoon: kpis.dueSoon });
-                  }}>{t("close")}</button>
-                </div>
-              ) : null}
+                ) : null}
 
-              {view === "Tasks" && (
-                <>
-                  {/*
+                {view === "Tasks" && (
+                  <>
+                    {/*
                   <div className="card cardPad" style={{ marginBottom: 20 }}>
                     <div className="grid4" style={{ display: "flex", justifyContent: "space-around", width: "100%", alignItems: "flex-start" }}>
                       <div className="card cardPad" style={{ flex: 1, textAlign: "center", padding: "4px 0", border: "none", boxShadow: "none", background: "transparent" }}>
@@ -702,7 +768,7 @@ useEffect(() => {
                   </div>
                   */}
 
-                  {/*
+                    {/*
                   <div style={{ display: "flex", justifyContent: "flex-start", gap: 20, marginBottom: 20 }}>
                     <div style={{ textAlign: "center" }}>
                       <div className="small">{t("openTasks")}</div>
@@ -714,32 +780,32 @@ useEffect(() => {
                     </div>
                   </div>
                   */}
-                </>
-              )}
+                  </>
+                )}
 
 
 
-              <div className="card cardPad" style={{ marginTop: 12 }}>
-                {activeProjectId && view === "Tasks" && (
-                  <>
-                    <div className="table-container">
-                      <TasksTable
-                        tasks={filteredTasks}
-                        onEdit={async (taskId, patch) => {
-                          // Optimistically update local state for immediate UI feedback
-                          setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
-                          try {
-                            await api.updateTask(taskId, patch);
-                            await refreshAll(activeProjectId);
-                          } catch (error) {
-                            // Revert on error
-                            console.error('Failed to update task:', error);
-                            await refreshAll(activeProjectId);
-                          }
-                        }}
-                      />
-                    </div>
-                    {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
+                <div className="card cardPad" style={{ marginTop: 12 }}>
+                  {activeProjectId && view === "Tasks" && (
+                    <>
+                      <div className="table-container">
+                        <TasksTable
+                          tasks={filteredTasks}
+                          onEdit={async (taskId, patch) => {
+                            // Optimistically update local state for immediate UI feedback
+                            setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...patch } : t));
+                            try {
+                              await api.updateTask(taskId, patch);
+                              await refreshAll(activeProjectId);
+                            } catch (error) {
+                              // Revert on error
+                              console.error('Failed to update task:', error);
+                              await refreshAll(activeProjectId);
+                            }
+                          }}
+                        />
+                      </div>
+                      {/* <h3 style={{ marginTop: 30, marginBottom: 10 }}>Board</h3>
                     <Board
                       tasks={filteredTasks}
                       onMove={async (taskId, nextStatus) => {
@@ -747,113 +813,118 @@ useEffect(() => {
                         await refreshAll(activeProjectId);
                       }}
                     /> */}
-                  </>
-                )}
+                    </>
+                  )}
 
-                {activeProjectId && view === "Timeline" && (
-                  <Timeline projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
-                )}
+                  {activeProjectId && view === "Timeline" && (
+                    <Timeline projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
+                  )}
 
-  {activeProjectId && view === "Files" && (
-    <div style={{ display: "grid", gap: 12 }}>
-      <FilesRoom projectId={activeProjectId} />
-      <div className="card cardPad" style={{ padding: 12 }}>
-            <div className="sectionTitle" style={{ marginBottom: 0 }}>
-              <h2>{t("municipality")}</h2>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e)=>setMunicipality(e.target.value)}>
-                  {MUNICIPALITIES_LIST.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-            <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
-              </div>
-            </div>
-          </div>
-      <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
-    </div>
-  )}
+                  {activeProjectId && view === "Files" && (
+                    <div style={{ display: "grid", gap: 12 }}>
+                      <FilesRoom projectId={activeProjectId} />
+                      <div className="card cardPad" style={{ padding: 12 }}>
+                        <div className="sectionTitle" style={{ marginBottom: 0 }}>
+                          <h2>{t("municipality")}</h2>
+                          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                            <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e) => setMunicipality(e.target.value)}>
+                              {MUNICIPALITIES_LIST.map((m) => (
+                                <option key={m} value={m}>{m}</option>
+                              ))}
+                            </select>
+                            <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
+                    </div>
+                  )}
 
-  {view === "Matter Settings" && activeProjectId && (
-    <MatterSettingsView
-      activeProject={activeProject}
-      onProjectUpdated={(p) => {
-        setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
-      }}
-      uxPrefs={uxPrefs}
-      onUxPrefsChange={setUxPrefs}
-      onClose={() => setView("Tasks")} // Go back to Board view after closing settings
-    />
-  )}
+                  {view === "Matter Settings" && activeProjectId && (
+                    <MatterSettingsView
+                      activeProject={activeProject}
+                      onProjectUpdated={(p) => {
+                        setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
+                      }}
+                      uxPrefs={uxPrefs}
+                      onUxPrefsChange={setUxPrefs}
+                      onClose={() => setView("Tasks")} // Go back to Board view after closing settings
+                    />
+                  )}
 
-  {activeProjectId && view === "Closing Pack" && (
-    <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
-  )}
+                  {activeProjectId && view === "Closing Pack" && (
+                    <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
+                  )}
 
-              </div>
-            </div>
-
-            <div className="rightColumn">
-              <div className="card cardPad">
-                <div className="sectionTitle">
-                  <h2>{t("spanishChecklist")}</h2>
-                  <span className="pill">{checklist.filter(c=>c.is_done).length}/{checklist.length}</span>
                 </div>
-                {activeProjectId && (
-                  <Checklist
-                    items={checklist}
-                    onToggle={async (itemId, is_done) => {
-                      await api.toggleChecklist(itemId, is_done);
-                      await refreshAll(activeProjectId);
-                    }}
-                  />
-                )}
               </div>
 
-              <div className="card cardPad">
-                <div className="sectionTitle">
-                  <h2>{t("activity")}</h2>
-                  <span className="pill">{activity.length}</span>
+              <div className="rightColumn">
+                <div className="card cardPad">
+                  <div className="sectionTitle">
+                    <h2>{t("spanishChecklist")}</h2>
+                    <span className="pill">{checklist.filter(c => c.is_done).length}/{checklist.length}</span>
+                  </div>
+                  {activeProjectId && (
+                    <Checklist
+                      items={checklist}
+                      onToggle={async (itemId, is_done) => {
+                        await api.toggleChecklist(itemId, is_done);
+                        await refreshAll(activeProjectId);
+                      }}
+                    />
+                  )}
                 </div>
-                <ActivityFeed items={activity} />
+
+                <div className="card cardPad">
+                  <div className="sectionTitle">
+                    <h2>{t("activity")}</h2>
+                    <span className="pill">{activity.length}</span>
+                  </div>
+                  <ActivityFeed items={activity} />
+                </div>
               </div>
             </div>
-          </div>
           )}
         </div>
-              <NewProjectModal
-  open={newProjectOpen}
-  onClose={() => {
-    setDefaultBg(loadPlatformDefaultBg());
-    setNewProjectOpen(false);
-  }}
-  clientIdFallback={projects[0]?.client_id ?? 1}
-  defaultBg={defaultBg}
-  onCreated={(p) => {
-    setProjects((prev) => [p, ...prev]);
-    setActiveProjectId(p.id);
-    setView("Tasks");
-  }}
-/>
+        <NewProjectModal
+          open={newProjectOpen}
+          onClose={() => {
+            setDefaultBg(loadPlatformDefaultBg());
+            setNewProjectOpen(false);
+          }}
+          clientIdFallback={projects[0]?.client_id ?? 1}
+          defaultBg={defaultBg}
+          onCreated={(p) => {
+            setProjects((prev) => [p, ...prev]);
+            setActiveProjectId(p.id);
+            setView("Tasks");
+          }}
+        />
 
-<QuickAddModal
-  open={quickAddOpen}
-  onClose={() => setQuickAddOpen(false)}
-  projectId={activeProjectId ?? null}
-  onCreated={(t) => {
-    setTasks((prev) => [t, ...prev]);
-  }}
-/>
+        <QuickAddModal
+          open={quickAddOpen}
+          onClose={() => setQuickAddOpen(false)}
+          projectId={activeProjectId ?? null}
+          onCreated={(t) => {
+            setTasks((prev) => [t, ...prev]);
+          }}
+        />
 
-          <GlobalSearchModal
-            open={globalSearchOpen}
-            onClose={() => setGlobalSearchOpen(false)}
-            tasks={tasks}
-            files={files as any}
-            checklist={checklist}
-            timeline={timeline}
-            onNavigate={(v) => setView(v)}
-          />      </main>
+        <GlobalSearchModal
+          open={globalSearchOpen}
+          onClose={() => setGlobalSearchOpen(false)}
+          tasks={tasks}
+          files={files as any}
+          checklist={checklist}
+          timeline={timeline}
+          onNavigate={(v) => setView(v)}
+        />
+        <CustomReportModal
+          open={customReportOpen}
+          onClose={() => setCustomReportOpen(false)}
+        />
+      </main>
     </div>
   );
 }

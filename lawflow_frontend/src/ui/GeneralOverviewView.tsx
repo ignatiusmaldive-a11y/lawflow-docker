@@ -38,7 +38,7 @@ function statusPill(status: string, t: ReturnType<typeof useI18n>["t"]) {
 function fmtDateShort(d?: string | null) {
   if (!d) return "—";
   const dt = new Date(d + "T00:00:00");
-  return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  return dt.toLocaleDateString("es-ES", { year: "numeric", month: "short", day: "2-digit" });
 }
 
 function daysUntil(dateStr?: string | null) {
@@ -262,22 +262,11 @@ export function GeneralOverviewView({
                   </td>
                   <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
                   <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
-                  <td>
-                    <div style={{ 
-                      fontWeight: isOverdue || isSoon ? 900 : 400,
-                      color: isOverdue ? "var(--danger)" : isSoon ? "var(--warn)" : "inherit"
-                    }}>
-                      {fmtDateShort(p.target_close_date)}
-                    </div>
-                    {d !== null && (
-                      <div style={{ fontSize: 10, color: "var(--muted)" }}>
-                        {isOverdue
-                          ? t("overdueDays").replace("{count}", String(Math.abs(d)))
-                          : t("daysLeft").replace("{count}", String(d))}
-                      </div>
-                    )}
-                  </td>
-                  <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
+                                    <td>
+                                      <div>
+                                        {fmtDateShort(p.target_close_date)}
+                                      </div>
+                                    </td>                  <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
                   <td style={{ textAlign: "center" }}>
                     <span className="pill neutral">{p.location}</span>
                   </td>

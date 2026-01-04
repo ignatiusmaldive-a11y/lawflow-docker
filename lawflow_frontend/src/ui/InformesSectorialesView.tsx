@@ -18,71 +18,71 @@ interface BusinessReport {
 const SAMPLE_REPORTS: BusinessReport[] = [
   {
     id: 1,
-    title: "Análisis del Mercado Inmobiliario de Marbella 2024",
+    title: "Análisis del Mercado Inmobiliario de Marbella 2025",
     type: "Local",
     location: "Marbella",
     description: "Estudio completo del mercado inmobiliario local incluyendo tendencias de precios, demanda y oferta.",
-    last_updated: "2024-01-15",
+    last_updated: "2025-01-15",
     sample_data: {}
   },
   {
     id: 2,
-    title: "Tendencias del Mercado Residencial en Costa del Sol",
+    title: "Tendencias del Mercado Residencial en Costa del Sol 2025",
     type: "Local",
     location: "Costa del Sol",
     description: "Análisis regional de las tendencias residenciales y comportamiento del comprador.",
-    last_updated: "2024-01-12",
+    last_updated: "2025-01-12",
     sample_data: {}
   },
   {
     id: 3,
-    title: "Informe Nacional: Evolución de Precios Inmobiliarios",
+    title: "Informe Nacional: Evolución de Precios Inmobiliarios 2025",
     type: "Nacional",
     description: "Panorama nacional de la evolución de precios inmobiliarios por comunidades autónomas.",
-    last_updated: "2024-01-10",
+    last_updated: "2025-01-10",
     sample_data: {}
   },
   {
     id: 4,
-    title: "Análisis del Mercado de Alquiler en Málaga Capital",
+    title: "Análisis del Mercado de Alquiler en Málaga Capital 2025",
     type: "Local",
     location: "Málaga",
     description: "Estudio detallado del mercado de alquiler en la capital malagueña.",
-    last_updated: "2024-01-08",
+    last_updated: "2025-01-08",
     sample_data: {}
   },
   {
     id: 5,
-    title: "Informe Nacional: Impacto de las Hipotecas Variables",
+    title: "Informe Nacional: Impacto de las Hipotecas Variables 2025",
     type: "Nacional",
     description: "Análisis del impacto de las condiciones hipotecarias en el mercado inmobiliario nacional.",
-    last_updated: "2024-01-05",
+    last_updated: "2025-01-05",
     sample_data: {}
   },
   {
     id: 6,
-    title: "Estudio del Mercado de Lujo en Puerto Banús",
+    title: "Estudio del Mercado de Lujo en Puerto Banús 2025",
     type: "Local",
     location: "Puerto Banús",
     description: "Análisis especializado del segmento de lujo en una de las zonas más exclusivas.",
-    last_updated: "2024-01-03",
+    last_updated: "2025-01-03",
     sample_data: {}
   },
   {
     id: 7,
-    title: "Tendencias Nacionales de Inversión Inmobiliaria 2024",
+    title: "Tendencias Nacionales de Inversión Inmobiliaria 2025",
     type: "Nacional",
     description: "Perspectivas de inversión y oportunidades en el mercado inmobiliario español.",
-    last_updated: "2024-01-01",
+    last_updated: "2025-01-01",
     sample_data: {}
   },
   {
     id: 8,
-    title: "Análisis del Mercado Turístico en Torremolinos",
+    title: "Análisis del Mercado Turístico en Torremolinos 2024",
     type: "Local",
     location: "Torremolinos",
     description: "Estudio del impacto del turismo en el mercado inmobiliario local.",
-    last_updated: "2023-12-28",
+    last_updated: "2024-12-28",
     sample_data: {}
   }
 ];
@@ -215,7 +215,23 @@ export function InformesSectorialesView() {
                 key={report.id}
                 style={{ cursor: "pointer" }}
                 onClick={() => {
-                  alert(`Informes completos disponibles próximamente. Este es un ejemplo del informe: "${report.title}"`);
+                  const slugMap: Record<string, string> = {
+                    "Análisis del Mercado Inmobiliario de Marbella 2025": "marbella-2025",
+                    "Tendencias del Mercado Residencial en Costa del Sol 2025": "costa-del-sol-2025",
+                    "Informe Nacional: Evolución de Precios Inmobiliarios 2025": "evolucion-precios-nacional",
+                    "Análisis del Mercado de Alquiler en Málaga Capital 2025": "alquiler-malaga-2025",
+                    "Informe Nacional: Impacto de las Hipotecas Variables 2025": "impacto-hipotecas-2025",
+                    "Estudio del Mercado de Lujo en Puerto Banús 2025": "puerto-banus-2025",
+                    "Tendencias Nacionales de Inversión Inmobiliaria 2025": "inversion-nacional-2025",
+                    "Análisis del Mercado Turístico en Torremolinos 2024": "turistico-torremolinos-2024"
+                  };
+                  const slug = slugMap[report.title];
+                  if (slug) {
+                    window.history.pushState(null, "", `/informes-sectoriales/${slug}`);
+                    window.dispatchEvent(new PopStateEvent("popstate"));
+                  } else {
+                    alert(`Informes completos disponibles próximamente. Este es un ejemplo del informe: "${report.title}"`);
+                  }
                 }}
               >
                 <td style={{ minWidth: "300px", whiteSpace: "normal" }}>
@@ -261,30 +277,30 @@ export function InformesSectorialesView() {
       {/* Filters & Actions */}
       <div className="table-container">
         <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <input
-          className="search"
-          placeholder="Buscar informes..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          style={{ width: 320 }}
-        />
+          <input
+            className="search"
+            placeholder="Buscar informes..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={{ width: 320 }}
+          />
 
-        <select
-          className="select"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          style={{ width: 180 }}
-        >
-          <option value="All">Todos los tipos</option>
-          <option value="Local">Local</option>
-          <option value="Nacional">Nacional</option>
-        </select>
+          <select
+            className="select"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            style={{ width: 180 }}
+          >
+            <option value="All">Todos los tipos</option>
+            <option value="Local">Local</option>
+            <option value="Nacional">Nacional</option>
+          </select>
 
-        <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-            {totalCount} informes disponibles
+          <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
+              {totalCount} informes disponibles
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
@@ -316,94 +332,94 @@ export function InformesSectorialesView() {
           flexDirection: 'column',
           gap: '24px'
         }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: '32px',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%'
-        }}>
-          {/* Company Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                display: 'grid',
-                placeItems: 'center',
-                background: 'linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.65))'
-              }}>◆</div>
-              <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '32px',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            width: '100%'
+          }}>
+            {/* Company Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  display: 'grid',
+                  placeItems: 'center',
+                  background: 'linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.65))'
+                }}>◆</div>
+                <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
+              </div>
+              <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
+                CRM para abogados especializados en derecho inmobiliario.
+              </p>
             </div>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
-              CRM para abogados especializados en derecho inmobiliario.
+
+            {/* Product Links */}
+            <div>
+              <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.history.pushState(null, "", "/agencias-polacas");
+                    window.dispatchEvent(new PopStateEvent("popstate"));
+                  }}
+                  style={{ color: "var(--text)", textDecoration: "none" }}
+                >
+                  Agencias Polacas
+                </a>
+              </h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Directorio</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Criterios de selección</a></li>
+              </ul>
+            </div>
+
+            {/* Contact & Support */}
+            <div>
+              <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Asistente IA</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Chat</a></li>
+                <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Investigación</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div style={{
+            borderTop: '1px solid var(--line)',
+            paddingTop: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            width: '100%',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0 }}>
+              © 2026 AMA - CRM. Todos los derechos reservados.
             </p>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Twitter</a>
+              <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>LinkedIn</a>
+              <span style={{ color: 'var(--muted)', fontSize: '13px' }}>Made with ❤️ in Marbella</span>
+            </div>
           </div>
-
-          {/* Product Links */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/informes-sectoriales"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.history.pushState(null, "", "/agencias-polacas");
-                  window.dispatchEvent(new PopStateEvent("popstate"));
-                }}
-                style={{ color: "var(--text)", textDecoration: "none" }}
-              >
-                Agencias Polacas
-              </a>
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Directorio</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); window.history.pushState(null, "", "/agencias-polacas"); window.dispatchEvent(new PopStateEvent('popstate')); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Criterios de selección</a></li>
-            </ul>
-          </div>
-
-          {/* Contact & Support */}
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Asistente IA</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Chat</a></li>
-              <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Investigación</a></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div style={{
-          borderTop: '1px solid var(--line)',
-          paddingTop: '20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <p style={{ color: 'var(--muted)', fontSize: '13px', margin: 0 }}>
-            © 2026 AMA - CRM. Todos los derechos reservados.
-          </p>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Twitter</a>
-            <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>LinkedIn</a>
-            <span style={{ color: 'var(--muted)', fontSize: '13px' }}>Made with ❤️ in Marbella</span>
-          </div>
-        </div>
         </footer>
       </div>
     </div>

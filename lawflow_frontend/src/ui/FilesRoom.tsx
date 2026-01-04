@@ -52,12 +52,12 @@ export function FilesRoom({ projectId }: { projectId: number }) {
                   <td className="fileNameCell">
                     <div className="fileName">{f.filename}</div>
                     <div className="fileMetaMobile small">
-                      {(f.mime_type ?? "—") + " · " + f.uploader + " · " + new Date(f.uploaded_at).toLocaleDateString()}
+                      {(f.mime_type ?? "—") + " · " + f.uploader + " · " + new Date(f.uploaded_at).toLocaleDateString("es-ES")}
                     </div>
                   </td>
                   <td className="small">{f.mime_type ?? "—"}</td>
                   <td>{f.uploader}</td>
-                  <td className="small">{new Date(f.uploaded_at).toLocaleString()}</td>
+                  <td className="small">{new Date(f.uploaded_at).toLocaleString("es-ES")}</td>
                 </tr>
               ))}
               {filtered.length === 0 && (
@@ -97,7 +97,7 @@ export function FilesRoom({ projectId }: { projectId: number }) {
           <div style={{ display: "grid", gap: 10 }}>
             <div className="small"><b>{t("type")}:</b> {selected.mime_type ?? "—"}</div>
             <div className="small"><b>{t("uploader")}:</b> {selected.uploader}</div>
-            <div className="small"><b>{t("uploaded")}:</b> {new Date(selected.uploaded_at).toLocaleString()}</div>
+            <div className="small"><b>{t("uploaded")}:</b> {new Date(selected.uploaded_at).toLocaleString("es-ES")}</div>
 
             <div className="card cardPad" style={{ padding: 12 }}>
               <div className="sectionTitle">
