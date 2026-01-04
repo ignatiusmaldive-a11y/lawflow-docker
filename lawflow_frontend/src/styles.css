@@ -246,7 +246,6 @@ select {
   color: var(--text);
   cursor: pointer;
   font-size: 16px;
-  display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
@@ -1009,7 +1008,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .hamburger {
-    display: block;
+    display: flex;
   }
 
   .shell {
