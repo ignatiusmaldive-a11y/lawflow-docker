@@ -48,10 +48,31 @@ select {
   transition: background 180ms ease;
   display: grid;
   grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr;
   height: 100%;
 }
 
+.sidebarWrap {
+  display: contents;
+}
+
+.sidebarTop {
+  grid-column: 1;
+  grid-row: 1;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: #0f1522;
+  padding: 16px;
+  height: var(--topbar-height, auto);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
 .sidebar {
+  grid-column: 1;
+  grid-row: 2;
   border-right: 1px solid var(--line);
   background: #0f1522;
   padding: 16px;
@@ -63,11 +84,30 @@ select {
   min-width: 0;
 }
 
+.sidebar > .card:first-child {
+  margin-top: 12px;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 8px;
+}
+
+.brandLink {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 14px;
+}
+
+.brandLink:hover {
+  background: var(--panel);
+}
+
+.brandLink:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--brand) 45%, var(--line));
+  outline-offset: 2px;
 }
 
 .brandMark {
@@ -143,12 +183,16 @@ select {
 }
 
 .main {
+  grid-column: 2;
+  grid-row: 2;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .topbar {
+  grid-column: 2;
+  grid-row: 1;
   padding: 16px 18px;
   border-bottom: 1px solid var(--line);
   background: transparent;
@@ -158,7 +202,7 @@ select {
 
 .topbar-container {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: space-between;
   gap: 14px;
   width: 100%;
@@ -167,6 +211,7 @@ select {
 .titleRow {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 2px;
 }
 
@@ -343,6 +388,16 @@ select {
   gap: 12px;
 }
 
+.rightColumn {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.rightColumn > .card:first-child {
+  margin-top: 12px;
+}
+
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -358,6 +413,27 @@ select {
 
 .cardPad {
   padding: 14px;
+}
+
+.cardSections {
+  display: grid;
+  gap: 0;
+}
+
+.cardSection {
+  padding: 12px 0;
+}
+
+.cardSections > .cardSection:first-child {
+  padding-top: 0;
+}
+
+.cardSections > .cardSection:last-child {
+  padding-bottom: 0;
+}
+
+.cardSections > .cardSection + .cardSection {
+  border-top: 1px solid var(--line);
 }
 
 .sectionTitle {
@@ -711,6 +787,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Files table: allow long filenames to wrap + mobile-friendly columns */
+.filesTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
 .filesTable .fileNameCell {
   white-space: normal;
   min-width: 180px;
@@ -720,6 +801,35 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   font-weight: 950;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.filesTable th:nth-child(2),
+.filesTable td:nth-child(2),
+.filesTable th:nth-child(3),
+.filesTable td:nth-child(3),
+.filesTable th:nth-child(4),
+.filesTable td:nth-child(4) {
+  width: 120px;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filesTable tbody tr {
+  cursor: pointer;
+}
+
+.filesTable tbody tr:hover {
+  background: color-mix(in oklab, var(--brand2) 10%, transparent);
+}
+
+.filesTable tbody tr.filesRowSelected {
+  background: color-mix(in oklab, var(--brand2) 18%, transparent);
+  outline: 1px solid color-mix(in oklab, var(--brand2) 30%, transparent);
+  outline-offset: -1px;
 }
 
 .fileMetaMobile {
@@ -779,6 +889,92 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: 3px;
 }
 
+.filesRoomGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.filesRoomGridUploadOnly {
+  grid-template-columns: 1fr minmax(260px, 1fr);
+}
+
+.filesRoomGridUploadOnly .filesRoomBlock {
+  grid-column: 2;
+  justify-items: end;
+}
+
+.filesRoomUploadHeader {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.filesRoomUploadHint {
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.filesRoomGridUploadOnly .filesUploadZone {
+  max-width: 520px;
+  justify-self: end;
+}
+
+.filesRoomBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.filesRoomBlockTitle {
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+.filesRoomBlock .search {
+  width: 100%;
+}
+
+.filesUploadZone {
+  position: static;
+  top: auto;
+  z-index: auto;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.filesUploadZone.active {
+  border-color: color-mix(in oklab, var(--brand2) 85%, var(--line));
+  background: color-mix(in oklab, var(--brand2) 10%, #1e1b2e);
+}
+
+@media (max-width: 680px) {
+  .filesRoomGridUploadOnly {
+    grid-template-columns: 1fr;
+  }
+
+  .filesRoomGridUploadOnly .filesRoomBlock {
+    grid-column: auto;
+    justify-items: stretch;
+  }
+
+  .filesRoomUploadHeader {
+    max-width: none;
+  }
+
+  .filesRoomGridUploadOnly .filesUploadZone {
+    max-width: none;
+    justify-self: stretch;
+  }
+}
+
 
 
 .timelineWrap {
@@ -801,8 +997,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .timelineLabels {
   display: grid;
-  auto-rows: 44px;
-  gap: 6px;
+  grid-auto-rows: 36px;
+  gap: 4px;
 }
 
 .timelineGrid {
@@ -810,28 +1006,51 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding-left: 0;
   /* Remove padding to align grid exactly with dates */
   display: grid;
-  auto-rows: 44px;
-  gap: 6px;
+  grid-auto-rows: 36px;
+  gap: 4px;
   position: relative;
   overflow: visible;
-  /* Allow today line to show */
+}
+
+.timelineHeader {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  height: 24px;
+  overflow: hidden;
+}
+
+.timelineHeaderItem {
+  position: absolute;
+  top: 4px;
+  text-align: left;
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
 }
 
 .barRow {
-  display: grid;
+  display: flex;
   height: 100%;
   align-items: center;
   position: relative;
-  grid-column: 1 / -1;
 }
 
 .bar {
-  grid-column: var(--start) / var(--end);
+  position: absolute;
+  left: var(--start);
+  width: var(--width);
   height: 20px;
+  min-width: 10px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(135deg, rgba(124, 58, 237, .85), rgba(124, 58, 237, .55));
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .timelineLabelItem {
@@ -852,9 +1071,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .todayLine::after {
   content: "TODAY";
   position: absolute;
-  top: -20px;
+  top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -110%);
   font-size: 10px;
   font-weight: 900;
   background: var(--brand2);
@@ -864,16 +1083,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .milestoneDiamond {
-  grid-column: var(--end);
-  /* Position at end date */
+  position: absolute;
+  left: var(--x);
   width: 18px;
   height: 18px;
   background: var(--warn);
-  transform: rotate(45deg);
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
   border: 2px solid var(--panel);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  justify-self: center;
-  /* Center in the day column */
 }
 
 .checklist {
@@ -1003,8 +1221,37 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Medium screens - hide sidebar by default, show hamburger */
 @media (max-width: 1400px) {
+  .sidebarTop,
   .sidebar {
     display: none;
+  }
+
+  .sidebarWrap {
+    display: none;
+  }
+
+  .sidebarWrap.open {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 51;
+    background: #0f1522;
+    border-right: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .sidebarWrap.open .sidebarTop,
+  .sidebarWrap.open .sidebar {
+    display: flex;
+    border-right: 0;
+  }
+
+  .sidebarWrap.open .sidebar {
+    flex: 1 1 auto;
   }
 
   .hamburger {
@@ -1013,6 +1260,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   .shell {
     grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .main {
+    grid-column: 1;
   }
 }
 
@@ -1078,10 +1330,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     grid-template-columns: 1fr;
   }
 
-  .sidebar {
-    display: none;
-  }
-
   .grid4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1127,8 +1375,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   .filesTable th:nth-child(2),
   .filesTable td:nth-child(2),
-  .filesTable th:nth-child(3),
-  .filesTable td:nth-child(3) {
+  .filesTable th:nth-child(4),
+  .filesTable td:nth-child(4) {
     display: none;
   }
 }
@@ -1151,8 +1399,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-size: 13px;
   }
 
-  .filesTable th:nth-child(4),
-  .filesTable td:nth-child(4) {
+  .filesTable th:nth-child(3),
+  .filesTable td:nth-child(3) {
     display: none;
   }
 }
@@ -1377,7 +1625,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: 14px;
   border-radius: var(--radius);
   border: 1px dashed color-mix(in oklab, var(--brand2) 55%, var(--line));
-  background: #102018;
+  background: #1e1b2e;
 }
 
 /* Language toggle */
@@ -1393,19 +1641,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   inset: 0;
   background: rgba(0, 0, 0, .5);
   z-index: 50;
-}
-
-/* Medium screens - show sidebar when open */
-@media (max-width: 1400px) {
-  .sidebarOverlay+.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    height: 100vh;
-    z-index: 51;
-    display: block;
-  }
 }
 
 /* Responsive board columns */

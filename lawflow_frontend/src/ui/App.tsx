@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../lib/i18n";
 import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem } from "../lib/api";
 import { api2, api3 } from "../lib/api";
@@ -402,9 +402,45 @@ export function App() {
     return { open, dueSoon, overdue, done };
   }, [tasks]);
 
+  const shellRef = useRef<HTMLDivElement>(null);
+  const topbarRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const shellEl = shellRef.current;
+    const topbarEl = topbarRef.current;
+    if (!shellEl || !topbarEl) return;
+
+    const update = () => {
+      const height = Math.round(topbarEl.getBoundingClientRect().height);
+      shellEl.style.setProperty("--topbar-height", `${height}px`);
+    };
+
+    update();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(topbarEl);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1401px)");
+    const onChange = () => {
+      if (mql.matches) setSidebarOpen(false);
+    };
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <div
       className="shell"
+      ref={shellRef}
       style={{
         background:
           view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
@@ -413,118 +449,127 @@ export function App() {
       }}
     >
       {sidebarOpen && <div className="sidebarOverlay" onClick={() => setSidebarOpen(false)} />}
-      <aside
-        className={`sidebar ${view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
-          }`}
-      >
-        <div className="brand">
-          <div className="brandMark">◆</div>
-          <div>
-            <div className="brandName">AMA - CRM</div>
-            <div className="small">{t("tagline")}</div>
-          </div>
-        </div>
-
-        <nav className="nav">
-          <a className={view === "General Overview" ? "active" : ""} href="#" onClick={(e) => { e.preventDefault(); setView("General Overview"); if (sidebarOpen) setSidebarOpen(false); }}>{t("overviewLink")}</a>
-        </nav>
-
-        <div style={{ borderTop: "1px solid var(--line)", margin: "10px 0" }} />
-
-        <div className="card cardPad">
-          <div className="active-matter-group">
-            <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
-            <select
-              className="select"
-              value={activeProjectId ?? undefined}
-              onChange={(e) => {
-                setActiveProjectId(Number(e.target.value));
-                if (view === "General Overview") setView("Tasks");
-                if (sidebarOpen) setSidebarOpen(false); // Close sidebar on selection
-              }}
-            >
-              {projects.map((p) => (
-                <option value={p.id} key={p.id}>
-                  {formatProjectLabel(p, { lang })}
-                </option>
-              ))}
-            </select>
-            <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-              <div className="small" style={{ fontWeight: 900 }}>
-                <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {activeProject ? riskPill(activeProject.risk, t) : null}
-                <button
-                  className="btn ghost"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (!activeProject) return;
-                    setPinnedIds(togglePin(activeProject.id));
-                  }}
-                  title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
-                  style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
-                >
-                  {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="pinned-recent-group">
-            {pinnedProjects.length > 0 && (
-              <div style={{ marginTop: 12 }}>
-                <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
-                  {pinnedProjects.slice(0, 4).map((p) => (
-                    <button
-                      key={p.id}
-                      className="chipRow"
-                      onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-                      title={p.title}
-                    >
-                      <span className="chipDot" />
-                      <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {recentProjects.length > 0 && (
-              <div style={{ marginTop: 12 }}>
-                <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
-                <div style={{ display: "grid", gap: 6 }}>
-                  {recentProjects.slice(0, 5).map((p) => (
-                    <button
-                      key={p.id}
-                      className="chipRow"
-                      onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-                      title={p.title}
-                    >
-                      <span className="chipDot muted" />
-                      <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="sidebarFooter">
-          <div className="userchip">
-            <div className="avatar">A</div>
+      <div className={`sidebarWrap${sidebarOpen ? " open" : ""}`}>
+        <div className="sidebarTop">
+          <a
+            className="brand brandLink"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveProjectId(null);
+              setView("General Overview");
+              if (sidebarOpen) setSidebarOpen(false);
+              window.scrollTo(0, 0);
+            }}
+            aria-label={t("home")}
+          >
+            <div className="brandMark">◆</div>
             <div>
-              <div style={{ fontWeight: 900, fontSize: 13 }}>Ana López</div>
-              <div className="small">Legal Ops</div>
+              <div className="brandName">AMA - CRM</div>
+              <div className="small">{t("tagline")}</div>
+            </div>
+          </a>
+        </div>
+
+        <aside
+          className={`sidebar ${view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" ? "hide-content" : ""
+            }`}
+        >
+          <div className="card cardPad">
+            <div className="active-matter-group">
+              <div className="small" style={{ fontWeight: 900, marginBottom: 8 }}>{t("activeMatter")}</div>
+              <select
+                className="select"
+                value={activeProjectId ?? undefined}
+                onChange={(e) => {
+                  setActiveProjectId(Number(e.target.value));
+                  if (view === "General Overview") setView("Tasks");
+                  if (sidebarOpen) setSidebarOpen(false); // Close sidebar on selection
+                }}
+              >
+                {projects.map((p) => (
+                  <option value={p.id} key={p.id}>
+                    {formatProjectLabel(p, { lang })}
+                  </option>
+                ))}
+              </select>
+              <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
+                <div className="small" style={{ fontWeight: 900 }}>
+                  <b>{t("statusTableCol")}</b>: {projectStatusLabel(activeProject?.status, t)}
+                </div>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {activeProject ? riskPill(activeProject.risk, t) : null}
+                  <button
+                    className="btn ghost"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (!activeProject) return;
+                      setPinnedIds(togglePin(activeProject.id));
+                    }}
+                    title={pinnedIds.includes(activeProject?.id ?? -1) ? t("unpinMatter") : t("pinMatter")}
+                    style={{ color: pinnedIds.includes(activeProject?.id ?? -1) ? "gold" : "inherit" }}
+                  >
+                    {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="pinned-recent-group">
+              {pinnedProjects.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
+                    {pinnedProjects.slice(0, 4).map((p) => (
+                      <button
+                        key={p.id}
+                        className="chipRow"
+                        onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                        title={p.title}
+                      >
+                        <span className="chipDot" />
+                        <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {recentProjects.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
+                  <div style={{ display: "grid", gap: 6 }}>
+                    {recentProjects.slice(0, 5).map((p) => (
+                      <button
+                        key={p.id}
+                        className="chipRow"
+                        onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                        title={p.title}
+                      >
+                        <span className="chipDot muted" />
+                        <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          <button className="btn ghost" title={t("settings")} onClick={() => setView("Matter Settings")}>⚙</button>
-        </div>
-      </aside>
 
-      <main className="main">
+          <div className="sidebarFooter">
+            <div className="userchip">
+              <div className="avatar">A</div>
+              <div>
+                <div style={{ fontWeight: 900, fontSize: 13 }}>Ana López</div>
+                <div className="small">Legal Ops</div>
+              </div>
+            </div>
+            <button className="btn ghost" title={t("settings")} onClick={() => setView("Matter Settings")}>⚙</button>
+          </div>
+        </aside>
+      </div>
+
         <header
+          ref={topbarRef}
           className={
             "topbar" + (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" || view === "Puerto Banus Report" ? " landingTopbar" : "")
           }
@@ -712,10 +757,7 @@ export function App() {
           </div>
         </header>
 
-
-
-
-
+      <main className="main">
         <div className="content">
           {view === "General Overview" ? (
             <GeneralOverviewView
@@ -855,21 +897,33 @@ export function App() {
 
                   {activeProjectId && view === "Files" && (
                     <div style={{ display: "grid", gap: 12 }}>
-                      <FilesRoom projectId={activeProjectId} />
-                      <div className="card cardPad" style={{ padding: 12 }}>
-                        <div className="sectionTitle" style={{ marginBottom: 0 }}>
-                          <h2>{t("municipality")}</h2>
-                          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                            <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e) => setMunicipality(e.target.value)}>
-                              {MUNICIPALITIES_LIST.map((m) => (
-                                <option key={m} value={m}>{m}</option>
-                              ))}
-                            </select>
-                            <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
+                      <div className="card cardPad">
+                        <div className="sectionTitle">
+                          <h2>{t("files")}</h2>
+                        </div>
+                        <FilesRoom projectId={activeProjectId} embedded />
+                      </div>
+
+                      <div className="card cardPad">
+                        <div className="cardSections">
+                          <div className="cardSection">
+                            <div className="sectionTitle" style={{ marginBottom: 0 }}>
+                              <h2>{t("templates")}</h2>
+                              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                                <select className="select" style={{ width: "min(220px, 100%)", maxWidth: 220 }} value={municipality} onChange={(e) => setMunicipality(e.target.value)}>
+                                  {MUNICIPALITIES_LIST.map((m) => (
+                                    <option key={m} value={m}>{m}</option>
+                                  ))}
+                                </select>
+                                <span className="pill">{formatTransactionType(activeProject?.transaction_type, lang)}</span>
+                              </div>
+                            </div>
+                            <div className="small">{t("templatesDescription")}</div>
                           </div>
+
+                          <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} embedded />
                         </div>
                       </div>
-                      <TemplatesView municipality={municipality} transactionType={activeProject?.transaction_type ?? "Purchase"} />
                     </div>
                   )}
 
@@ -893,21 +947,23 @@ export function App() {
               </div>
 
               <div className="rightColumn">
-                <div className="card cardPad">
-                  <div className="sectionTitle">
-                    <h2>{t("spanishChecklist")}</h2>
-                    <span className="pill">{checklist.filter(c => c.is_done).length}/{checklist.length}</span>
+                {!["Timeline", "Files", "Closing Pack"].includes(view) && (
+                  <div className="card cardPad">
+                    <div className="sectionTitle">
+                      <h2>{t("spanishChecklist")}</h2>
+                      <span className="pill">{checklist.filter(c => c.is_done).length}/{checklist.length}</span>
+                    </div>
+                    {activeProjectId && (
+                      <Checklist
+                        items={checklist}
+                        onToggle={async (itemId, is_done) => {
+                          await api.toggleChecklist(itemId, is_done);
+                          await refreshAll(activeProjectId);
+                        }}
+                      />
+                    )}
                   </div>
-                  {activeProjectId && (
-                    <Checklist
-                      items={checklist}
-                      onToggle={async (itemId, is_done) => {
-                        await api.toggleChecklist(itemId, is_done);
-                        await refreshAll(activeProjectId);
-                      }}
-                    />
-                  )}
-                </div>
+                )}
 
                 <div className="card cardPad">
                   <div className="sectionTitle">

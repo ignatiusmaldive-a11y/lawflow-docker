@@ -80,7 +80,7 @@ export function SectorialReportView({ data }: { data: ReportData }) {
                         </div>
                         <div style={{ height: 300 }}>
                             <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 16, textAlign: "center" }}>Evolución (Histórico)</h3>
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 1, height: 1 }}>
                                 <AreaChart data={data.priceData}>
                                     <defs>
                                         <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
@@ -134,7 +134,7 @@ export function SectorialReportView({ data }: { data: ReportData }) {
 
                         <div style={{ height: 350 }}>
                             <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 16, textAlign: "center" }}>Distribución del Mercado</h3>
-                            <ResponsiveContainer width="100%" height="80%">
+                            <ResponsiveContainer width="100%" height="80%" initialDimension={{ width: 1, height: 1 }}>
                                 <PieChart>
                                     <Pie
                                         data={data.originData}

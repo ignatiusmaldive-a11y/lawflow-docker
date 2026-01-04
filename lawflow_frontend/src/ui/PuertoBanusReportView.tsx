@@ -106,7 +106,7 @@ export function PuertoBanusReportView() {
                         </div>
                         <div style={{ height: 300 }}>
                             <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 16, textAlign: "center" }}>Evolución del Precio (2020-2025)</h3>
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 1, height: 1 }}>
                                 <AreaChart data={PRICE_DATA}>
                                     <defs>
                                         <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
@@ -160,7 +160,7 @@ export function PuertoBanusReportView() {
 
                         <div style={{ height: 350 }}>
                             <h3 style={{ fontSize: 14, fontWeight: 800, marginBottom: 16, textAlign: "center" }}>Origen de la Inversión (2025)</h3>
-                            <ResponsiveContainer width="100%" height="80%">
+                            <ResponsiveContainer width="100%" height="80%" initialDimension={{ width: 1, height: 1 }}>
                                 <PieChart>
                                     <Pie
                                         data={ORIGIN_DATA}
