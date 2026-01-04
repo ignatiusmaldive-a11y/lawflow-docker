@@ -1987,40 +1987,57 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .overview-toolbar {
   display: flex;
-  gap: 12px;
+  gap: clamp(8px, 1.2vw, 12px);
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .overview-toolbar .overview-actions {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .overview-toolbar .overview-search {
-  flex: 1 1 320px;
-  min-width: 220px;
+  flex: 2 1 240px;
+  min-width: 0;
 }
 
 .overview-toolbar .overview-status {
-  flex: 0 1 220px;
-  min-width: 180px;
-  max-width: 260px;
+  flex: 1 1 180px;
+  min-width: 120px;
+  max-width: 220px;
 }
 
-@media (max-width: 720px) {
-  .overview-toolbar .overview-actions {
-    margin-left: 0;
-    width: 100%;
-    justify-content: space-between;
+.overview-new-project {
+  padding: clamp(6px, .8vw, 8px) clamp(10px, 1.2vw, 16px);
+  font-size: clamp(11px, 1.1vw, 13px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+@media (max-width: 520px) {
+  .overview-toolbar {
+    flex-wrap: wrap;
   }
 
-  .overview-toolbar .overview-search,
+  .overview-toolbar .overview-search {
+    flex: 1 1 100%;
+  }
+
   .overview-toolbar .overview-status {
     flex: 1 1 100%;
-    min-width: 0;
     max-width: none;
+  }
+
+  .overview-toolbar .overview-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 

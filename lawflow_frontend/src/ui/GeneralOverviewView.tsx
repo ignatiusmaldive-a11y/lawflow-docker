@@ -220,7 +220,7 @@ export function GeneralOverviewView({
             <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
               {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
             </div>
-            <button className="btn primary" onClick={onNewProject} style={{ padding: "8px 16px", fontSize: "13px" }}>
+            <button className="btn primary overview-new-project" onClick={onNewProject}>
               {t("newProject")}
             </button>
           </div>
