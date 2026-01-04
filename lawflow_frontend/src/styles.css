@@ -20,11 +20,11 @@
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
 }
 
 #root {
-  height: 100%;
+  min-height: 100vh;
 }
 
 body {
@@ -53,7 +53,6 @@ select {
   display: grid;
   grid-template-columns: 280px 1fr;
   grid-template-rows: auto 1fr;
-  height: 100%;
   min-height: 100vh;
 }
 
@@ -201,7 +200,7 @@ select {
   grid-row: 2;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .topbar {
@@ -378,14 +377,7 @@ select {
 
 .content {
   padding: 16px 18px;
-  overflow: auto;
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.content::-webkit-scrollbar {
-  display: none;
-  /* Chrome/Safari */
+  overflow: visible;
 }
 
 
@@ -1991,6 +1983,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .overview-actions {
   margin-left: auto;
+}
+
+.overview-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.overview-toolbar .overview-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-toolbar .overview-search {
+  flex: 1 1 320px;
+  min-width: 220px;
+}
+
+.overview-toolbar .overview-status {
+  flex: 0 1 220px;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+@media (max-width: 720px) {
+  .overview-toolbar .overview-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .overview-toolbar .overview-search,
+  .overview-toolbar .overview-status {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: none;
+  }
 }
 
 @media (max-width: 1040px) {

@@ -194,20 +194,18 @@ export function GeneralOverviewView({
 
       {/* Filters & Actions */}
       <div className="table-container">
-        <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div className="card cardPad overview-toolbar">
           <input
-            className="search"
+            className="search overview-search"
             placeholder={t("searchProjectsPlaceholder")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            style={{ width: 320 }}
           />
 
           <select
-            className="select"
+            className="select overview-status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ width: 220 }}
           >
             <option value="All">{t("allStatuses")}</option>
             <option value="Intake">{t("statusIntake")}</option>
@@ -218,7 +216,7 @@ export function GeneralOverviewView({
             <option value="Completed">{t("statusCompleted")}</option>
           </select>
 
-          <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="overview-actions">
             <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
               {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
             </div>
@@ -231,7 +229,7 @@ export function GeneralOverviewView({
 
       {/* Main Table */}
       <div className="table-container">
-        <div className="card" style={{ overflowX: "hidden" }}>
+        <div className="card">
           <table className="table mattersTable" style={{ width: "100%" }}>
             <thead>
               <tr>
