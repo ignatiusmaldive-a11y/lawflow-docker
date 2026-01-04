@@ -248,25 +248,43 @@ export function GeneralOverviewView({
                 const isSoon = d !== null && d <= 7 && d >= 0;
                 const matterLabel = formatProjectLabel(p);
 
-                return (
-                  <tr
-                    key={p.id}
-                    onClick={() => onProjectSelect(p.id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="matterCell">
-                      <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
-                        {matterLabel}
-                      </div>
-                    </td>
-                    <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
-                    <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
-                    <td><div>{fmtDateShort(p.target_close_date)}</div></td>
-                    <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
-                    <td style={{ textAlign: "center" }}><span className="pill neutral">{p.location}</span></td>
-                  </tr>
-                );
-              })}
+	                return (
+	                  <tr
+	                    key={p.id}
+	                    onClick={() => onProjectSelect(p.id)}
+	                    style={{ cursor: "pointer" }}
+	                  >
+	                    <td className="matterCell">
+	                      <div className="rowCell">
+	                        <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
+	                          {matterLabel}
+	                        </div>
+	                      </div>
+	                    </td>
+	                    <td style={{ textAlign: "center" }}>
+	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                        {statusPill(p.status, t)}
+	                      </div>
+	                    </td>
+	                    <td style={{ textAlign: "center" }}>
+	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                        {riskPill(p.risk, t)}
+	                      </div>
+	                    </td>
+	                    <td>
+	                      <div className="rowCell">{fmtDateShort(p.target_close_date)}</div>
+	                    </td>
+	                    <td>
+	                      <div className="rowCell">{formatClientName(p.client?.name, t("unknownClient"))}</div>
+	                    </td>
+	                    <td style={{ textAlign: "center" }}>
+	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                        <span className="pill neutral">{p.location}</span>
+	                      </div>
+	                    </td>
+	                  </tr>
+	                );
+	              })}
               {sortedAndFilteredProjects.length === 0 && (
                 <tr>
                   <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>

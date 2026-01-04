@@ -752,6 +752,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .mattersTable tbody td {
   padding-top: 12px;
   padding-bottom: 12px;
+  vertical-align: bottom;
+}
+
+.mattersTable tbody td .rowCell {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
 }
 
 .mattersTable th:nth-child(1) {
