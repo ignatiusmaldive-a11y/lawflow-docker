@@ -318,7 +318,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       // If no language is stored, or it's not 'en'/'es', default to 'es'
       if (raw === "en") setLangState("en");
       else setLangState("es"); // Default to Spanish
-    } catch {}
+    } catch { }
   }, []);
 
   // setLang is no longer needed as there's no UI to change language

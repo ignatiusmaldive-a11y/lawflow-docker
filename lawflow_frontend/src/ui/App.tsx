@@ -23,6 +23,7 @@ import { AgenciasPolacasView } from "./AgenciasPolacasView";
 import { PuertoBanusReportView } from "./PuertoBanusReportView";
 import { SectorialReportView } from "./SectorialReportView";
 import { REPORTS_DATA } from "../lib/reportData";
+import { ChatView } from "./ChatView";
 import { CustomReportModal } from "./CustomReportModal";
 import { Callout } from "./components/Callout";
 import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
@@ -37,6 +38,7 @@ type View =
   | "Informes Sectoriales"
   | "Agencias Polacas"
   | "Puerto Banus Report"
+  | "Chat"
   | "Sectorial Report";
 
 const LS_RECENTS = "lawflow.recents.v1";
@@ -263,6 +265,8 @@ export function App() {
         setView("Informes Sectoriales");
       } else if (window.location.pathname === "/agencias-polacas") {
         setView("Agencias Polacas");
+      } else if (window.location.pathname === "/chat") {
+        setView("Chat");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else if (window.location.pathname === "/informes-sectoriales/puerto-banus-2025") {
@@ -291,6 +295,8 @@ export function App() {
         setView("Informes Sectoriales");
       } else if (window.location.pathname === "/agencias-polacas") {
         setView("Agencias Polacas");
+      } else if (window.location.pathname === "/chat") {
+        setView("Chat");
       } else if (window.location.pathname === "/project") {
         setView("Tasks");
       } else if (window.location.pathname === "/informes-sectoriales/puerto-banus-2025") {
@@ -329,6 +335,10 @@ export function App() {
     } else if (view === "Puerto Banus Report") {
       if (window.location.pathname !== "/informes-sectoriales/puerto-banus-2025") {
         window.history.pushState(null, "", "/informes-sectoriales/puerto-banus-2025");
+      }
+    } else if (view === "Chat") {
+      if (window.location.pathname !== "/chat") {
+        window.history.pushState(null, "", "/chat");
       }
     } else if (view === "Sectorial Report") {
       if (selectedReportSlug && window.location.pathname !== `/informes-sectoriales/${selectedReportSlug}`) {
@@ -569,9 +579,26 @@ export function App() {
                     <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
                   </div>
                 </div>
+              ) : view === "Chat" ? (
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">{t("aiAssistant")}</div>
+                    <div className="small">Tu compañero inteligente para la gestión legal e inmobiliaria</div>
+                  </div>
+                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setView("General Overview")}
+                    >
+                      AMA-CRM
+                    </span>
+                    <span style={{ opacity: 0.5 }}>/</span>
+                    <span style={{ color: "var(--text)" }}>{t("aiAssistant")}</span>
+                  </nav>
+                </div>
               ) : (
                 <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
-                  <p className="h1">
+                  <div className="h1">
                     {view === "General Overview" ? (
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <div className="brandMark">◆</div>
@@ -581,7 +608,7 @@ export function App() {
                         </div>
                       </div>
                     ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
-                  </p>
+                  </div>
                   {view !== "General Overview" && activeProject && (
                     <div className="projectMetaInline">
                       <div className="small">
@@ -607,7 +634,7 @@ export function App() {
                 className="topNav"
                 style={{
                   minHeight: 42,
-                  display: (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" || view === "Puerto Banus Report") ? "none" : "block",
+                  display: (view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas" || view === "Puerto Banus Report" || view === "Chat") ? "none" : "block",
                 }}
               >
                 {activeProjectId && view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && view !== "Puerto Banus Report" && (
@@ -624,19 +651,21 @@ export function App() {
             <div className="actions">
               <div className="projectHeaderActions">
                 {/* Action Button: Conditional Label & Logic */}
-                <button
-                  className="btn quickAddBtn"
-                  onClick={() => {
-                    if (view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report") {
-                      setCustomReportOpen(true);
-                    } else {
-                      setQuickAddOpen(true);
-                    }
-                  }}
-                  title={view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report" ? "Crear Informe" : t("quickAdd")}
-                >
-                  {view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report" ? "Crear Informe" : t("quickAdd")}
-                </button>
+                {view !== "Chat" && (
+                  <button
+                    className="btn quickAddBtn"
+                    onClick={() => {
+                      if (view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report") {
+                        setCustomReportOpen(true);
+                      } else {
+                        setQuickAddOpen(true);
+                      }
+                    }}
+                    title={view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report" ? "Crear Informe" : t("quickAdd")}
+                  >
+                    {view === "Informes Sectoriales" || view === "Puerto Banus Report" || view === "Sectorial Report" ? "Crear Informe" : t("quickAdd")}
+                  </button>
+                )}
 
                 <div className="headerIconRow">
                   <button
@@ -660,7 +689,7 @@ export function App() {
                     <span className="iconSquareGlyph">⌂</span>
                   </button>
 
-                  {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && view !== "Puerto Banus Report" && view !== "Sectorial Report" && activeProject && (
+                  {view !== "General Overview" && view !== "Informes Sectoriales" && view !== "Agencias Polacas" && view !== "Puerto Banus Report" && view !== "Sectorial Report" && view !== "Chat" && activeProject && (
                     <button
                       className="iconSquare headerIconBtn"
                       onClick={(e) => {
@@ -704,6 +733,8 @@ export function App() {
             <PuertoBanusReportView />
           ) : view === "Sectorial Report" && selectedReportSlug && REPORTS_DATA[selectedReportSlug] ? (
             <SectorialReportView data={REPORTS_DATA[selectedReportSlug]} />
+          ) : view === "Chat" ? (
+            <ChatView />
           ) : (
             <div className="contentGrid">
               <div className="leftColumn">
