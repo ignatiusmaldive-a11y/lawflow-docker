@@ -194,20 +194,18 @@ export function GeneralOverviewView({
 
       {/* Filters & Actions */}
       <div className="table-container">
-        <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div className="card cardPad overview-toolbar">
           <input
-            className="search"
+            className="search overview-search"
             placeholder={t("searchProjectsPlaceholder")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            style={{ width: 320 }}
           />
 
           <select
-            className="select"
+            className="select overview-status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ width: 220 }}
           >
             <option value="All">{t("allStatuses")}</option>
             <option value="Intake">{t("statusIntake")}</option>
@@ -218,11 +216,11 @@ export function GeneralOverviewView({
             <option value="Completed">{t("statusCompleted")}</option>
           </select>
 
-          <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="overview-actions">
             <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
               {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
             </div>
-            <button className="btn primary" onClick={onNewProject} style={{ padding: "8px 16px", fontSize: "13px" }}>
+            <button className="btn primary overview-new-project" onClick={onNewProject}>
               {t("newProject")}
             </button>
           </div>
@@ -231,7 +229,7 @@ export function GeneralOverviewView({
 
       {/* Main Table */}
       <div className="table-container">
-        <div className="card" style={{ overflowX: "hidden" }}>
+        <div className="card">
           <table className="table mattersTable" style={{ width: "100%" }}>
             <thead>
               <tr>
@@ -250,25 +248,43 @@ export function GeneralOverviewView({
                 const isSoon = d !== null && d <= 7 && d >= 0;
                 const matterLabel = formatProjectLabel(p);
 
-                return (
-                  <tr
-                    key={p.id}
-                    onClick={() => onProjectSelect(p.id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="matterCell">
-                      <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
-                        {matterLabel}
-                      </div>
-                    </td>
-                    <td style={{ textAlign: "center" }}>{statusPill(p.status, t)}</td>
-                    <td style={{ textAlign: "center" }}>{riskPill(p.risk, t)}</td>
-                    <td><div>{fmtDateShort(p.target_close_date)}</div></td>
-                    <td>{formatClientName(p.client?.name, t("unknownClient"))}</td>
-                    <td style={{ textAlign: "center" }}><span className="pill neutral">{p.location}</span></td>
-                  </tr>
-                );
-              })}
+	                return (
+	                  <tr
+	                    key={p.id}
+	                    onClick={() => onProjectSelect(p.id)}
+	                    style={{ cursor: "pointer" }}
+	                  >
+	                    <td className="matterCell">
+	                      <div className="rowCell">
+	                        <div className="matterText" style={{ fontWeight: 800 }} title={matterLabel}>
+	                          {matterLabel}
+	                        </div>
+	                      </div>
+	                    </td>
+	                    <td style={{ textAlign: "center" }}>
+	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                        {statusPill(p.status, t)}
+	                      </div>
+	                    </td>
+	                    <td style={{ textAlign: "center" }}>
+	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                        {riskPill(p.risk, t)}
+	                      </div>
+	                    </td>
+	                    <td>
+	                      <div className="rowCell">{fmtDateShort(p.target_close_date)}</div>
+	                    </td>
+	                    <td>
+	                      <div className="rowCell">{formatClientName(p.client?.name, t("unknownClient"))}</div>
+	                    </td>
+	                    <td style={{ textAlign: "center" }}>
+	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                        <span className="pill neutral">{p.location}</span>
+	                      </div>
+	                    </td>
+	                  </tr>
+	                );
+	              })}
               {sortedAndFilteredProjects.length === 0 && (
                 <tr>
                   <td colSpan={6} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
