@@ -60,7 +60,7 @@ export function GeneralOverviewView({
   onNewProject: () => void;
 }) {
   const { t } = useI18n();
-  const [sortField, setSortField] = useState<SortField>("target_close_date");
+  const [sortField, setSortField] = useState<SortField>("project_number");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");

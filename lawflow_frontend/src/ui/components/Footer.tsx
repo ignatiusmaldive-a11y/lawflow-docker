@@ -1,9 +1,16 @@
 import React from "react";
 
 export function Footer() {
+    const scrollMainToTop = () => {
+        const contentEl = document.querySelector(".content");
+        if (contentEl instanceof HTMLElement) contentEl.scrollTo({ top: 0, left: 0 });
+        window.scrollTo(0, 0);
+    };
+
     const navigateTo = (path: string) => {
         window.history.pushState(null, "", path);
         window.dispatchEvent(new PopStateEvent("popstate"));
+        requestAnimationFrame(scrollMainToTop);
     };
 
     return (
@@ -17,11 +24,13 @@ export function Footer() {
         }}>
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                gap: '32px',
+                gridTemplateColumns: '1fr auto auto auto',
+                columnGap: '44px',
+                rowGap: '32px',
                 maxWidth: '1200px',
                 margin: '0 auto',
-                width: '100%'
+                width: '100%',
+                alignItems: 'start'
             }}>
                 {/* Company Info */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -37,17 +46,27 @@ export function Footer() {
                         <span style={{ fontSize: '18px', fontWeight: '900' }}>AMA - CRM</span>
                     </div>
                     <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
-                        CRM para abogados especializados en derecho inmobiliario.
+                        CRM especializado en derecho inmobiliario.
                     </p>
                 </div>
 
                 {/* Product Links */}
                 <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Informes Sectoriales</h4>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo("/informes-sectoriales"); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Local</a></li>
-                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo("/informes-sectoriales"); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Nacional</a></li>
-                    </ul>
+                    <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                navigateTo("/informes-sectoriales");
+                            }}
+                            style={{ color: "var(--text)", textDecoration: "none" }}
+                        >
+                            Informes Sectoriales
+                        </a>
+                    </h4>
+                    <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0, maxWidth: 180 }}>
+                        Informes y análisis del sector para entender el mercado y apoyar decisiones.
+                    </p>
                 </div>
 
                 {/* Legal Links */}
@@ -64,19 +83,28 @@ export function Footer() {
                             Agencias Polacas
                         </a>
                     </h4>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo("/agencias-polacas"); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Directorio</a></li>
-                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo("/agencias-polacas"); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Criterios de selección</a></li>
-                    </ul>
+                    <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0, maxWidth: 180 }}>
+                        Directorio de referencia de agencias enfocadas en compradores polacos.
+                    </p>
                 </div>
 
                 {/* Contact & Support */}
                 <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>Asistente IA</h4>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <li><a href="#" onClick={(e) => { e.preventDefault(); navigateTo("/chat"); }} style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Chat</a></li>
-                        <li><a href="#" style={{ color: 'var(--muted)', textDecoration: 'none', fontSize: '14px' }}>Investigación</a></li>
-                    </ul>
+                    <h4 style={{ fontSize: '14px', fontWeight: '900', color: 'var(--text)', margin: '0 0 16px 0' }}>
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                navigateTo("/chat");
+                            }}
+                            style={{ color: "var(--text)", textDecoration: "none" }}
+                        >
+                            Asistente IA
+                        </a>
+                    </h4>
+                    <p style={{ color: 'var(--muted)', fontSize: '14px', lineHeight: '1.5', margin: 0, maxWidth: 180 }}>
+                        Chat inteligente para ayudarte con tareas, contexto y consultas rápidas.
+                    </p>
                 </div>
             </div>
 

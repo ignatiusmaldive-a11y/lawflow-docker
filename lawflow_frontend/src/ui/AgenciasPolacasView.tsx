@@ -86,6 +86,78 @@ const SAMPLE_AGENCIES: PolishAgency[] = [
     languages: ["PL", "ES", "EN"],
     website: "https://example.com",
     description: "Acompañamiento a familias y perfiles relocation: colegios, zonas, servicios y apoyo integral durante el traslado."
+  },
+  {
+    id: 9,
+    name: "Poznan Coast Partners",
+    areas: ["Benalmádena", "Fuengirola", "Torremolinos"],
+    specialties: ["Apartamentos", "Primera vivienda", "Familias"],
+    languages: ["PL", "ES", "EN"],
+    website: "https://example.com",
+    description: "Agencia centrada en vivienda residencial y primera compra, con acompañamiento en visitas y coordinación de financiación."
+  },
+  {
+    id: 10,
+    name: "Szczecin Property Desk",
+    areas: ["Estepona", "Cancelada", "San Pedro"],
+    specialties: ["Obra nueva", "Residencial", "Llave en mano"],
+    languages: ["PL", "EN"],
+    website: "https://example.com",
+    description: "Equipo especializado en promociones y proyectos de obra nueva, con soporte de reservas y gestión de postventa."
+  },
+  {
+    id: 11,
+    name: "Lodz Costa Invest",
+    areas: ["Málaga", "Rincón de la Victoria", "Benalmádena"],
+    specialties: ["Inversión", "Alquiler", "Ciudad"],
+    languages: ["PL", "ES", "EN"],
+    website: "https://example.com",
+    description: "Enfoque inversor: análisis de rentabilidad, demanda y apoyo a la gestión de alquiler vacacional."
+  },
+  {
+    id: 12,
+    name: "Katowice Golf Estates",
+    areas: ["Benahavís", "Nueva Andalucía", "Marbella"],
+    specialties: ["Golf", "Villas", "Lifestyle"],
+    languages: ["PL", "ES", "EN", "DE"],
+    website: "https://example.com",
+    description: "Selección de viviendas cerca de campos de golf con asesoría para compradores internacionales."
+  },
+  {
+    id: 13,
+    name: "Gdynia Beachfront Realty",
+    areas: ["Fuengirola", "La Cala de Mijas", "Mijas"],
+    specialties: ["Costa", "Segunda residencia", "Alquiler vacacional"],
+    languages: ["PL", "ES", "EN"],
+    website: "https://example.com",
+    description: "Especialistas en propiedades cerca del mar, con soporte para inversión y segunda residencia."
+  },
+  {
+    id: 14,
+    name: "Rzeszow Family Relocation",
+    areas: ["Marbella", "San Pedro", "Estepona"],
+    specialties: ["Relocation", "Familias", "Servicios"],
+    languages: ["PL", "ES", "EN"],
+    website: "https://example.com",
+    description: "Acompañamiento integral para mudanza: colegios, servicios y coordinación del proceso de compra."
+  },
+  {
+    id: 15,
+    name: "Bialystok NewBuild Hub",
+    areas: ["Casares", "Estepona", "Sotogrande"],
+    specialties: ["Obra nueva", "Promociones", "Entrega"],
+    languages: ["PL", "ES", "EN"],
+    website: "https://example.com",
+    description: "Catálogo de nuevas promociones con proceso guiado desde la reserva hasta la entrega."
+  },
+  {
+    id: 16,
+    name: "Lublin Prime Keys",
+    areas: ["Golden Mile", "Puerto Banús", "Marbella"],
+    specialties: ["Lujo", "Villas", "Prime"],
+    languages: ["PL", "EN"],
+    website: "https://example.com",
+    description: "Intermediación en zonas prime con visitas privadas y soporte para compradores de alto nivel."
   }
 ];
 
@@ -238,159 +310,49 @@ export function AgenciasPolacasView() {
       </div>
 
       <div className="table-container">
-        <div className="card agenciasTableWrap">
-          <div className="cardPad" style={{ paddingBottom: 10 }}>
-            <div style={{ fontWeight: 900, color: "var(--text)" }}>Directorio</div>
-            <div style={{ marginTop: 2, fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-              Datos de ejemplo (verifica y sustituye por agencias reales)
-            </div>
+        <div className="card cardPad">
+          <div style={{ fontWeight: 900, color: "var(--text)", marginBottom: 2 }}>Directorio</div>
+          <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, marginBottom: 14 }}>
+            Datos de ejemplo (verifica y sustituye por agencias reales)
           </div>
 
-          <table className="table agenciasTable" style={{ width: "100%" }}>
-            <thead>
-              <tr>
-                <SortHeader field="name" label="Agencia" />
-                <SortHeader field="area" label="Zonas (principal)" align="center" />
-                <SortHeader field="specialty" label="Especialidad" align="center" />
-                <SortHeader field="languages" label="Idiomas" align="center" />
-                <th style={{ textAlign: "left" }}>Web</th>
-              </tr>
-            </thead>
-            <tbody>
-              {agencies.map((agency) => (
-                <tr key={agency.id}>
-                  <td style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{agency.name}</div>
-                    <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: "1.4" }}>{agency.description}</div>
-                  </td>
-                  <td style={{ textAlign: "center", minWidth: 0 }}>
-                    <span className="pill neutral" style={{ maxWidth: "unset" }}>{agency.areas[0] ?? "—"}</span>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-                      {agency.areas.slice(1, 4).map((a) => (
-                        <span key={a} className="pill" style={{ maxWidth: "unset" }}>{a}</span>
-                      ))}
+          {agencies.length > 0 ? (
+            <ol style={{ margin: 0, paddingLeft: 18, display: "grid", gap: 10 }}>
+              {agencies.map((agency) => {
+                const primaryArea = agency.areas[0] ?? "—";
+                const primarySpecialty = agency.specialties[0] ?? "—";
+                const languages = agency.languages.join(", ");
+                const websiteLabel = agency.website ? agency.website.replace(/^https?:\/\//, "") : null;
+
+                return (
+                  <li key={agency.id} style={{ padding: "10px 10px", borderRadius: 12, border: "1px solid var(--line)", background: "var(--panel2)" }}>
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                      <div style={{ fontWeight: 950, minWidth: 0 }}>{agency.name}</div>
+                      {agency.website ? (
+                        <a
+                          href={agency.website}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: "var(--muted)", textDecoration: "none", fontSize: 13, fontWeight: 850, overflowWrap: "anywhere" }}
+                        >
+                          {websiteLabel}
+                        </a>
+                      ) : (
+                        <span style={{ color: "var(--muted)", fontSize: 13 }}>—</span>
+                      )}
                     </div>
-                  </td>
-                  <td style={{ textAlign: "center", minWidth: 0 }}>
-                    <span className="pill ok" style={{ maxWidth: "unset" }}>{agency.specialties[0] ?? "—"}</span>
-                    <div style={{ marginTop: 6, display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-                      {agency.specialties.slice(1, 4).map((s) => (
-                        <span key={s} className="pill neutral" style={{ maxWidth: "unset" }}>{s}</span>
-                      ))}
+
+                    <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                      <span className="pill neutral" style={{ maxWidth: "unset" }}>{primaryArea}</span>
+                      <span className="pill ok" style={{ maxWidth: "unset" }}>{primarySpecialty}</span>
+                      <span className="pill neutral" style={{ maxWidth: "unset" }}>{languages}</span>
                     </div>
-                  </td>
-                  <td style={{ textAlign: "center", minWidth: 0 }}>
-                    <span className="pill neutral" style={{ maxWidth: "unset" }}>{agency.languages.join(", ")}</span>
-                  </td>
-                  <td style={{ minWidth: 0 }}>
-                    {agency.website ? (
-                      <a
-                        href={agency.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ color: "var(--muted)", textDecoration: "none", fontSize: 14, fontWeight: 700 }}
-                      >
-                        {agency.website.replace(/^https?:\/\//, "")}
-                      </a>
-                    ) : (
-                      <span style={{ color: "var(--muted)" }}>—</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-
-              {agencies.length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
-                    No se encontraron agencias que coincidan con los criterios de búsqueda.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="table-container">
-        <div className="agenciasCards">
-          {agencies.map((agency) => (
-            <div key={agency.id} className="card cardPad" style={{ minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 950, marginBottom: 4, lineHeight: 1.15 }}>{agency.name}</div>
-                  <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.45 }}>{agency.description}</div>
-                </div>
-                <div className="pill neutral" title={`Orden: ${sortFieldLabel(sortField)}`}>
-                  #{agency.id}
-                </div>
-              </div>
-
-              <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-                <div>
-                  <div className="small" style={{ fontWeight: 900, marginBottom: 6 }}>
-                    Zonas
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {agency.areas.map((a) => (
-                      <span key={a} className="pill neutral" style={{ maxWidth: "unset" }}>
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="small" style={{ fontWeight: 900, marginBottom: 6 }}>
-                    Especialidades
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {agency.specialties.map((s) => (
-                      <span key={s} className="pill" style={{ maxWidth: "unset" }}>
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
-                  <div>
-                    <div className="small" style={{ fontWeight: 900, marginBottom: 6 }}>
-                      Idiomas
-                    </div>
-                    <div className="pill neutral" style={{ maxWidth: "unset" }}>
-                      {agency.languages.join(", ")}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right", minWidth: 0 }}>
-                    <div className="small" style={{ fontWeight: 900, marginBottom: 6 }}>
-                      Web
-                    </div>
-                    {agency.website ? (
-                      <a
-                        href={agency.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          color: "var(--muted)",
-                          textDecoration: "none",
-                          fontSize: 13,
-                          fontWeight: 850,
-                          overflowWrap: "anywhere",
-                        }}
-                      >
-                        {agency.website.replace(/^https?:\/\//, "")}
-                      </a>
-                    ) : (
-                      <span style={{ color: "var(--muted)" }}>—</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {agencies.length === 0 && (
-            <div className="card cardPad" style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <div style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}>
               No se encontraron agencias que coincidan con los criterios de búsqueda.
             </div>
           )}

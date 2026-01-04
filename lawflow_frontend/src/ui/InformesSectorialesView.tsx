@@ -8,7 +8,7 @@ type SortDirection = "asc" | "desc";
 interface BusinessReport {
   id: number;
   title: string;
-  type: "Local" | "Nacional";
+  type: "Local" | "Nacional" | "Noticias 2025";
   location?: string;
   description: string;
   last_updated: string;
@@ -85,10 +85,51 @@ const SAMPLE_REPORTS: BusinessReport[] = [
     description: "Estudio del impacto del turismo en el mercado inmobiliario local.",
     last_updated: "2024-12-28",
     sample_data: {}
+  },
+  {
+    id: 1001,
+    title: "Cambios Regulatorios Clave en Alquileres Turísticos (VFT) en la Costa del Sol para 2025",
+    type: "Noticias 2025",
+    location: "Costa del Sol",
+    description:
+      "Resumen de los cambios (LPH/LO 1/2025), requisitos VFT y acciones recomendadas para propietarios y gestores.",
+    last_updated: "2025",
+    sample_data: {}
+  },
+  {
+    id: 1002,
+    title: "Fin del Golden Visa Inmobiliario y su Impacto en el Mercado de Lujo de la Costa del Sol",
+    type: "Noticias 2025",
+    location: "Costa del Sol",
+    description:
+      "Impacto del fin de la residencia por inversión inmobiliaria (abril 2025) y recomendaciones para inversores no UE.",
+    last_updated: "2025",
+    sample_data: {}
+  },
+  {
+    id: 1003,
+    title: "Estadísticas y Tendencias del Mercado Inmobiliario en Costa del Sol 2025",
+    type: "Noticias 2025",
+    location: "Costa del Sol",
+    description:
+      "Datos y tabla clave (INE/Registradores/Idealista) con precios, variación anual y compras extranjeras; proyección 2026.",
+    last_updated: "2025",
+    sample_data: {}
+  },
+  {
+    id: 1004,
+    title: "Avances en el Plan General de Marbella y Aspectos Fiscales Relevantes 2025",
+    type: "Noticias 2025",
+    location: "Marbella",
+    description:
+      "Estado del PGOM/POU (LISTA) y resumen de impuestos clave en Andalucía 2025 (ISD, plusvalía, IBI, IRNR).",
+    last_updated: "2025",
+    sample_data: {}
   }
 ];
 
 function fmtDateShort(d: string) {
+  if (/^\d{4}$/.test(d)) return d;
   const dt = new Date(d + "T00:00:00");
   return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
 }
@@ -100,9 +141,9 @@ export function InformesSectorialesView() {
   const [filter, setFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("All");
 
-  const { localReports, nacionalReports, totalCount } = useMemo(() => {
+  const { localReports, news2025Reports, totalCount } = useMemo(() => {
     const textQuery = filter.trim().toLowerCase();
-    let filtered = SAMPLE_REPORTS.filter((r) => {
+    let filtered = SAMPLE_REPORTS.filter((r) => r.type !== "Nacional").filter((r) => {
       const matchesText =
         !textQuery ||
         r.title.toLowerCase().includes(textQuery) ||
@@ -118,8 +159,9 @@ export function InformesSectorialesView() {
       let bVal: any;
 
       if (sortField === "last_updated") {
-        aVal = new Date(a[sortField]).getTime();
-        bVal = new Date(b[sortField]).getTime();
+        const parse = (raw: string) => (/^\d{4}$/.test(raw) ? new Date(`${raw}-01-01`).getTime() : new Date(raw).getTime());
+        aVal = parse(a[sortField]);
+        bVal = parse(b[sortField]);
       } else {
         aVal = a[sortField];
         bVal = b[sortField];
@@ -136,8 +178,8 @@ export function InformesSectorialesView() {
     });
 
     const localReports = filtered.filter((r) => r.type === "Local");
-    const nacionalReports = filtered.filter((r) => r.type === "Nacional");
-    return { localReports, nacionalReports, totalCount: filtered.length };
+    const news2025Reports = filtered.filter((r) => r.type === "Noticias 2025");
+    return { localReports, news2025Reports, totalCount: filtered.length };
   }, [sortField, sortDirection, filter, typeFilter]);
 
   const handleSort = (field: SortField) => {
@@ -196,9 +238,11 @@ export function InformesSectorialesView() {
     <div className="table-container">
       <div className="card" style={{ overflowX: "auto" }}>
         <div className="cardPad" style={{ paddingBottom: 10 }}>
-          <div style={{ fontWeight: 900, color: "var(--text)" }}>{title}</div>
-          <div style={{ marginTop: 2, fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-            {reports.length} informes
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontWeight: 900, color: "var(--text)" }}>{title}</div>
+            <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, textAlign: "right", whiteSpace: "nowrap" }}>
+              {reports.length} informes
+            </div>
           </div>
         </div>
         <table className="table" style={{ width: "100%" }}>
@@ -207,7 +251,7 @@ export function InformesSectorialesView() {
               <SortHeader field="title" label="Título del Informe" className="column-title" />
               <SortHeader field="type" label="Tipo" align="center" />
               <SortHeader field="location" label="Ubicación" align="center" />
-              <SortHeader field="last_updated" label="Última Actualización" />
+              <SortHeader field="last_updated" label="Fecha" />
             </tr>
           </thead>
           <tbody>
@@ -224,7 +268,15 @@ export function InformesSectorialesView() {
                     "Informe Nacional: Impacto de las Hipotecas Variables 2025": "impacto-hipotecas-2025",
                     "Estudio del Mercado de Lujo en Puerto Banús 2025": "puerto-banus-2025",
                     "Tendencias Nacionales de Inversión Inmobiliaria 2025": "inversion-nacional-2025",
-                    "Análisis del Mercado Turístico en Torremolinos 2024": "turistico-torremolinos-2024"
+                    "Análisis del Mercado Turístico en Torremolinos 2024": "turistico-torremolinos-2024",
+                    "Cambios Regulatorios Clave en Alquileres Turísticos (VFT) en la Costa del Sol para 2025":
+                      "cambios-regulatorios-vft-2025",
+                    "Fin del Golden Visa Inmobiliario y su Impacto en el Mercado de Lujo de la Costa del Sol":
+                      "fin-golden-visa-2025",
+                    "Estadísticas y Tendencias del Mercado Inmobiliario en Costa del Sol 2025":
+                      "estadisticas-tendencias-costa-del-sol-2025",
+                    "Avances en el Plan General de Marbella y Aspectos Fiscales Relevantes 2025":
+                      "pgom-marbella-fiscalidad-2025",
                   };
                   const slug = slugMap[report.title];
                   if (slug) {
@@ -242,7 +294,9 @@ export function InformesSectorialesView() {
                   </div>
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  <span className={`pill ${report.type === "Local" ? "neutral" : "ok"}`}>
+                  <span
+                    className={`pill ${report.type === "Local" ? "neutral" : "warn"}`}
+                  >
                     {report.type}
                   </span>
                 </td>
@@ -294,7 +348,7 @@ export function InformesSectorialesView() {
           >
             <option value="All">Todos los tipos</option>
             <option value="Local">Local</option>
-            <option value="Nacional">Nacional</option>
+            <option value="Noticias 2025">Noticias 2025</option>
           </select>
 
           <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -314,11 +368,11 @@ export function InformesSectorialesView() {
         </div>
       ) : (
         <>
+          {(typeFilter === "Noticias 2025" || (typeFilter === "All" && news2025Reports.length > 0)) && (
+            <ReportsSection title="Noticias 2025" reports={news2025Reports} />
+          )}
           {(typeFilter === "Local" || (typeFilter === "All" && localReports.length > 0)) && (
             <ReportsSection title="Local" reports={localReports} />
-          )}
-          {(typeFilter === "Nacional" || (typeFilter === "All" && nacionalReports.length > 0)) && (
-            <ReportsSection title="Nacional" reports={nacionalReports} />
           )}
         </>
       )}

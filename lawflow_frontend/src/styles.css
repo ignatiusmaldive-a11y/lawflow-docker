@@ -23,6 +23,10 @@ body {
   height: 100%;
 }
 
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -50,6 +54,7 @@ select {
   grid-template-columns: 280px 1fr;
   grid-template-rows: auto 1fr;
   height: 100%;
+  min-height: 100vh;
 }
 
 .sidebarWrap {
@@ -79,12 +84,21 @@ select {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   min-width: 0;
 }
 
-.sidebar > .card:first-child {
+.sidebarScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebarScroll > .card:first-child {
   margin-top: 12px;
 }
 
@@ -542,6 +556,12 @@ select {
   background-repeat: no-repeat;
 }
 
+.selectFit {
+  width: max-content;
+  max-width: none;
+  display: inline-block;
+}
+
 select.select::-ms-expand {
   display: none;
 }
@@ -737,6 +757,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   overflow: hidden;
 }
 
+.mattersTable tbody td {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
 .mattersTable th:nth-child(1) {
   width: 36%;
 }
@@ -805,11 +830,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .filesTable th:nth-child(2),
 .filesTable td:nth-child(2),
-.filesTable th:nth-child(3),
-.filesTable td:nth-child(3),
 .filesTable th:nth-child(4),
 .filesTable td:nth-child(4) {
   width: 120px;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filesTable th:nth-child(3),
+.filesTable td:nth-child(3) {
+  width: 150px;
   text-align: center;
   padding-left: 8px;
   padding-right: 8px;
@@ -889,6 +923,157 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: 3px;
 }
 
+.writerReportWrap {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.writerReportArticle {
+  padding: 8px 0 24px;
+}
+
+.writerReportMeta {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.writerReportMetaTight {
+  margin-top: 0;
+}
+
+.writerReportLead {
+  margin-top: 14px;
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.writerReportLeadTight {
+  margin-top: 12px;
+}
+
+.writerReportLead p {
+  margin: 10px 0 0;
+}
+
+.writerReportLead p:first-child {
+  margin-top: 0;
+}
+
+.writerReportSection {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.writerReportSection:first-of-type {
+  border-top: 0;
+  padding-top: 12px;
+}
+
+.writerReportSectionTitle {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+.writerReportBody {
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.writerReportBody p {
+  margin: 10px 0 0;
+}
+
+.writerReportBody p:first-child {
+  margin-top: 0;
+}
+
+.writerReportCallout {
+  margin-top: 12px;
+  padding: 14px 14px 14px 16px;
+  border-radius: 16px;
+  border: 1px dashed color-mix(in oklab, var(--brand) 35%, var(--line));
+  background: color-mix(in oklab, var(--panel) 65%, transparent);
+}
+
+.writerReportList {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.writerReportList li {
+  margin: 6px 0;
+}
+
+.writerReportTableWrap {
+  margin-top: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.writerReportTable th,
+.writerReportTable td {
+  white-space: normal;
+}
+
+.writerReportLinks {
+  margin-top: 12px;
+  margin-bottom: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.writerReportLinkItem {
+  margin: 8px 0;
+}
+
+.writerReportLinkLabel {
+  color: color-mix(in oklab, var(--brand) 70%, white);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--brand) 35%, transparent);
+  padding-bottom: 1px;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.writerReportLinkLabel:hover {
+  border-bottom-color: color-mix(in oklab, var(--brand) 60%, transparent);
+}
+
+.writerReportLinkUrl {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  text-decoration: none;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  border-bottom: 1px dashed color-mix(in oklab, var(--muted) 30%, transparent);
+  padding-bottom: 1px;
+}
+
+.writerReportLinkUrl:hover {
+  border-bottom-color: color-mix(in oklab, var(--muted) 60%, transparent);
+}
+
+@media (max-width: 640px) {
+  .writerReportArticle {
+    padding: 4px 0 16px;
+  }
+}
+
 .filesRoomGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -925,7 +1110,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .filesRoomGridUploadOnly .filesUploadZone {
   max-width: 520px;
+  width: 100%;
   justify-self: end;
+  box-sizing: border-box;
 }
 
 .filesRoomBlock {
@@ -1768,10 +1955,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .topNavItem.active {
   color: var(--text);
   border-bottom-color: var(--brand);
-}
-
-.sidebar.hide-content>*:not(.card) {
-  visibility: hidden;
 }
 
 .sidebar.hide-content .active-matter-group {

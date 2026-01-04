@@ -165,7 +165,7 @@ const EN: Dict = {
 };
 
 const ES: Dict = {
-  tagline: "Transacciones inmobiliarias",
+  tagline: "Derecho inmobiliario",
   activeMatter: "Asunto activo",
   tasks: "Tareas",
   timeline: "Cronograma",
@@ -183,7 +183,7 @@ const ES: Dict = {
   completed: "Completadas",
   work: "Trabajo",
   spanishChecklist: "Checklist de compraventa (España)",
-  activity: "Actividad",
+  activity: "Últimos eventos",
   downloadIcs: "Descargar ICS",
   fileRoom: "Sala de archivos",
   upload: "Subir",
@@ -312,7 +312,7 @@ const ES: Dict = {
   filePreviewTip: "Consejo: sube un PDF o imagen para ver vista previa integrada.",
 
   // Templates section
-  templatesDescription: "Estas son reglas de plantillas de demostración (Costa del Sol). Las firmas reales suelen mantenerlas como checklists editables + plantillas de documentos.",
+  templatesDescription: "Plantillas de demostración (Costa del Sol).",
   checklistOverrides: "Anulaciones del checklist",
   appliesTo: "Aplica a",
   template: "Plantilla",

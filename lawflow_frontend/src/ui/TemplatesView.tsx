@@ -17,7 +17,7 @@ export function TemplatesView({ municipality, transactionType, embedded = false 
     <>
       <div className="sectionTitle">
         <h2>{t("checklistOverrides")}</h2>
-        <span className="pill">{formatTransactionType(transactionType, lang)}</span>
+        {!embedded && <span className="pill">{formatTransactionType(transactionType, lang)}</span>}
       </div>
       <div style={{ display: "grid", gap: 8 }}>
         {(tpl?.checklist_overrides ?? []).map((x, i) => (

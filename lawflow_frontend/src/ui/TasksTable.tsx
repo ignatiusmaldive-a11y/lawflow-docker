@@ -5,6 +5,48 @@ import { daysUntil } from "../lib/formatting";
 const STATUSES: Task["status"][] = ["Pendiente", "En curso", "Revisión", "Hecho"];
 const PRIORITIES: Task["priority"][] = ["Baja", "Media", "Alta"];
 
+function formatTags(tags?: string | null) {
+  if (!tags) return "";
+  const dict: Record<string, string> = {
+    dd: "Diligencia",
+    registry: "Registro",
+    contracts: "Contratos",
+    legal: "Legal",
+    client: "Cliente",
+    banking: "Banca",
+    bank: "Banco",
+    hoa: "Comunidad",
+    urbanism: "Urbanismo",
+    energy: "Energía",
+    notary: "Notaría",
+    taxes: "Impuestos",
+    closing: "Cierre",
+    scheduling: "Agenda",
+    finance: "Finanzas",
+    documentation: "Documentación",
+    "new-build": "Obra nueva",
+    guarantees: "Garantías",
+    quality: "Calidad",
+    "post-completion": "Post-cierre",
+    utilities: "Suministros",
+    compliance: "Cumplimiento",
+    admin: "Administración",
+    archiving: "Archivado",
+    billing: "Facturación",
+    survey: "Tasación",
+  };
+
+  return tags
+    .split(",")
+    .map((tag) => {
+      const trimmed = tag.trim();
+      if (!trimmed) return "";
+      return dict[trimmed.toLowerCase()] ?? trimmed;
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
 export function TasksTable({
   tasks,
   onEdit,
@@ -13,16 +55,17 @@ export function TasksTable({
   onEdit: (taskId: number, patch: Partial<Task>) => Promise<void>;
 }) {
   const rows = useMemo(() => [...tasks].sort((a, b) => a.id - b.id), [tasks]);
+  const centerCell: React.CSSProperties = { textAlign: "center" };
 
   return (
     <table className="table">
       <thead>
         <tr>
           <th>Tarea</th>
-          <th>Estado</th>
-          <th>Asignado</th>
-          <th>Vencimiento</th>
-          <th>Prioridad</th>
+          <th style={centerCell}>Estado</th>
+          <th style={centerCell}>Asignado</th>
+          <th style={centerCell}>Vencimiento</th>
+          <th style={centerCell}>Prioridad</th>
           <th>Etiquetas</th>
         </tr>
       </thead>
@@ -30,10 +73,9 @@ export function TasksTable({
         {rows.map((t) => (
           <tr key={t.id}>
             <td style={{ fontWeight: 950, whiteSpace: "normal", minWidth: "140px" }}>{t.title}</td>
-            <td>
+            <td style={centerCell}>
               <select
-                className="select"
-                style={{ minWidth: '130px' }}
+                className="select selectFit"
                 value={t.status}
                 onChange={(e) => onEdit(t.id, { status: e.target.value as any })}
               >
@@ -44,8 +86,8 @@ export function TasksTable({
                 ))}
               </select>
             </td>
-            <td>{t.assignee}</td>
-            <td>
+            <td style={centerCell}>{t.assignee}</td>
+            <td style={centerCell}>
               <input
                 className={`select ${t.status !== "Hecho" && daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
                   t.status !== "Hecho" && daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
@@ -56,8 +98,8 @@ export function TasksTable({
                 style={{ maxWidth: '130px' }}
               />
             </td>
-            <td>
-              <select className="select" style={{ minWidth: '80px' }} value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>
+            <td style={centerCell}>
+              <select className="select selectFit" value={t.priority} onChange={(e) => onEdit(t.id, { priority: e.target.value as any })}>
                 {PRIORITIES.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -67,7 +109,7 @@ export function TasksTable({
             </td>
             <td style={{ whiteSpace: "normal", minWidth: "120px" }}>
               <div>
-                <div>{t.tags ?? ""}</div>
+                <div>{formatTags(t.tags)}</div>
                 {t.status === "Hecho" ? (
                   <div
                     style={{ fontSize: 10, marginTop: 2, color: "var(--brand2)" }}
