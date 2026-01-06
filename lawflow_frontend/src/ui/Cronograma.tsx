@@ -84,7 +84,7 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
     return raw;
   }, [items, fiscal, recurring]);
 
-  const { start, end, rows, showToday, todayPct, dateHeaders, rangeMs, holidayMarkers } = useMemo(() => {
+  const { start, end, rows, showToday, todayPct, dateHeaders, rangeMs, holidayMarkers, weekendBands } = useMemo(() => {
     if (allItems.length === 0) {
       const now = new Date();
       return {
@@ -95,7 +95,8 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
         todayPct: 0,
         dateHeaders: [] as any[],
         rangeMs: 1,
-        holidayMarkers: [] as any[]
+        holidayMarkers: [] as any[],
+        weekendBands: [] as any[]
       };
     }
 
@@ -143,6 +144,21 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
       cursor.setMonth(cursor.getMonth() + 1);
     }
 
+    // Weekend background bands
+    const weekendBands = [] as { leftPct: number; widthPct: number }[];
+    const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    for (let d = startDay; d <= endDay; d = addDays(d, 1)) {
+      const dow = d.getDay(); // 0=Sun, 6=Sat
+      if (dow !== 0 && dow !== 6) continue;
+      const segStart = d < start ? start : d;
+      const segEndCandidate = addDays(d, 1);
+      const segEnd = segEndCandidate > end ? end : segEndCandidate;
+      const leftPct = clamp(((segStart.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
+      const widthPct = clamp(((segEnd.getTime() - segStart.getTime()) / rangeMs) * 100, 0, 100);
+      if (widthPct > 0) weekendBands.push({ leftPct, widthPct });
+    }
+
     // Holiday Markers
     const markers = holidays.map(h => {
       const d = parseDate(h);
@@ -152,7 +168,7 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
       };
     }).filter(Boolean);
 
-    return { start, end, rows: allItems, showToday, todayPct, dateHeaders: headers, rangeMs, holidayMarkers: markers };
+    return { start, end, rows: allItems, showToday, todayPct, dateHeaders: headers, rangeMs, holidayMarkers: markers, weekendBands };
   }, [allItems, tasks, holidays]);
 
   return (
@@ -190,6 +206,10 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
             </div>
 
             <div className="timelineGrid">
+              {weekendBands.map((b: any, idx: number) => (
+                <div key={idx} className="weekendBand" style={{ left: `${b.leftPct}%`, width: `${b.widthPct}%` }} />
+              ))}
+
               {holidayMarkers.map((m: any, idx: number) => (
                 <div key={idx} className="holidayGridLine" style={{ left: `${m.leftPct}%` }} />
               ))}
@@ -239,26 +259,24 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
             <h2>Impuestos y Obligaciones Fiscales</h2>
             <span className="pill warn">{fiscal.filter(f => f.status !== 'Paid').length} Pendientes</span>
           </div>
-          <div style={{ overflowX: "auto" }}>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Concepto</th>
-                  <th>Importe</th>
-                  <th>Vencimiento</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fiscal.map(f => (
-                  <tr key={f.id}>
-                    <td style={{ fontWeight: 950 }}>{f.obligation_type}</td>
-                    <td>{f.amount ? `${f.amount.toLocaleString()}€` : "—"}</td>
-                    <td>{f.due_date || f.filing_deadline}</td>
-                    <td>
-                      <span className={`pill ${f.status === 'Paid' ? 'ok' : 'warn'}`}>
-                        {f.status}
-                      </span>
+	          <div style={{ overflowX: "auto" }}>
+	            <table className="table">
+	              <thead>
+	                <tr>
+	                  <th>Concepto</th>
+	                  <th>Vencimiento</th>
+	                  <th>Estado</th>
+	                </tr>
+	              </thead>
+	              <tbody>
+	                {fiscal.map(f => (
+	                  <tr key={f.id}>
+	                    <td style={{ fontWeight: 950 }}>{f.obligation_type}</td>
+	                    <td>{f.due_date || f.filing_deadline}</td>
+	                    <td>
+	                      <span className={`pill ${f.status === 'Paid' ? 'ok' : 'warn'}`}>
+	                        {f.status}
+	                      </span>
                     </td>
                   </tr>
                 ))}

@@ -29,7 +29,6 @@ import { NewsReportView } from "./NewsReportView";
 import { ChatView } from "./ChatView";
 import { CustomReportModal } from "./CustomReportModal";
 import { Callout } from "./components/Callout";
-import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
 type View =
   | "General Overview"
@@ -196,9 +195,6 @@ export function App() {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [defaultBg, setDefaultBg] = useState<string>(() => (typeof window !== 'undefined' ? loadPlatformDefaultBg() : '#0b1220'));
-  const [uxPrefs, setUxPrefs] = useState<UxPrefs>(() =>
-    typeof window !== "undefined" ? loadUxPrefs() : { tipsEnabled: false, calendarAlertsEnabled: false }
-  );
 
 
   const [view, setView] = useState<View>("General Overview");
@@ -723,10 +719,8 @@ export function App() {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       {formatProjectLabel(activeProject, { lang })}
                       {activeProject.client?.nationality && (
-                        <span className="pill neutral" style={{ fontWeight: 800, verticalAlign: 'middle', textTransform: 'uppercase' }}>
-                          {activeProject.client.nationality === "Polish" ? "🇵🇱 PL" :
-                            activeProject.client.nationality === "Spanish" ? "🇪🇸 ES" :
-                              `📍 ${activeProject.client.nationality}`}
+                        <span className="pill neutral" style={{ fontWeight: 800, verticalAlign: "middle", textTransform: "uppercase" }}>
+                          {activeProject.client.nationality}
                         </span>
                       )}
                     </div>
@@ -890,7 +884,7 @@ export function App() {
           ) : (
             <div className="contentGrid">
               <div className="leftColumn">
-                {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
+                {!tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
@@ -902,7 +896,7 @@ export function App() {
                   />
                 ) : null}
 
-                {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
+                {(kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
                   <div className="deadlineBanner">
                     <div style={{ fontWeight: 950 }}>
                       {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
@@ -1077,8 +1071,6 @@ export function App() {
                       onProjectUpdated={(p) => {
                         setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
                       }}
-                      uxPrefs={uxPrefs}
-                      onUxPrefsChange={setUxPrefs}
                       onClose={() => setView("Tasks")} // Go back to Board view after closing settings
                     />
                   )}
