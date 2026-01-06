@@ -3,62 +3,18 @@
 LawFlow is a **project-based CRM / matter management** demo tailored for a small real-estate–focused law firm in Spain (purchases & sales, Costa del Sol).  
 It combines a modern **Vite + React + TypeScript frontend** with a lightweight **FastAPI + SQLAlchemy + SQLite backend**.
 
-This repo is designed to *look and feel like a polished SaaS*, while keeping implementation simple and easy to extend.
+### AI Assistant (Chat)
+- Integrated **Google Gemini (2.5-flash)** for legal & procedural queries
+- Multi-turn conversation support
+- Context-aware responses for Spanish real-estate matters
 
----
+### Business Intelligence (Reports)
+- **Sectorial Reports**: Detailed analysis of Marbella, Costa del Sol, and luxury markets (e.g., Puerto Banús)
+- **Interactive Charts**: Recharts integration for visual data analysis
+- **2025 Market News**: Regulatory updates and golden visa impact reports
 
-## What’s included (demo features)
-
-### Matter (Project) management
-- Multiple matters (Purchase/Sale) with realistic seed data
-- “Active matter” selector + pinned + recent matters
-- Matter header with breadcrumbs + status strip
-- **Per-matter background color** (visual context switching)
-
-### Task + process tracking
-- Kanban board (drag & drop)
-- Table view (filtering + list)
-- Timeline view (phases + milestone)
-- Deadline KPIs + “Deadline alerts” banner
-
-### Calendar + deadline exports
-- Calendar view with upcoming deadlines
-- **ICS export** of deadlines + milestones (Google Calendar / Outlook)
-
-### File room
-- File list per matter
-- Upload via button and **drag & drop**
-- **Preview drawer** for PDF / images (for uploaded files)
-- Seeded file rows (metadata) to demo list/search (upload real PDFs/images to preview)
-
-### Templates by municipality
-- Demo “rules & templates” per municipality:
-  - **Marbella**
-  - **Mijas**
-  - **Estepona**
-- Shows checklist overrides + document templates
-
-### Closing pack generation
-- “Closing pack” view with:
-  - Generate ZIP endpoint
-  - **Wizard stepper**: Notary → Taxes → Registry → Utilities
-  - **Readiness gating** + auto-suggested missing items (demo logic)
-
-### Global search
-- **Ctrl+K / Cmd+K** global search modal across:
-  - Tasks
-  - Files
-  - Checklist items
-
-### Language toggle
-- Header toggle switches **EN / ES** (demo i18n)
-- Persisted in localStorage
-
-### Platform settings page
-- “Settings” view to configure:
-  - Default project background color (localStorage)
-  - Density (Comfort / Compact) (localStorage)
-  - Per-project background color (persisted via backend)
+### Polish Agency Directory
+- Specialized directory for agencies working with Polish investors in the Costa del Sol
 
 ---
 
@@ -68,6 +24,7 @@ This repo is designed to *look and feel like a polished SaaS*, while keeping imp
 - Python 3.11+ (required by pyproject.toml)
 - Node.js 18+
 - npm
+- **Google API Key**: Required for the AI Assistant component. Get one at [Google AI Studio](https://aistudio.google.com/).
 
 ### 2) Run with the provided script
 From repo root (same level as `lawflow_backend/` and `lawflow_frontend/`):
@@ -142,16 +99,19 @@ See `config/database/README.md` for detailed database configuration.
 
 ## Quick tour (how to demo in 2 minutes)
 
-1. **Switch matters** using “Active matter” (sidebar).
-2. Open **Files**:
+2. Open **AI Assistant**:
+   - Navigate to the Chat section and ask about real estate regulations in Spain.
+3. Open **Sectorial Reports**:
+   - Browse the market analysis and open the **Puerto Banús 2025** report for detailed charts.
+4. Open **Files**:
    - drag & drop a PDF → click the row → preview drawer opens.
-3. Open **Templates**:
+5. Open **Templates**:
    - switch municipality (Marbella/Mijas/Estepona) and compare rules.
-4. Open **Closing pack**:
+6. Open **Closing pack**:
    - click through the wizard steps and see readiness gating.
-5. Press **Ctrl+K** and search for: “NIE”, “Registry”, “Notary”.
-6. Toggle **EN/ES** in the header.
-7. Open **Settings** and change the project background colors.
+7. Press **Ctrl+K** and search for: “NIE”, “Registry”, “Notary”.
+8. Toggle **EN/ES** in the header.
+9. Open **Settings** and change the project background colors.
 
 ---
 
@@ -221,6 +181,14 @@ Health check: `http://localhost:8000/health`
 
 ### Closing Pack
 - `GET /closing-pack/{project_id}` — generate and download ZIP file
+
+### AI Assistant (Chat)
+- `POST /chat` — Send message to Gemini assistant
+  ```json
+  {
+    "message": "What are the rules for VFT in Marbella?"
+  }
+  ```
 
 ### Health & Monitoring
 - `GET /health` — basic health check

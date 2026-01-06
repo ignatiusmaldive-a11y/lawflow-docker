@@ -64,6 +64,7 @@ export function GeneralOverviewView({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [filter, setFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
+  const searchPlaceholder = t("searchProjectsPlaceholder");
 
   const sortedAndFilteredProjects = useMemo(() => {
     let filtered = projects.filter(p => {
@@ -197,7 +198,8 @@ export function GeneralOverviewView({
         <div className="card cardPad overview-toolbar">
           <input
             className="search overview-search"
-            placeholder={t("searchProjectsPlaceholder")}
+            placeholder={searchPlaceholder}
+            size={Math.max(1, searchPlaceholder.length)}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
@@ -217,9 +219,6 @@ export function GeneralOverviewView({
           </select>
 
           <div className="overview-actions">
-            <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-              {t("showingProjects").replace("{count}", String(sortedAndFilteredProjects.length))}
-            </div>
             <button className="btn primary overview-new-project" onClick={onNewProject}>
               {t("newProject")}
             </button>

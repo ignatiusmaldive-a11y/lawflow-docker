@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Drawer } from "./components/Drawer";
 import { useI18n } from "../lib/i18n";
-import { api2, FileItem } from "../lib/api";
+import { api2, api3, FileItem, Project } from "../lib/api";
+
+export type FilesRoomHandle = {
+  uploadFile: (file: File) => Promise<void>;
+  setDragging: (dragging: boolean) => void;
+};
 
 function formatMimeLabel(mime?: string | null) {
   const raw = (mime ?? "—").split(";")[0].trim();
@@ -24,7 +29,19 @@ function formatMimeLabel(mime?: string | null) {
   return raw || "—";
 }
 
-export function FilesRoom({ projectId, embedded = false }: { projectId: number; embedded?: boolean }) {
+export const FilesRoom = React.forwardRef<FilesRoomHandle, {
+  projectId: number;
+  embedded?: boolean;
+  project?: Project | null;
+  onProjectUpdated?: (p: Project) => void;
+  externalDropTarget?: boolean;
+}>(function FilesRoom({
+    projectId,
+    project,
+    onProjectUpdated,
+    externalDropTarget = false,
+    embedded = false,
+  }, ref) {
   const { t } = useI18n();
   const [dragging, setDragging] = useState(false);
   const [selected, setSelected] = useState<FileItem | null>(null);
@@ -32,9 +49,16 @@ export function FilesRoom({ projectId, embedded = false }: { projectId: number; 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  const [dropboxFolder, setDropboxFolder] = useState<string>("");
+  const [dropboxBusy, setDropboxBusy] = useState(false);
+  const [dropboxError, setDropboxError] = useState<string | null>(null);
+  const [dropboxEditing, setDropboxEditing] = useState(false);
+
   const [files, setFiles] = useState<FileItem[]>([]);
   const [q, setQ] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const dropboxInputRef = useRef<HTMLInputElement | null>(null);
+  const dragDepthRef = useRef(0);
 
   async function refresh() {
     const list = await api2.files(projectId);
@@ -56,9 +80,36 @@ export function FilesRoom({ projectId, embedded = false }: { projectId: number; 
     }
   }
 
+  React.useImperativeHandle(ref, () => ({
+    uploadFile: handleUpload,
+    setDragging: (v: boolean) => setDragging(v),
+  }), [projectId]);
+
   useEffect(() => {
     refresh().catch(console.error);
   }, [projectId]);
+
+  useEffect(() => {
+    setDropboxFolder((project?.dropbox_folder ?? "").trim());
+    setDropboxError(null);
+    setDropboxEditing(false);
+  }, [projectId, project?.dropbox_folder]);
+
+  async function saveDropboxFolder(next: string) {
+    setDropboxBusy(true);
+    setDropboxError(null);
+    try {
+      const updated = await api3.patchProject(projectId, { dropbox_folder: next.trim() ? next.trim() : null });
+      onProjectUpdated?.(updated);
+      setDropboxFolder((updated.dropbox_folder ?? "").trim());
+      setDropboxEditing(false);
+    } catch (err) {
+      console.error(err);
+      setDropboxError(t("dropboxSaveFailed"));
+    } finally {
+      setDropboxBusy(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const qq = q.trim().toLowerCase();
@@ -108,7 +159,7 @@ export function FilesRoom({ projectId, embedded = false }: { projectId: number; 
   const Room = (
     <>
       <div className="filesRoomGrid filesRoomGridUploadOnly">
-        <div className="filesRoomBlock">
+        <div className="filesRoomBlock filesRoomUploadBlock">
           <div className="filesRoomUploadHeader">
             <span className="filesRoomBlockTitle">{t("uploadFilesTitle")}</span>
             <span className="filesRoomUploadHint small">{t("uploadFilesHint")}</span>
@@ -150,6 +201,78 @@ export function FilesRoom({ projectId, embedded = false }: { projectId: number; 
             {uploadError ? <div className="small" style={{ marginTop: 8, color: "rgba(239,68,68,.9)" }}>{uploadError}</div> : null}
           </div>
         </div>
+
+        <div className="filesRoomBlock filesRoomDropboxBlock">
+          <div className="filesRoomUploadHeader">
+            <span className="filesRoomBlockTitle">{t("dropboxFolderTitle")}</span>
+            <span className="filesRoomUploadHint small">{t("dropboxFolderHint")}</span>
+          </div>
+
+          <div
+            className="dropZone filesUploadZone dropboxZone"
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              if (!dropboxEditing) setDropboxEditing(true);
+              queueMicrotask(() => dropboxInputRef.current?.focus());
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!dropboxEditing) setDropboxEditing(true);
+                queueMicrotask(() => dropboxInputRef.current?.focus());
+              }
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+              <div className="small" style={{ opacity: 0.95 }}>
+                {project?.dropbox_folder ? (
+                  <span><b>{t("dropboxAssigned")}:</b> {project.dropbox_folder}</span>
+                ) : (
+                  <span>{t("dropboxNotAssigned")}</span>
+                )}
+              </div>
+              <button
+                className="btn primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!dropboxEditing) {
+                    setDropboxEditing(true);
+                    queueMicrotask(() => dropboxInputRef.current?.focus());
+                    return;
+                  }
+                  void saveDropboxFolder(dropboxFolder);
+                }}
+                disabled={dropboxBusy}
+              >
+                {dropboxBusy ? t("saving") : t("dropboxAssign")}
+              </button>
+            </div>
+
+            {dropboxEditing ? (
+              <input
+                ref={dropboxInputRef}
+                className="search"
+                style={{ width: "100%", marginTop: 10 }}
+                value={dropboxFolder}
+                placeholder={t("dropboxFolderPlaceholder")}
+                onChange={(e) => setDropboxFolder(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    setDropboxFolder((project?.dropbox_folder ?? "").trim());
+                    setDropboxEditing(false);
+                    return;
+                  }
+                  if (e.key === "Enter") void saveDropboxFolder(dropboxFolder);
+                }}
+                disabled={dropboxBusy}
+              />
+            ) : null}
+
+            {dropboxError ? <div className="small" style={{ marginTop: 8, color: "rgba(239,68,68,.9)" }}>{dropboxError}</div> : null}
+          </div>
+        </div>
       </div>
     </>
   );
@@ -157,15 +280,27 @@ export function FilesRoom({ projectId, embedded = false }: { projectId: number; 
   return (
     <div
       style={{ display: "grid", gap: embedded ? 0 : 12 }}
-      onDragOver={(e)=>{ e.preventDefault(); setDragging(true); }}
-      onDragLeave={(e)=>{ e.preventDefault(); setDragging(false); }}
-      onDrop={async (e)=>{ e.preventDefault(); setDragging(false); const f=e.dataTransfer.files?.[0]; if(!f) return; await handleUpload(f); }}>
-      {dragging ? (<div className="dropZone">{t("dragDrop")}</div>) : null}
+      onDragOver={externalDropTarget ? undefined : (e) => { e.preventDefault(); }}
+      onDragEnter={externalDropTarget ? undefined : (e) => { e.preventDefault(); dragDepthRef.current += 1; setDragging(true); }}
+      onDragLeave={externalDropTarget ? undefined : (e) => {
+        e.preventDefault();
+        dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+        if (dragDepthRef.current === 0) setDragging(false);
+      }}
+      onDrop={externalDropTarget ? undefined : async (e) => {
+        e.preventDefault();
+        dragDepthRef.current = 0;
+        setDragging(false);
+        const f = e.dataTransfer.files?.[0];
+        if (!f) return;
+        await handleUpload(f);
+      }}>
+      {dragging ? (<div className="dropZone dragOverlay">{t("dragDrop")}</div>) : null}
 
       {embedded ? (
         <div className="cardSections">
-          <div className="cardSection">{Table}</div>
-          <div className="cardSection">{Room}</div>
+          <div className="cardSection filesRoomTableSection">{Table}</div>
+          <div className="cardSection filesRoomWidgetsSection">{Room}</div>
         </div>
       ) : (
         <>
@@ -221,4 +356,4 @@ export function FilesRoom({ projectId, embedded = false }: { projectId: number; 
       </Drawer>
     </div>
   );
-}
+});

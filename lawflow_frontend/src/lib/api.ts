@@ -2,6 +2,7 @@ export type Client = { id: number; name: string; email?: string | null; phone?: 
 
 export type Project = {
   bg_color?: string;
+  dropbox_folder?: string | null;
 
   id: number;
   title: string;
@@ -126,7 +127,7 @@ export type ProjectCreate = {
   client_id: number;
 };
 
-export type ProjectUpdate = Partial<Pick<Project, "title" | "status" | "risk" | "target_close_date" | "bg_color">>;
+export type ProjectUpdate = Partial<Pick<Project, "title" | "status" | "risk" | "target_close_date" | "bg_color" | "dropbox_folder">>;
 
 export type TaskCreate = {
   project_id: number;
@@ -154,6 +155,14 @@ export const api3 = {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return (await res.json()) as Project;
+  },
+  createDropboxFolder: async (projectId: number, force = false) => {
+    const res = await fetch(`${API_BASE}/projects/${projectId}/dropbox/create?force=${force ? "1" : "0"}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error(await res.text());
     return (await res.json()) as Project;

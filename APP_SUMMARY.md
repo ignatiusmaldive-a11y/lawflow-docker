@@ -19,6 +19,10 @@ It is built to showcase an **innovative, modern SaaS UI** (Monday/Asana-inspired
 - **Templates:** municipality-based rules & document template lists
 - **Closing Pack:** a generated ZIP summarizing the transaction readiness + documents
 - **Activity:** audit-ish feed for major actions/events
+- **AI Assistant:** Google Gemini-powered chat for legal and procedural support
+- **Sectorial Reports:** Business intelligence reports with interactive charts for market analysis
+- **Agencias Polacas:** Specialized folder for Polish investors targeting the Costa del Sol
+- **General Overview:** Portfolio-wide dashboard of all active matters
 
 ## Key UX flows
 1. **Pick an active matter** → pinned/recent items help you navigate quickly.
@@ -30,8 +34,10 @@ It is built to showcase an **innovative, modern SaaS UI** (Monday/Asana-inspired
 3. Upload and review documents in **Files** (drag & drop + preview drawer).
 4. Use **Templates** to see municipality-specific requirements.
 5. Generate a **Closing Pack** using a stepper wizard with readiness gating.
-6. Use **Ctrl+K** global search across tasks/files/checklist.
-7. Switch UI language EN/ES and tweak platform visuals in **Settings**.
+6. Use **AI Assistant** to ask complex legal questions (ES/EN).
+7. Access **Sectorial Reports** for deep dives into local market trends.
+8. Use **Ctrl+K** global search across tasks/files/checklist.
+9. Switch UI language EN/ES and tweak platform visuals in **Settings**.
 
 ## What’s “demo-realistic” vs. “production-ready”
 - UI patterns and flows are production-like.

@@ -213,6 +213,11 @@ Configure these in the systemd service files:
 ```ini
 Environment="DATABASE_URL=sqlite:///./lawflow.db"
 Environment="ALLOWED_ORIGINS=*"
+Environment="GOOGLE_API_KEY=your_gemini_api_key_here"
+```
+
+> [!IMPORTANT]
+> A valid `GOOGLE_API_KEY` is required for the AI Assistant component (Chat) to function. You can obtain one from the [Google AI Studio](https://aistudio.google.com/).
 ```
 
 ### Frontend Service

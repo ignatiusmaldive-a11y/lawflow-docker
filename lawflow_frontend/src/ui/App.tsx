@@ -9,7 +9,7 @@ import { Timeline } from "./Cronograma";
 import { Checklist } from "./Checklist";
 import { ActivityFeed } from "./ActivityFeed";
 
-import { FilesRoom } from "./FilesRoom";
+import { FilesRoom, type FilesRoomHandle } from "./FilesRoom";
 import { TemplatesView, MUNICIPALITIES_LIST } from "./TemplatesView";
 import { ClosingPackView } from "./ClosingPackView";
 import { ClosingPackWizard } from "./ClosingPackWizard";
@@ -211,6 +211,8 @@ export function App() {
   const [selectedReportSlug, setSelectedReportSlug] = useState<string | null>(null);
   const [selectedNewsSlug, setSelectedNewsSlug] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const filesRoomRef = useRef<FilesRoomHandle | null>(null);
+  const filesDragDepthRef = useRef(0);
 
   const scrollMainToTop = () => {
     contentRef.current?.scrollTo({ top: 0, left: 0 });
@@ -708,13 +710,7 @@ export function App() {
                 <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
                   <div className="h1">
                     {view === "General Overview" ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div className="brandMark">◆</div>
-                        <div>
-                          <div className="brandName">AMA-CRM</div>
-                          <div className="small">Listado General</div>
-                        </div>
-                      </div>
+                      <span style={{ fontSize: "1.5em" }}>Listado General</span>
                     ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
                   </div>
                   {view !== "General Overview" && activeProject && (
@@ -987,11 +983,39 @@ export function App() {
 
                   {activeProjectId && view === "Files" && (
                     <div style={{ display: "grid", gap: 12 }}>
-                      <div className="card cardPad">
+                      <div
+                        className="card cardPad"
+                        onDragOver={(e) => { e.preventDefault(); }}
+                        onDragEnter={(e) => {
+                          e.preventDefault();
+                          filesDragDepthRef.current += 1;
+                          filesRoomRef.current?.setDragging(true);
+                        }}
+                        onDragLeave={(e) => {
+                          e.preventDefault();
+                          filesDragDepthRef.current = Math.max(0, filesDragDepthRef.current - 1);
+                          if (filesDragDepthRef.current === 0) filesRoomRef.current?.setDragging(false);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          filesDragDepthRef.current = 0;
+                          filesRoomRef.current?.setDragging(false);
+                          const f = e.dataTransfer.files?.[0];
+                          if (!f) return;
+                          void filesRoomRef.current?.uploadFile(f);
+                        }}
+                      >
                         <div className="sectionTitle">
                           <h2>{t("files")}</h2>
                         </div>
-                        <FilesRoom projectId={activeProjectId} embedded />
+                        <FilesRoom
+                          ref={filesRoomRef}
+                          projectId={activeProjectId}
+                          embedded
+                          project={activeProject}
+                          onProjectUpdated={(p) => setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)))}
+                          externalDropTarget
+                        />
                       </div>
 
                       <div className="card cardPad">
