@@ -42,6 +42,18 @@ setup() {
   (cd "$FRONTEND_DIR" && npm install)
 }
 
+kill_on_port() {
+  local port=$1
+  local pids
+  pids=$(lsof -t -i:"$port" || true)
+  if [ -n "$pids" ]; then
+    echo "Killing processes on port $port (PIDs: $pids)..."
+    for pid in $pids; do
+      kill -9 "$pid" 2>/dev/null || true
+    done
+  fi
+}
+
 start() {
   if [ ! -d "$VENV_DIR" ]; then
     echo "Missing venv at $VENV_DIR. Run ./run.sh setup first." >&2
@@ -50,6 +62,10 @@ start() {
 
   # shellcheck disable=SC1091
   source "$VENV_DIR/bin/activate"
+
+  echo "Checking for port conflicts..."
+  kill_on_port 8000
+  kill_on_port 5173
 
   echo "Starting backend (uvicorn)..."
   (cd "$BACKEND_DIR" && uvicorn app.main:app --reload --port 8000) &
