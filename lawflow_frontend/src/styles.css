@@ -375,6 +375,11 @@ select {
   background: transparent;
 }
 
+.btn.btnSm {
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
 .content {
   padding: 16px 18px;
   overflow: visible;
@@ -1107,18 +1112,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .filesRoomGridUploadOnly {
-  grid-template-columns: 1fr minmax(260px, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  align-items: stretch;
 }
 
 .filesRoomGridUploadOnly .filesRoomDropboxBlock {
-  grid-column: 2;
-  justify-items: end;
+  justify-items: stretch;
 }
 
 .filesRoomGridUploadOnly .filesRoomDropboxBlock .dropboxZone {
   max-width: 520px;
   width: 100%;
-  justify-self: end;
+  margin-inline: auto;
   box-sizing: border-box;
 }
 
@@ -1127,8 +1132,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .filesRoomGridUploadOnly .filesRoomUploadBlock {
-  grid-column: 1;
-  justify-items: start;
+  justify-items: stretch;
 }
 
 .filesRoomUploadHeader {
@@ -1139,6 +1143,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: baseline;
   white-space: nowrap;
   text-align: left;
+  margin-inline: auto;
 }
 
 .filesRoomUploadHint {
@@ -1152,13 +1157,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .filesRoomGridUploadOnly .filesRoomUploadBlock .filesUploadZone {
   max-width: 520px;
   width: 100%;
-  justify-self: start;
+  margin-inline: auto;
   box-sizing: border-box;
 }
 
 .filesRoomBlock {
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: 8px;
+  min-width: 0;
 }
 
 .filesRoomBlockTitle {
@@ -1176,6 +1183,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   z-index: auto;
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease;
+  min-height: clamp(88px, 10vw, 112px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
 }
 
 .filesUploadZone.active {
@@ -1184,32 +1196,50 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 @media (max-width: 680px) {
-  .filesRoomGridUploadOnly {
-    grid-template-columns: 1fr;
-  }
-
-  .filesRoomGridUploadOnly .filesRoomBlock {
-    grid-column: auto;
-    justify-items: stretch;
-  }
-
-  .filesRoomGridUploadOnly .filesRoomDropboxBlock {
-    grid-column: auto;
-    justify-items: stretch;
-  }
-
   .filesRoomUploadHeader {
     max-width: none;
   }
 
   .filesRoomGridUploadOnly .filesRoomUploadBlock .filesUploadZone {
     max-width: none;
-    justify-self: stretch;
   }
 
   .filesRoomGridUploadOnly .filesRoomDropboxBlock .dropboxZone {
     max-width: none;
-    justify-self: stretch;
+  }
+}
+
+.filesWidgetRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.filesWidgetRow .btn {
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.filesWidgetText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .filesWidgetRow {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .filesWidgetRow .btn {
+    width: 100%;
+  }
+
+  .filesWidgetText {
+    white-space: normal;
   }
 }
 

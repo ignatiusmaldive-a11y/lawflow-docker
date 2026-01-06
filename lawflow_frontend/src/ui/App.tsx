@@ -29,6 +29,7 @@ import { NewsReportView } from "./NewsReportView";
 import { ChatView } from "./ChatView";
 import { CustomReportModal } from "./CustomReportModal";
 import { Callout } from "./components/Callout";
+import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
 type View =
   | "General Overview"
@@ -195,6 +196,9 @@ export function App() {
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [defaultBg, setDefaultBg] = useState<string>(() => (typeof window !== 'undefined' ? loadPlatformDefaultBg() : '#0b1220'));
+  const [uxPrefs, setUxPrefs] = useState<UxPrefs>(() =>
+    typeof window !== "undefined" ? loadUxPrefs() : { tipsEnabled: false, calendarAlertsEnabled: false }
+  );
 
 
   const [view, setView] = useState<View>("General Overview");
@@ -715,17 +719,12 @@ export function App() {
                 <div className="h1">
                   {view === "General Overview" ? (
                     <span style={{ fontSize: "1.5em" }}>Listado General</span>
-                  ) : (activeProject ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      {formatProjectLabel(activeProject, { lang })}
-                      {activeProject.client?.nationality && (
-                        <span className="pill neutral" style={{ fontWeight: 800, verticalAlign: "middle", textTransform: "uppercase" }}>
-                          {activeProject.client.nationality}
-                        </span>
-                      )}
-                    </div>
-                  ) : "LawFlow")}
-                </div>
+	                  ) : (activeProject ? (
+	                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+	                      {formatProjectLabel(activeProject, { lang })}
+	                    </div>
+	                  ) : "LawFlow")}
+	                </div>
                 {view !== "General Overview" && activeProject && (
                   <div className="projectMetaInline">
                     <div className="small">
@@ -884,7 +883,7 @@ export function App() {
           ) : (
             <div className="contentGrid">
               <div className="leftColumn">
-                {!tipsDismissed && tipsTimerReady ? (
+                {uxPrefs.tipsEnabled && !tipsDismissed && tipsTimerReady ? (
                   <Callout
                     title={t("demoTitle")}
                     body={t("demoBody")}
@@ -896,7 +895,7 @@ export function App() {
                   />
                 ) : null}
 
-                {(kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
+                {uxPrefs.calendarAlertsEnabled && (kpis.overdue > 0 || kpis.dueSoon > 0) && (kpis.overdue > deadlineDismissedStats.overdue || kpis.dueSoon > deadlineDismissedStats.dueSoon) ? (
                   <div className="deadlineBanner">
                     <div style={{ fontWeight: 950 }}>
                       {t("deadlineAlerts")}: {kpis.overdue > 0 ? t("overdueCount").replace("{count}", String(kpis.overdue)) : t("overdueCount").replace("{count}", "0")} · {kpis.dueSoon > 0 ? t("dueSoonCount").replace("{count}", String(kpis.dueSoon)) : t("dueSoonCount").replace("{count}", "0")}
@@ -1071,6 +1070,8 @@ export function App() {
                       onProjectUpdated={(p) => {
                         setProjects((prev) => prev.map((x) => (x.id === p.id ? p : x)));
                       }}
+                      uxPrefs={uxPrefs}
+                      onUxPrefsChange={setUxPrefs}
                       onClose={() => setView("Tasks")} // Go back to Board view after closing settings
                     />
                   )}

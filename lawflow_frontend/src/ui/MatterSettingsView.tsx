@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Project, api3 } from "../lib/api";
 import { useI18n } from "../lib/i18n";
 import { Spinner } from "./components/Spinner"; // Assuming Spinner is available
+import { saveUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
 type MatterSettingsViewProps = {
   activeProject: Project | null;
   onProjectUpdated: (project: Project) => void;
+  uxPrefs: UxPrefs;
+  onUxPrefsChange: (prefs: UxPrefs) => void;
   onClose: () => void; // Function to navigate back to a project view
 };
 
-export function MatterSettingsView({ activeProject, onProjectUpdated, onClose }: MatterSettingsViewProps) {
+export function MatterSettingsView({ activeProject, onProjectUpdated, uxPrefs, onUxPrefsChange, onClose }: MatterSettingsViewProps) {
   const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +61,39 @@ export function MatterSettingsView({ activeProject, onProjectUpdated, onClose }:
       {error && <div className="callout" style={{ background: "var(--danger)", marginBottom: 16 }}>{error}</div>}
 
       <div style={{ display: "grid", gap: 16, maxWidth: 400 }}>
+        <div>
+          <label style={{ display: "block", marginBottom: 8, fontWeight: 900, fontSize: 13 }}>
+            UX
+          </label>
+          <div className="small" style={{ marginBottom: 8 }}>
+            Enable/disable demo tips and deadline alert banners.
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 8 }}>
+            <input
+              type="checkbox"
+              checked={uxPrefs.tipsEnabled}
+              onChange={(e) => {
+                const next = { ...uxPrefs, tipsEnabled: e.target.checked };
+                saveUxPrefs(next);
+                onUxPrefsChange(next);
+              }}
+            />
+            <span style={{ fontWeight: 900, fontSize: 13 }}>Show tips</span>
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={uxPrefs.calendarAlertsEnabled}
+              onChange={(e) => {
+                const next = { ...uxPrefs, calendarAlertsEnabled: e.target.checked };
+                saveUxPrefs(next);
+                onUxPrefsChange(next);
+              }}
+            />
+            <span style={{ fontWeight: 900, fontSize: 13 }}>Show deadline alerts</span>
+          </label>
+        </div>
+
         {/* Background Color */}
         <div>
           <label style={{ display: "block", marginBottom: 8, fontWeight: 900, fontSize: 13 }}>

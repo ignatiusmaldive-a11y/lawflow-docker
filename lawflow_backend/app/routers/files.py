@@ -9,8 +9,50 @@ from ..schemas import FileItemOut
 
 router = APIRouter(prefix="/files", tags=["files"])
 
-UPLOAD_DIR = Path("./uploads")
+BASE_DIR = Path(__file__).resolve().parents[2]  # lawflow_backend/
+UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+def _is_within(child: Path, parent: Path) -> bool:
+    parent = parent.resolve()
+    child = child.resolve()
+    return child == parent or parent in child.parents
+
+def _resolve_stored_path(stored_path: str) -> Path:
+    p = Path(stored_path)
+
+    # Absolute paths are allowed only if they stay within known storage dirs.
+    if p.is_absolute():
+        resolved = p.resolve()
+        allowed = [
+            BASE_DIR / "uploads",
+            BASE_DIR / "seed",
+            BASE_DIR.parent / "uploads",
+            BASE_DIR.parent / "seed",
+        ]
+        if not any(_is_within(resolved, root) for root in allowed):
+            raise HTTPException(status_code=400, detail="Ruta de archivo inválida")
+        return resolved
+
+    # Reject traversal for relative stored paths.
+    if any(part == ".." for part in p.parts):
+        raise HTTPException(status_code=400, detail="Ruta de archivo inválida")
+
+    # Prefer backend-root relative paths, but keep compatibility with older paths
+    # that were stored relative to the repo root (process CWD).
+    candidates: list[Path] = []
+    for base in (BASE_DIR, BASE_DIR.parent):
+        cand = (base / p).resolve()
+        if _is_within(cand, base / "uploads") or _is_within(cand, base / "seed"):
+            candidates.append(cand)
+
+    if not candidates:
+        raise HTTPException(status_code=400, detail="Ruta de archivo inválida")
+
+    for cand in candidates:
+        if cand.exists():
+            return cand
+    return candidates[0]
 
 @router.get("", response_model=list[FileItemOut])
 def list_files(project_id: int, db: Session = Depends(get_db)):
@@ -33,7 +75,7 @@ def upload_file(
     item = FileItem(
         project_id=project_id,
         filename=safe_name,
-        stored_path=str(dest),
+        stored_path=str(dest.relative_to(BASE_DIR)),
         mime_type=file.content_type,
         uploader=uploader,
     )
@@ -48,7 +90,28 @@ def download(file_id: int, db: Session = Depends(get_db)):
     item = db.get(FileItem, file_id)
     if not item:
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
-    path = Path(item.stored_path)
+    path = _resolve_stored_path(item.stored_path)
     if not path.exists():
         raise HTTPException(status_code=404, detail="Contenido no disponible (solo metadatos de demo). Sube un archivo real para previsualizar/descargar.")
-    return FileResponse(path, filename=item.filename, media_type=item.mime_type or "application/octet-stream")
+    return FileResponse(
+        path,
+        filename=item.filename,
+        media_type=item.mime_type or "application/octet-stream",
+        content_disposition_type="attachment",
+    )
+
+
+@router.get("/view/{file_id}")
+def view(file_id: int, db: Session = Depends(get_db)):
+    item = db.get(FileItem, file_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    path = _resolve_stored_path(item.stored_path)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Contenido no disponible (solo metadatos de demo). Sube un archivo real para previsualizar/descargar.")
+    return FileResponse(
+        path,
+        filename=item.filename,
+        media_type=item.mime_type or "application/octet-stream",
+        content_disposition_type="inline",
+    )

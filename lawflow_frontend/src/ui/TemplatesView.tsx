@@ -53,7 +53,9 @@ export function TemplatesView({ municipality, transactionType, embedded = false 
                 <div className="small">{t("locationPack")}: {municipality}</div>
               </div>
             </div>
-            <button className="btn">{t("preview")}</button>
+            <button className="btn btnSm" onClick={() => alert(t("previewPending"))}>
+              {t("preview")}
+            </button>
           </div>
         ))}
         {(tpl?.document_templates?.length ?? 0) === 0 && <div className="small">{t("noDocumentTemplates")}</div>}

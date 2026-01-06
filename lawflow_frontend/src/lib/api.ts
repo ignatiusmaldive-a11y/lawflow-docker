@@ -172,6 +172,7 @@ export const api2 = {
   closingPackUrl: (projectId: number, lang?: "en" | "es") =>
     `${API_BASE}/closing-pack/${projectId}${lang ? `?lang=${encodeURIComponent(lang)}` : ""}`,
   downloadFileUrl: (fileId: number) => `${API_BASE}/files/download/${fileId}`,
+  viewFileUrl: (fileId: number) => `${API_BASE}/files/view/${fileId}`,
 };
 
 export type ProjectCreate = {
