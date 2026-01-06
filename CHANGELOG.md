@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Systemd service files for production deployment
 - Nginx reverse proxy configuration
 - Health check endpoints (`/health`, `/health/detailed`)
+- **AI Assistant (Chat)**: Integrated Google Gemini (2.5-flash) for legal & procedural support.
+- **Sectorial Reports (Business Intelligence)**: Market analysis for Marbella, Costa del Sol, and luxury sectors with interactive charts.
+- **Polish Agency Directory**: Specialized view for Polish investors.
+- **General Overview**: New portfolio-wide dashboard.
+- **Footer Component**: Standardized footer across new landing views.
 
 ### Changed
 - Updated deployment documentation to reflect systemd-based setup (replacing Docker instructions)

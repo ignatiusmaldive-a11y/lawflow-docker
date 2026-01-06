@@ -23,6 +23,7 @@ class Project(Base):
     bg_color: Mapped[str] = mapped_column(String(20), default="#0b1220")
     start_date: Mapped[datetime | None] = mapped_column(Date, nullable=True)
     target_close_date: Mapped[datetime | None] = mapped_column(Date, nullable=True)
+    dropbox_folder: Mapped[str | None] = mapped_column(String(520), nullable=True)
 
     client_id: Mapped[int | None] = mapped_column(ForeignKey("clients.id"), nullable=True)
     client: Mapped["Client | None"] = relationship(back_populates="projects")

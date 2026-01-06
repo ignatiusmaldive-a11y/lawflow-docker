@@ -20,6 +20,7 @@ class ProjectOut(BaseModel):
     bg_color: str
     start_date: Optional[date] = None
     target_close_date: Optional[date] = None
+    dropbox_folder: Optional[str] = None
     client_id: Optional[int] = None
     client: Optional[ClientOut] = None
     class Config: from_attributes = True
@@ -112,6 +113,7 @@ class ProjectUpdate(BaseModel):
     risk: Optional[str] = None
     target_close_date: Optional[date] = None
     bg_color: Optional[str] = None
+    dropbox_folder: Optional[str] = None
 
 class TaskCreate(BaseModel):
     project_id: int

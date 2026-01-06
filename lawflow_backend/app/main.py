@@ -31,10 +31,22 @@ def ensure_bg_color_column():
         # Table doesn't exist yet, which is fine - it will be created by create_all
         pass
 
+def ensure_dropbox_folder_column():
+    # Add the dropbox_folder column on existing SQLite DBs without recreating tables.
+    try:
+        with engine.connect() as conn:
+            cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(projects);")]
+            if "dropbox_folder" not in cols:
+                conn.exec_driver_sql("ALTER TABLE projects ADD COLUMN dropbox_folder VARCHAR(520)")
+    except Exception:
+        # Table doesn't exist yet, which is fine - it will be created by create_all
+        pass
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
     ensure_bg_color_column()
+    ensure_dropbox_folder_column()
     db = SessionLocal()
     try:
         seed_if_empty(db)

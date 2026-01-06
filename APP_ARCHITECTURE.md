@@ -44,6 +44,7 @@ This document describes the architecture and how data flows through LawFlow.
   - `templates.py` — municipality “template rules” (demo)
   - `calendar.py` — ICS export
   - `closing_pack.py` — ZIP generation
+  - `chat.py` — Gemini AI Assistant integration
 
 ### Frontend module map
 - `src/ui/App.tsx`
@@ -61,8 +62,13 @@ This document describes the architecture and how data flows through LawFlow.
 - `src/ui/*`
   - `Table.tsx`, `Timeline.tsx`, `CalendarView.tsx`, `FilesRoom.tsx`, `TemplatesView.tsx`
   - `ClosingPackWizard.tsx`, `SettingsView.tsx`
+  - `ChatView.tsx` — AI Assistant interface
+  - `InformesSectorialesView.tsx` — Market reports listing
+  - `SectorialReportView.tsx` — Detailed report with charts
+  - `AgenciasPolacasView.tsx` — Polish agency directory
+  - `GeneralOverviewView.tsx` — Portfolio dashboard
 - `src/ui/components/*`
-  - `Drawer.tsx`, `Modal.tsx`, `Callout.tsx`
+  - `Drawer.tsx`, `Modal.tsx`, `Callout.tsx`, `Footer.tsx`
 
 ---
 
@@ -146,6 +152,11 @@ Fields (representative):
 - If “ready”, user can download ZIP:
   - `GET /closing-pack/{project_id}`
 - Backend generates ZIP with markdown docs + manifest.json
+
+### AI Assistant Interaction
+- Frontend sends user message to `POST /chat`.
+- Backend (via `chat.py`) forwards query to Google Gemini 2.5-flash.
+- Resulting text returned to frontend and displayed in `ChatView`.
 
 ### Settings & appearance
 - Platform settings stored in localStorage (default bg color, density)

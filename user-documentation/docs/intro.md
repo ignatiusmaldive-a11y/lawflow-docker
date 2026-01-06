@@ -16,6 +16,8 @@ LawFlow combines powerful task management with specialized legal workflows to he
 - **Calendar Integration**: Deadline tracking and external calendar sync
 - **Template System**: Municipality-specific legal document templates
 - **Closing Pack Generation**: Automated document assembly and client delivery
+- **AI Assistant**: Google Gemini-powered chat for real-time legal support
+- **Sectorial Reports**: In-depth market analysis and business intelligence
 
 ## Key Features
 
@@ -30,6 +32,7 @@ LawFlow combines powerful task management with specialized legal workflows to he
 - Automatic deadline calculations
 - Template-based document generation
 - Integration with external calendars
+- **AI-Powered Queries**: Instant answers for procedural real-estate questions
 
 ### 📊 **Comprehensive Tracking**
 - Real-time matter status updates

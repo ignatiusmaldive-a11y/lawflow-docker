@@ -89,7 +89,7 @@ export function TasksTable({
             <td style={centerCell}>{t.assignee}</td>
             <td style={centerCell}>
               <input
-                className={`select ${t.status !== "Hecho" && daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
+                className={`select dateNoBorder ${t.status !== "Hecho" && daysUntil(t.due_date)! < 0 ? "bad" : ""} ${
                   t.status !== "Hecho" && daysUntil(t.due_date)! >= 0 && daysUntil(t.due_date)! <= 7 ? "warn" : ""
                 }`}
                 type="date"

@@ -442,6 +442,14 @@ select {
   border-top: 1px solid var(--line);
 }
 
+.cardSections > .filesRoomTableSection {
+  padding-bottom: 22px;
+}
+
+.cardSections > .filesRoomWidgetsSection {
+  padding-top: 14px;
+}
+
 .sectionTitle {
   display: flex;
   align-items: center;
@@ -563,6 +571,23 @@ input[type="date"].select {
   background-image: none;
   padding-right: 8px;
   /* Reduce distance to calendar icon (2/3 of previous) */
+}
+
+input[type="date"].select.dateNoBorder {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding-right: 0;
+}
+
+input[type="date"].select.dateNoBorder:focus {
+  outline: none;
+}
+
+input[type="date"].select.dateNoBorder::-webkit-calendar-picker-indicator {
+  margin-left: -10px;
+  padding: 0;
+  transform: translateX(-4px);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -1085,9 +1110,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   grid-template-columns: 1fr minmax(260px, 1fr);
 }
 
-.filesRoomGridUploadOnly .filesRoomBlock {
+.filesRoomGridUploadOnly .filesRoomDropboxBlock {
   grid-column: 2;
   justify-items: end;
+}
+
+.filesRoomGridUploadOnly .filesRoomDropboxBlock .dropboxZone {
+  max-width: 520px;
+  width: 100%;
+  justify-self: end;
+  box-sizing: border-box;
+}
+
+.filesRoomGridUploadOnly .filesRoomDropboxBlock .dropboxZone .search {
+  width: 100%;
+}
+
+.filesRoomGridUploadOnly .filesRoomUploadBlock {
+  grid-column: 1;
+  justify-items: start;
 }
 
 .filesRoomUploadHeader {
@@ -1108,10 +1149,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   flex: 1 1 auto;
 }
 
-.filesRoomGridUploadOnly .filesUploadZone {
+.filesRoomGridUploadOnly .filesRoomUploadBlock .filesUploadZone {
   max-width: 520px;
   width: 100%;
-  justify-self: end;
+  justify-self: start;
   box-sizing: border-box;
 }
 
@@ -1152,11 +1193,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     justify-items: stretch;
   }
 
+  .filesRoomGridUploadOnly .filesRoomDropboxBlock {
+    grid-column: auto;
+    justify-items: stretch;
+  }
+
   .filesRoomUploadHeader {
     max-width: none;
   }
 
-  .filesRoomGridUploadOnly .filesUploadZone {
+  .filesRoomGridUploadOnly .filesRoomUploadBlock .filesUploadZone {
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .filesRoomGridUploadOnly .filesRoomDropboxBlock .dropboxZone {
     max-width: none;
     justify-self: stretch;
   }
@@ -1815,6 +1866,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: #1e1b2e;
 }
 
+.dropZone.dragOverlay {
+  pointer-events: none;
+}
+
 /* Language toggle */
 .langToggle {
   display: flex;
@@ -2010,8 +2065,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .overview-toolbar .overview-search {
-  flex: 2 1 240px;
+  flex: 0 1 auto;
   min-width: 0;
+  width: auto;
 }
 
 .overview-toolbar .overview-status {
@@ -2035,7 +2091,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .overview-toolbar .overview-search {
-    flex: 1 1 100%;
+    flex: 0 1 auto;
   }
 
   .overview-toolbar .overview-status {
