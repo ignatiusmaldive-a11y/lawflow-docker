@@ -14,14 +14,14 @@ It is built to showcase an **innovative, modern SaaS UI** (Monday/Asana-inspired
 - **Project (Matter):** a single property transaction case
 - **Tasks:** operational steps, assigned to staff, with due dates and priorities
 - **Checklist:** standardized Spanish legal checklists per transaction type
-- **Timeline:** phases (Intake/DD/Contracts/Notary/Registry) + milestone (target completion)
-- **Files:** a “file room” per matter (uploads + preview)
+- **Timeline:** Multi-layer Gantt view. Includes legal phases, project milestones, public holidays, and fiscal monitoring (ITP/AJD, IRNR).
+- **Files:** a “file room” per matter (uploads + preview). Supports bilingual documents (Spanish/Polish).
 - **Templates:** municipality-based rules & document template lists
 - **Closing Pack:** a generated ZIP summarizing the transaction readiness + documents
 - **Activity:** audit-ish feed for major actions/events
 - **AI Assistant:** Google Gemini-powered chat for legal and procedural support
 - **Sectorial Reports:** Business intelligence reports with interactive charts for market analysis
-- **Agencias Polacas:** Specialized folder for Polish investors targeting the Costa del Sol
+- **Agencias Polacas:** Specialized folder and high-fidelity project scenarios for Polish investors targeting the Costa del Sol (including NIE and translation workflows).
 - **General Overview:** Portfolio-wide dashboard of all active matters
 
 ## Key UX flows

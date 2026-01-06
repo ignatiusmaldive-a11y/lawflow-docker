@@ -17,8 +17,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AI Assistant (Chat)**: Integrated Google Gemini (2.5-flash) for legal & procedural support.
 - **Sectorial Reports (Business Intelligence)**: Market analysis for Marbella, Costa del Sol, and luxury sectors with interactive charts.
 - **Polish Agency Directory**: Specialized view for Polish investors.
+- **Enhanced Timeline (v2)**: 
+  - Integrated location-based public holidays.
+  - Added visibility for fiscal obligations and recurring rental tasks directly in the Gantt chart.
+  - Restored "Alertas de plazos" (Upcoming deadlines) for active project monitoring.
+- **High-Fidelity Polish Samples**: Enriched demo data with realistic activities, NIE applications, bilingual contracts, and translation history for Polish-specific matters.
 - **General Overview**: New portfolio-wide dashboard.
 - **Footer Component**: Standardized footer across new landing views.
+
+### Fixed
+- **Connectivity**: Resolved Vite proxy `ECONNREFUSED` by switching from `localhost` to `127.0.0.1` in `vite.config.ts`.
+- **UI Stability**: Reverted experimental internal API calls in `Cronograma.tsx` for a more stable prop-driven architecture.
+- **Seeding**: Fixed idempotent seeding of Polish projects to ensure data is populated even if the database was partially existing.
 
 ### Changed
 - Updated deployment documentation to reflect systemd-based setup (replacing Docker instructions)

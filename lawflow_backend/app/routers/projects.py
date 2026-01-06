@@ -1,9 +1,17 @@
 import re
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db import get_db
-from ..models import Activity, Project
+from ..models import Activity, Project, Client, RentalManagement
 from ..schemas import ProjectOut, ProjectCreate, ProjectUpdate, ProjectDetail
+from ..services.checklist_engine import auto_populate_checklist, create_linked_tasks
+from ..services.fiscal_engine import (
+    create_purchase_fiscal_obligations, 
+    create_sale_fiscal_obligations,
+    create_rental_fiscal_obligations,
+    create_ongoing_ibi_obligation
+)
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -28,9 +36,51 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
 
 @router.post("", response_model=ProjectOut)
 def create_project(payload: ProjectCreate, db: Session = Depends(get_db)):
-    p = Project(**payload.model_dump())
+    # 1. Create the project
+    project_data = payload.model_dump()
+    is_rental = project_data.pop("is_rental", False)
+    
+    p = Project(**project_data)
     db.add(p)
-    db.add(Activity(project_id=0, actor="System", verb="Asunto creado", detail=p.title))
+    db.flush()  # Get p.id
+    
+    # 2. Log activity
+    db.add(Activity(project_id=p.id, actor="System", verb="Asunto creado", detail=p.title))
+    
+    # 3. Fetch client for nationality info
+    client = db.get(Client, p.client_id)
+    if not client:
+        # Fallback to default if no client (though schema requires client_id)
+        client = Client(nationality="Spanish") 
+    
+    # 4. Auto-populate checklist
+    checklist_items = auto_populate_checklist(p, client, is_rental=is_rental, db=db)
+    
+    # 5. Create linked tasks
+    create_linked_tasks(checklist_items, p, db, client=client)
+    
+    # 6. Create fiscal obligations based on type
+    if p.transaction_type == "Purchase":
+        # For demo purposes, assume notary is 30 days from now if not specified
+        notary_date = (p.start_date or p.target_close_date or datetime.now()).date()
+        create_purchase_fiscal_obligations(p, notary_date, db)
+    elif p.transaction_type == "Sale":
+        sale_date = (p.start_date or p.target_close_date or datetime.now()).date()
+        create_sale_fiscal_obligations(p, sale_date, db)
+        
+    # 7. Setup rental management if applicable
+    if is_rental:
+        rental = RentalManagement(
+            project_id=p.id,
+            rental_status="Setup",
+            notes="Configurado automáticamente al crear el proyecto."
+        )
+        db.add(rental)
+        
+        # Create rental specific fiscal obligations
+        rental_start = (p.target_close_date or datetime.now()).date()
+        create_rental_fiscal_obligations(p, client.nationality, rental_start, db)
+
     db.commit()
     db.refresh(p)
     return p

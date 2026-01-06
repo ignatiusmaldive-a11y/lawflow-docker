@@ -8,6 +8,9 @@ class ClientOut(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     notes: Optional[str] = None
+    nationality: Optional[str] = None
+    tax_residency: Optional[str] = None
+    preferred_language: Optional[str] = None
     class Config: from_attributes = True
 
 class ProjectOut(BaseModel):
@@ -76,11 +79,62 @@ class ActivityOut(BaseModel):
     detail: Optional[str] = None
     class Config: from_attributes = True
 
+class ChatOut(BaseModel):
+    response: str
+
+class FiscalObligationOut(BaseModel):
+    id: int
+    project_id: int
+    obligation_type: str
+    amount: Optional[float] = None
+    due_date: Optional[date] = None
+    filing_deadline: Optional[date] = None
+    status: str
+    reference_number: Optional[str] = None
+    notes: Optional[str] = None
+    class Config: from_attributes = True
+
+class RecurringTaskOut(BaseModel):
+    id: int
+    project_id: int
+    title: str
+    frequency: str
+    next_due_date: Optional[date] = None
+    category: Optional[str] = None
+    is_active: bool
+    description: Optional[str] = None
+    class Config: from_attributes = True
+
+class RentalManagementOut(BaseModel):
+    id: int
+    project_id: int
+    rental_status: str
+    rental_type: Optional[str] = None
+    monthly_income: Optional[float] = None
+    tenant_name: Optional[str] = None
+    lease_start: Optional[date] = None
+    lease_end: Optional[date] = None
+    tourist_license: Optional[str] = None
+    notes: Optional[str] = None
+    class Config: from_attributes = True
+
+class ChecklistTemplateOut(BaseModel):
+    id: int
+    name: str
+    transaction_type: str
+    client_profile: Optional[str] = None
+    description: Optional[str] = None
+    stages_data: Optional[dict] = None
+    class Config: from_attributes = True
+
 class ProjectDetail(ProjectOut):
     tasks: List[TaskOut] = []
     checklist_items: List[ChecklistItemOut] = []
     timeline_items: List[TimelineItemOut] = []
     activities: List[ActivityOut] = []
+    fiscal_obligations: List[FiscalObligationOut] = []
+    recurring_tasks: List[RecurringTaskOut] = []
+    rental_management: Optional[RentalManagementOut] = None
 
 class FileItemOut(BaseModel):
     id: int
@@ -106,6 +160,7 @@ class ProjectCreate(BaseModel):
     risk: str = "Normal"
     bg_color: str = "#0b1220"
     client_id: int
+    is_rental: bool = False
 
 class ProjectUpdate(BaseModel):
     title: Optional[str] = None
@@ -128,5 +183,3 @@ class TaskCreate(BaseModel):
 class ChatIn(BaseModel):
     message: str
 
-class ChatOut(BaseModel):
-    response: str

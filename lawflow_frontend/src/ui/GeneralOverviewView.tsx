@@ -233,8 +233,8 @@ export function GeneralOverviewView({
             <thead>
               <tr>
                 <SortHeader field="project_number" label={t("matterTableCol")} className="column-matter" />
-                <SortHeader field="status" label={t("statusTableCol")} align="center" />
-                <SortHeader field="risk" label={t("riskTableCol")} align="center" />
+                <SortHeader field="status" label={t("statusTableCol")} align="left" />
+                <SortHeader field="risk" label={t("riskTableCol")} align="left" />
                 <SortHeader field="target_close_date" label={t("deadlineTableCol")} />
                 <SortHeader field="client" label={t("clientTableCol")} />
                 <SortHeader field="location" label={t("locationTableCol")} className="column-location" align="center" />
@@ -260,13 +260,13 @@ export function GeneralOverviewView({
 	                        </div>
 	                      </div>
 	                    </td>
-	                    <td style={{ textAlign: "center" }}>
-	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                    <td style={{ textAlign: "left" }}>
+	                      <div className="rowCell" style={{ justifyContent: "flex-start" }}>
 	                        {statusPill(p.status, t)}
 	                      </div>
 	                    </td>
-	                    <td style={{ textAlign: "center" }}>
-	                      <div className="rowCell" style={{ justifyContent: "center" }}>
+	                    <td style={{ textAlign: "left" }}>
+	                      <div className="rowCell" style={{ justifyContent: "flex-start" }}>
 	                        {riskPill(p.risk, t)}
 	                      </div>
 	                    </td>

@@ -9,6 +9,11 @@ router = APIRouter(prefix="/calendar", tags=["calendar"])
 def ics_escape(s: str) -> str:
     return s.replace('\\', '\\\\').replace(';','\\;').replace(',','\\,').replace('\n','\\n')
 
+@router.get("/holidays")
+def get_holidays(location: str = "Marbella", year: int = 2026):
+    from ..services.calendar_utils import get_holidays as gh
+    return gh(year, location)
+
 @router.get("/ics")
 def project_ics(project_id: int, db: Session = Depends(get_db)):
     p = db.get(Project, project_id)

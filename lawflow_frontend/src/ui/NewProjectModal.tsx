@@ -21,6 +21,7 @@ export function NewProjectModal({
   const [location, setLocation] = useState("Marbella");
   const [risk, setRisk] = useState("Normal");
   const [status, setStatus] = useState("Intake");
+  const [isRental, setIsRental] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const payload: ProjectCreate = useMemo(
@@ -32,8 +33,9 @@ export function NewProjectModal({
       status,
       client_id: clientIdFallback,
       bg_color: defaultBg,
+      is_rental: isRental,
     }),
-    [title, transactionType, location, risk, status, clientIdFallback, defaultBg]
+    [title, transactionType, location, risk, status, clientIdFallback, defaultBg, isRental]
   );
 
   return (
@@ -77,6 +79,18 @@ export function NewProjectModal({
         <div>
           <div className="small" style={{ marginBottom: 4 }}>Color</div>
           <div className="pill" style={{ display: "inline-flex", marginTop: 4 }}>Usa el color predeterminado</div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+          <input
+            type="checkbox"
+            id="isRental"
+            checked={isRental}
+            onChange={(e) => setIsRental(e.target.checked)}
+            style={{ width: 18, height: 18 }}
+          />
+          <label htmlFor="isRental" className="small" style={{ cursor: "pointer", fontWeight: 700 }}>
+            Inversión / Alquiler Vacacional
+          </label>
         </div>
       </div>
 

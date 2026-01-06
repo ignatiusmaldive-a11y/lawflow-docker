@@ -45,6 +45,9 @@ This document describes the architecture and how data flows through LawFlow.
   - `calendar.py` — ICS export
   - `closing_pack.py` — ZIP generation
   - `chat.py` — Gemini AI Assistant integration
+  - `fiscal.py` — Fiscal obligations listing
+  - `recurring_tasks.py` — Recurring task templates
+  - `rental.py` — Rental management data
 
 ### Frontend module map
 - `src/ui/App.tsx`
@@ -115,9 +118,23 @@ Fields (representative):
 3. For active project, load:
    - `GET /tasks?project_id=...`
    - `GET /checklist?project_id=...`
-   - `GET /timeline?project_id=...`
-   - `GET /activity?project_id=...`
-   - `GET /files?project_id=...`
+    - `GET /timeline?project_id=...`
+    - `GET /activity?project_id=...`
+    - `GET /files?project_id=...`
+    - `GET /fiscal?project_id=...`
+    - `GET /recurring-tasks?project_id=...`
+
+### Timeline & Fiscal Synchronization
+1. The **Timeline** view is now prop-driven. 
+2. `App.tsx` fetches:
+   - Base timeline items (`/timeline`)
+   - Tasks (`/tasks`)
+   - Fiscal obligations (`/fiscal`)
+   - Recurring tasks (`/recurring-tasks`)
+3. Data is passed down to `Cronograma.tsx` which handles:
+   - Merging fiscal/recurring items into the Gantt view
+   - Fetching location-based holidays internally with proper error handling
+   - Displaying the **Alertas de plazos** (Upcoming deadlines) and **Obligaciones Fiscales** tables.
 
 ### Board drag & drop (Kanban)
 - UI updates task status locally after DnD.
