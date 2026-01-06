@@ -20,15 +20,48 @@ export function formatDate(dateStr: string | null | undefined): string {
 export function formatClientName(name: string | null | undefined, unknownLabel = "Unknown Client"): string {
   if (!name) return unknownLabel;
 
+  const trimmed = name.trim();
+  if (!trimmed) return unknownLabel;
+
+  const formatCoupleName = (leftRaw: string, rightRaw: string): string | null => {
+    const left = leftRaw.trim();
+    const right = rightRaw.trim();
+    if (!left || !right) return null;
+
+    // If right side is already "Surname, First", keep it and just append the other party.
+    if (right.includes(",")) return `${right} & ${left}`;
+
+    // Expected: "<SecondFirst> <SharedSurname...>"
+    const rightParts = right.split(/\s+/).filter(Boolean);
+    if (rightParts.length < 2) return null;
+    const secondFirstName = rightParts[0];
+    const sharedSurname = rightParts.slice(1).join(" ");
+    return `${sharedSurname}, ${secondFirstName} & ${left}`;
+  };
+
+  // Handle couple/joint names like "María & Daniel Ruiz" => "Ruiz, Daniel & María"
+  // Also repair the previously mangled output "& Daniel Ruiz, María" => "Ruiz, Daniel & María".
+  const mangledMatch = trimmed.match(/^&\s+(.+),\s*(.+)$/);
+  if (mangledMatch) {
+    const repaired = formatCoupleName(mangledMatch[2], mangledMatch[1]);
+    if (repaired) return repaired;
+  }
+
+  const connectorMatch = trimmed.match(/\s*(.+?)\s*(?:&|\by\b|\band\b)\s*(.+)\s*/i);
+  if (connectorMatch) {
+    const formatted = formatCoupleName(connectorMatch[1], connectorMatch[2]);
+    if (formatted) return formatted;
+  }
+
   // Format: Surname, First Name
   // Example: "Laura Pérez" becomes "Pérez, Laura"
-  const parts = name.trim().split(/\s+/);
+  const parts = trimmed.split(/\s+/);
   if (parts.length >= 2) {
     const firstName = parts[0];
     const surname = parts.slice(1).join(" ");
     return `${surname}, ${firstName}`;
   }
-  return name; // If only one part, return as is
+  return trimmed; // If only one part, return as is
 }
 
 export function formatProjectLabel(

@@ -195,18 +195,42 @@ export function GeneralOverviewView({
 
       {/* Filters & Actions */}
       <div className="table-container">
-        <div className="card cardPad overview-toolbar">
+        <div className="card cardPad overview-toolbar overview-toolbar-fit">
           <input
             className="search overview-search"
             placeholder={searchPlaceholder}
             size={Math.max(1, searchPlaceholder.length)}
+            style={
+              {
+                ["--overview-search-ch" as any]: Math.max(12, Math.min(48, searchPlaceholder.length + 2)),
+              } as React.CSSProperties
+            }
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           />
 
+          {(() => {
+            const options = [
+              t("allStatuses"),
+              t("statusIntake"),
+              t("statusDueDiligence"),
+              t("statusContracts"),
+              t("statusNotary"),
+              t("statusRegistry"),
+              t("statusCompleted"),
+            ];
+            const maxLen = options.reduce((acc, label) => Math.max(acc, label.length), 0);
+            const statusCh = Math.max(12, Math.min(34, maxLen + 4));
+
+            return (
           <select
             className="select overview-status"
             value={statusFilter}
+            style={
+              {
+                ["--overview-status-ch" as any]: statusCh,
+              } as React.CSSProperties
+            }
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="All">{t("allStatuses")}</option>
@@ -217,6 +241,8 @@ export function GeneralOverviewView({
             <option value="Registry">{t("statusRegistry")}</option>
             <option value="Completed">{t("statusCompleted")}</option>
           </select>
+            );
+          })()}
 
           <div className="overview-actions">
             <button className="btn primary overview-new-project" onClick={onNewProject}>

@@ -28,8 +28,8 @@
     }
   },
   "loggers": {
-    "uvicorn": {"handlers": ["default"], "level": "info"},
-    "uvicorn.error": {"handlers": ["default"], "level": "info"},
-    "uvicorn.access": {"handlers": ["access"], "level": "info", "propagate": false}
+    "uvicorn": {"handlers": ["default"], "level": "INFO"},
+    "uvicorn.error": {"handlers": ["default"], "level": "INFO"},
+    "uvicorn.access": {"handlers": ["access"], "level": "INFO", "propagate": false}
   }
 }

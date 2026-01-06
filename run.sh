@@ -54,6 +54,37 @@ kill_on_port() {
   fi
 }
 
+backend_healthy() {
+  local url=${1:-http://127.0.0.1:8000/health}
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsS "$url" >/dev/null 2>&1
+    return $?
+  fi
+
+  python - <<PY >/dev/null 2>&1
+import urllib.request
+urllib.request.urlopen("${url}", timeout=1).read()
+PY
+}
+
+wait_for_backend() {
+  local url=${1:-http://127.0.0.1:8000/health}
+  local timeout_s=${2:-30}
+  local start_ts
+  start_ts=$(date +%s)
+
+  while true; do
+    if backend_healthy "$url"; then
+      return 0
+    fi
+    if [ $(( $(date +%s) - start_ts )) -ge "$timeout_s" ]; then
+      echo "Backend did not become ready within ${timeout_s}s (${url})." >&2
+      return 1
+    fi
+    sleep 0.25
+  done
+}
+
 start() {
   if [ ! -d "$VENV_DIR" ]; then
     echo "Missing venv at $VENV_DIR. Run ./run.sh setup first." >&2
@@ -71,11 +102,18 @@ start() {
   (cd "$BACKEND_DIR" && uvicorn app.main:app --reload --port 8000 --log-config logging_config.json) &
   BACK_PID=$!
 
+  trap 'echo "Stopping..."; test -n "${BACK_PID:-}" && kill "$BACK_PID" 2>/dev/null; test -n "${FRONT_PID:-}" && kill "$FRONT_PID" 2>/dev/null' EXIT
+
+  echo "Waiting for backend to be ready..."
+  if ! wait_for_backend "http://127.0.0.1:8000/health" 30; then
+    kill "$BACK_PID" 2>/dev/null || true
+    exit 1
+  fi
+
   echo "Starting frontend (Vite)..."
   (cd "$FRONTEND_DIR" && npm run dev -- --host --port 5173) &
   FRONT_PID=$!
 
-  trap 'echo "Stopping..."; kill $BACK_PID $FRONT_PID 2>/dev/null' EXIT
   wait -n
 }
 

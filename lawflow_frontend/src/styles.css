@@ -2129,6 +2129,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: center;
   flex-wrap: nowrap;
   min-width: 0;
+  --overview-control-min-height: 40px;
+  --overview-control-pad-y: 9px;
 }
 
 .overview-toolbar .overview-actions {
@@ -2151,13 +2153,51 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   max-width: 220px;
 }
 
+.overview-toolbar-fit .overview-search {
+  width: calc(var(--overview-search-ch, 22) * 1ch);
+  max-width: 100%;
+}
+
+.overview-toolbar-fit .overview-status {
+  flex: 0 1 auto;
+  width: calc(var(--overview-status-ch, 16) * 1ch);
+  max-width: 100%;
+}
+
+.overview-toolbar .overview-search,
+.overview-toolbar .overview-status,
+.overview-toolbar .overview-new-project {
+  min-height: var(--overview-control-min-height);
+}
+
+.overview-toolbar .overview-search {
+  padding: var(--overview-control-pad-y) 12px;
+}
+
+.overview-toolbar .overview-status {
+  padding-top: var(--overview-control-pad-y);
+  padding-bottom: var(--overview-control-pad-y);
+}
+
 .overview-new-project {
-  padding: clamp(6px, .8vw, 8px) clamp(10px, 1.2vw, 16px);
-  font-size: clamp(11px, 1.1vw, 13px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--overview-control-pad-y) 12px;
+  font-size: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 180px;
+}
+
+.overview-new-project.btn.primary {
+  background: color-mix(in oklab, var(--brand) 26%, var(--panel));
+  border-color: color-mix(in oklab, var(--brand) 50%, var(--line));
+}
+
+.overview-new-project.btn.primary:hover {
+  background: color-mix(in oklab, var(--brand) 32%, var(--panel2));
 }
 
 @media (max-width: 520px) {
@@ -2172,6 +2212,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .overview-toolbar .overview-status {
     flex: 1 1 100%;
     max-width: none;
+  }
+
+  .overview-toolbar-fit .overview-search {
+    width: 100%;
+  }
+
+  .overview-toolbar-fit .overview-status {
+    width: 100%;
   }
 
   .overview-toolbar .overview-actions {
