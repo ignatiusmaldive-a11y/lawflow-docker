@@ -45,7 +45,7 @@ export function SettingsView({ projects, onProjectUpdated }: { projects: Project
           <h2>Settings</h2>
           <span className="pill">Platform</span>
         </div>
-        <div className="small">Configure demo platform defaults: project colors, density, and UX flags.</div>
+        <div className="small">Configure demo platform defaults: project colors and density.</div>
       </div>
 
       <div className="card cardPad">
