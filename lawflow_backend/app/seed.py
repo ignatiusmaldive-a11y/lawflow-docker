@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from .models import Client, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem
+from .models import Client, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem, FiscalObligation, RecurringTask, RentalManagement
 
 PURCHASE = [
   ("Admision", "KYC / Incorporación del cliente + carta de compromiso"),
@@ -36,32 +36,92 @@ def seed_if_empty(db: Session):
 
     today = date.today()
 
-    # Clients
+    # Existing Spanish/International clients
     c1 = Client(
         name="Sofía Martínez",
         email="sofia.martinez@example.com",
         phone="+34 600 111 222",
+        nationality="Spanish",
+        tax_residency="ES",
+        preferred_language="es",
         notes="Buyer relocating to Costa del Sol. Needs NIE + Spanish bank account guidance.",
     )
     c2 = Client(
         name="James O'Connor",
         email="j.oconnor@example.com",
         phone="+34 611 333 444",
+        nationality="Irish",
+        tax_residency="IE",
+        preferred_language="en",
         notes="Seller. Mortgage cancellation required. Wants tight notary window.",
     )
     c3 = Client(
         name="María & Daniel Ruiz",
         email="ruiz.family@example.com",
         phone="+34 622 555 888",
+        nationality="Spanish",
+        tax_residency="ES",
+        preferred_language="es",
         notes="New-build purchase. Snagging plan + developer guarantees.",
     )
     c4 = Client(
         name="Laura Pérez",
         email="laura.perez@example.com",
         phone="+34 633 777 999",
+        nationality="Spanish",
+        tax_residency="ES",
+        preferred_language="es",
         notes="Sale with tourist license considerations; HOA rules review.",
     )
-    db.add_all([c1, c2, c3, c4])
+    
+    # Polish clients (1/3 of total demo data)
+    c5_polish = Client(
+        name="Krzysztof Nowak",
+        email="k.nowak@example.pl",
+        phone="+48 600 111 222",
+        nationality="Polish",
+        tax_residency="PL",
+        preferred_language="pl",
+        notes="First-time buyer in Spain. Requires NIE coordination with Polish consulate and IRNR quarterly filing setup.",
+    )
+    c6_polish = Client(
+        name="Anna Kowalska",
+        email="a.kowalska@example.pl",
+        phone="+48 611 333 444",
+        nationality="Polish",
+        tax_residency="PL",
+        preferred_language="pl",
+        notes="Seller with non-resident tax obligations. CGT considerations for Polish tax resident.",
+    )
+    c7_polish = Client(
+        name="Piotr & Magda Wiśniewski",
+        email="wisniewski.family@example.pl",
+        phone="+48 622 555 888",
+        nationality="Polish",
+        tax_residency="PL",
+        preferred_language="pl",
+        notes="Investment property for holiday rentals. Need rental license and quarterly IRNR filing setup.",
+    )
+    c8_polish = Client(
+        name="Jakub Lewandowski",
+        email="j.lewandowski@example.pl",
+        phone="+48 633 777 999",
+        nationality="Polish",
+        tax_residency="PL",
+        preferred_language="pl",
+        notes="Real estate investor. Multiple property purchases for rental portfolio in Costa del Sol.",
+    )
+    c9_polish = Client(
+        name="Zofia Kamiński",
+        email="z.kaminski@example.pl",
+        phone="+48 644 888 111",
+        nationality="Polish",
+        tax_residency="PL",
+        preferred_language="pl",
+        notes="Retiree selling property to return to Poland. Non-resident CGT and Plusvalía obligations.",
+    )
+    
+    db.add_all([c1, c2, c3, c4, c5_polish, c6_polish, c7_polish, c8_polish, c9_polish])
     db.flush()
 
     # Matters (15 projects for comprehensive demo coverage)
@@ -232,9 +292,117 @@ def seed_if_empty(db: Session):
         target_close_date=today - timedelta(days=12),
         client_id=c4.id,
     )
+    
+    # Polish client projects (5 projects = 1/3 of total 15)
+    p16_polish = Project(
+        title="Purchase – Beachfront Apartment in Marbella (Polish Buyer)",
+        transaction_type="Purchase",
+        location="Marbella",
+        status="Due Diligence",
+        risk="Normal",
+        bg_color="#0e1320",
+        start_date=today - timedelta(days=10),
+        target_close_date=today + timedelta(days=35),
+        client_id=c5_polish.id,
+    )
+    p17_polish =Project(
+        title="Sale – Townhouse in Mijas (Polish Seller)",
+        transaction_type="Sale",
+        location="Mijas",
+        status="Contracts",
+        risk="At Risk",
+        bg_color="#0a1714",
+        start_date=today - timedelta(days=18),
+        target_close_date=today + timedelta(days=22),
+        client_id=c6_polish.id,
+    )
+    p18_polish = Project(
+        title="Purchase – Villa in Estepona for Rental (Polish Investment)",
+        transaction_type="Purchase",
+        location="Estepona",
+        status="Notary",
+        risk="Normal",
+        bg_color="#0f1521",
+        start_date=today - timedelta(days=32),
+        target_close_date=today + timedelta(days=8),
+        client_id=c7_polish.id,
+    )
+    p19_polish = Project(
+        title="Purchase – New-build in Manilva (Polish Investor)",
+        transaction_type="Purchase",
+        location="Estepona",
+        status="Due Diligence",
+        risk="At Risk",
+        bg_color="#0c1422",
+        start_date=today - timedelta(days=25),
+        target_close_date=today + timedelta(days=40),
+        client_id=c8_polish.id,
+    )
+    p20_polish = Project(
+        title="Sale – Apartment in Fuengirola (Polish Retiree)",
+        transaction_type="Sale",
+        location="Mijas",
+        status="Registry",
+        risk="Normal",
+        bg_color="#0d1523",
+        start_date=today - timedelta(days=60),
+        target_close_date=today - timedelta(days=15),
+        client_id=c9_polish.id,
+    )
 
-    projects = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15]
+    projects = [p1, p2, p16_polish, p3, p4, p17_polish, p5, p6, p18_polish, p7, p8, p19_polish, p9, p10, p20_polish, p11, p12, p13, p14, p15]
     db.add_all(projects)
+    db.flush()
+
+    # --- NEW: Fiscal, Recurring & Rental Demo Data ---
+    
+    # Rental Management for p18 (Polish Investment Villa)
+    rm1 = RentalManagement(
+        project_id=p18_polish.id,
+        rental_status="Active",
+        tenant_name="Soren & Elin Larsen",
+        monthly_income=4500.0,
+        lease_start=date(2026, 1, 15),
+        lease_end=date(2027, 1, 14),
+        tourist_license="VFT/MA/99887",
+        notes="High-yield holiday rental managed by local agency. Scandinavian tenants."
+    )
+    db.add(rm1)
+
+    # Fiscal Obligations for p16 (Polish Purchase Marbella)
+    fo1 = FiscalObligation(
+        project_id=p16_polish.id,
+        obligation_type="ITP (Impuesto Transmisiones Patrimoniales)",
+        amount=56000.0,
+        due_date=today + timedelta(days=40),
+        status="Pending",
+        notes="Calculated at 7% on €800k purchase price."
+    )
+    db.add(fo1)
+
+    # Recurring Tasks (e.g., IRNR for Polish residents)
+    rt1 = RecurringTask(
+        project_id=p16_polish.id,
+        title="IRNR Trimestral (No resident)",
+        frequency="Quarterly",
+        next_due_date=date(2026, 4, 20),
+        is_active=True
+    )
+    rt2 = RecurringTask(
+        project_id=p18_polish.id,
+        title="IRNR Trimestral Ingresos Alquiler",
+        frequency="Quarterly",
+        next_due_date=date(2026, 4, 20),
+        is_active=True
+    )
+    rt3 = RecurringTask(
+        project_id=p20_polish.id,
+        title="IBI Anual (Impuesto Bienes Inmuebles)",
+        frequency="Annual",
+        next_due_date=date(2026, 11, 15),
+        is_active=True
+    )
+    db.add_all([rt1, rt2, rt3])
     db.flush()
 
     # Helpers
@@ -371,6 +539,34 @@ def seed_if_empty(db: Session):
     add_task(p15, "Confirmación completado registro", "Done", "Lucía", -8, "Low", "Registry", "Escritura registrada exitosamente en Registro de la Propiedad.")
     add_task(p15, "Documentación final cliente", "Done", "Ana", -6, "Low", "Client,Admin", "Proporcionada documentación completa de transacción al vendedor.")
     add_task(p15, "Archivo final expediente", "Done", "Ana", -3, "Low", "Admin,Archiving", "Expediente villa lujo completamente archivado.")
+    
+    # Polish projects tasks (p16-p20)
+    # p16 (Polish Purchase - Beachfront Marbella) — Due Diligence
+    add_task(p16_polish, "Coordinar solicitud NIE con consulado polaco", "In Progress", "Ana", 3, "High", "NIE,Poland", "Agendar cita en consulado polaco de Málaga para solicitud NIE.")
+    add_task(p16_polish, "Configurar sistema IRNR trimestral", "Backlog", "Lucía", 8, "Medium", "Taxes,IRNR", "Preparar sistema de declaración trimestral IRNR para no residente.")
+    add_task(p16_polish, "Solicitar Nota Simple propiedad costera", "In Progress", "Lucía", 2, "High", "DD,Registry", "Obtener extracto registral de propiedad frente al mar.")
+    add_task(p16_polish, "Verificación fondos desde Polonia", "Review", "Carlos", 5, "High", "Finance,International", "Confirmar ruta de transferencia internacional desde banco polaco.")
+    
+    # p17 (Polish Sale - Townhouse Mijas) — Contracts, At Risk
+    add_task(p17_polish, "Calcular CGT para no residente polaco", "In Progress", "Lucía", 2, "High", "Taxes,CGT", "Cálculo impuesto ganancias capital para vendedor no residente.")
+    add_task(p17_polish, "Coordinación certificado retenciones", "Backlog", "Ana", 6, "High", "Taxes,Legal", "Obtener certificado retenciones de Agencia Tributaria.")
+    add_task(p17_polish, "Redactar contratos bilingües (ES/PL)", "Review", "Carlos", 4, "Medium", "Contracts,Translation", "Preparar contratos en español con resumen en polaco.")
+    
+    # p18 (Polish Purchase - Villa Rental Estepona) — Notary
+    add_task(p18_polish, "Solicitar licencia VUT (vivienda uso turístico)", "In Progress", "Ana", 3, "High", "Rental,License", "Tramitar licencia turística para alquiler vacacional.")
+    add_task(p18_polish, "Configurar IRNR trimestral ingresos alquiler", "Backlog", "Lucía", 10, "High", "Taxes,IRNR,Rental", "Preparar sistema declaración trimestral ingresos alquiler para no resident.")
+    add_task(p18_polish, "Reservar notaría + coordinación intérprete", "In Progress", "Javier", 2, "High", "Notary,Translation", "Asegurar notaría y disponibilidad intérprete polaco si necesario.")
+    add_task(p18_polish, "Redactar contrato arrendamiento estándar", "Backlog", "Carlos", 12, "Medium", "Rental,Contracts", "Preparar contrato alquiler vacacional conforme normativa VUT.")
+    
+    # p19 (Polish Purchase - New-build Manilva) — Due Diligence, At Risk
+    add_task(p19_polish, "Evaluación riesgo promotor", "In Progress", "Carlos", 5, "High", "DD,Developer", "Investigar estabilidad financiera promotor y historial proyectos.")
+    add_task(p19_polish, "Verificación aval bancario", "Review", "Lucía", 3, "High", "DD,Finance", "Confirmar aval bancario cubre precio total compra.")
+    add_task(p19_polish, "Apoyo NIE comprador polaco", "Done", "Ana", -2, "Low", "NIE,Poland", "NIE solicitado en consulado polaco.")
+    
+    # p20 (Polish Sale - Fuengirola Retiree) — Registry, completed
+    add_task(p20_polish, "Presentación Plusvalía municipal", "Done", "Lucía", -10, "Low", "Taxes", "Plusvalía municipal presentada y pagada.")
+    add_task(p20_polish, "Orientación CGT vendedor no residente", "Done", "Lucía", -12, "Low", "Taxes,CGT", "Guía fiscal CGT para vendedor polaco completada.")
+    add_task(p20_polish, "Confirmación registro finalizado", "Done", "Lucía", -8, "Low", "Registry", "Escritura registrada exitosamente.")
 
     # Timeline: phases + milestone per project
     def add_timeline(p, close_in_days):
@@ -426,6 +622,16 @@ def seed_if_empty(db: Session):
             add_timeline(p14, 12)
         elif p.id == p15.id:
             add_timeline(p15, -12)
+        elif p.id == p16_polish.id:
+            add_timeline(p16_polish, 35)
+        elif p.id == p17_polish.id:
+            add_timeline(p17_polish, 22)
+        elif p.id == p18_polish.id:
+            add_timeline(p18_polish, 8)
+        elif p.id == p19_polish.id:
+            add_timeline(p19_polish, 40)
+        elif p.id == p20_polish.id:
+            add_timeline(p20_polish, -15)
 
     # Checklist: realistic completion states based on project progress
     def add_checklist(p):
@@ -602,10 +808,33 @@ def seed_if_empty(db: Session):
     add_activity(p14, "Lucía", "Verificado", "Derechos de extracción de agua confirmados.", 5)
 
     # p15 (Ojén Luxury Villa) - Registry, completed
-    add_activity(p15, "Ana López", "Completado", "Divulgaciones de propiedad de lujo finalizadas.", 13)
-    add_activity(p15, "Lucía", "Presentado", "Declaración de impuesto de transmisión de alto valor presentada.", 10)
-    add_activity(p15, "Lucía", "Confirmado", "Confirmación de finalización registral recibida.", 8)
     add_activity(p15, "Ana López", "Entregado", "Documentación completa de la transacción.", 7)
+    
+    # Polish Projects (p16-p20) - Activity Enrichment
+    # p16 (Warsaw Investor)
+    add_activity(p16_polish, "Ana López", "Asunto abierto", "Compra de villa para inversión por cliente polaco.", 10)
+    add_activity(p16_polish, "Lucía", "Traducido", "Contrato de reserva traducido al polaco para revisión del cliente.", 8)
+    add_activity(p16_polish, "Carlos", "NIE Tramitado", "Solicitud de NIE coordinada con la policía local.", 5)
+    
+    # p17 (Krakow Family)
+    add_activity(p17_polish, "Ana López", "Asunto abierto", "Compra de segunda residencia en Marbella.", 7)
+    add_activity(p17_polish, "Lucía", "Verificado", "Poder notarial desde Polonia recibido y validado.", 4)
+    add_activity(p17_polish, "Javier", "Banco", "Apertura de cuenta española para transferencia internacional.", 3)
+    
+    # p18 (Rental Portfolio)
+    add_activity(p18_polish, "Ana López", "Asunto abierto", "Adquisición de portfolio de alquiler vacacional.", 12)
+    add_activity(p18_polish, "Carlos", "Licencia", "Solicitud de licencia turística para 3 unidades presentada.", 6)
+    add_activity(p18_polish, "System", "Alerta", "Inspección técnica de la propiedad programada.", 2)
+    
+    # p19 (Wroclaw Tech Couple)
+    add_activity(p19_polish, "Ana López", "Asunto abierto", "Compra de ático sobre plano en Estepona.", 15)
+    add_activity(p19_polish, "Lucía", "Aval", "Seguro de caución del promotor verificado.", 10)
+    add_activity(p19_polish, "Carlos", "Visita", "Reporte de progreso de obra enviado con fotos.", 5)
+    
+    # p20 (Gdansk Estate)
+    add_activity(p20_polish, "Ana López", "Asunto abierto", "Venta de propiedad de herencia internacional.", 20)
+    add_activity(p20_polish, "Javier", "Impuestos", "Cálculo de impuesto de sucesiones (no residentes) completado.", 12)
+    add_activity(p20_polish, "Lucía", "Documentación", "Traducción jurada de certificado de defunción polaco obtenida.", 8)
 
     # Add files for additional projects
     # p6-p10 files
@@ -631,6 +860,14 @@ def seed_if_empty(db: Session):
     db.add(FileItem(project_id=p14.id, filename="Permiso_Agricola.pdf", stored_path="seed/Agricultural_Permit.pdf", mime_type="application/pdf", uploader="Ana López"))
     db.add(FileItem(project_id=p15.id, filename="Divulgaciones_Lujo.pdf", stored_path="seed/Luxury_Disclosures.pdf", mime_type="application/pdf", uploader="Ana López"))
     db.add(FileItem(project_id=p15.id, filename="Recibo_Impuesto_Transmisiones.pdf", stored_path="seed/Transfer_Tax_Receipt.pdf", mime_type="application/pdf", uploader="Lucía"))
+    
+    # Polish Projects (p16-p20) - File Enrichment
+    db.add(FileItem(project_id=p16_polish.id, filename="Contrato_Reserva_Polaco.pdf", stored_path="seed/Reservation_Contract_Polish.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p16_polish.id, filename="Solicitud_NIE_Investor.pdf", stored_path="seed/NIE_Application.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p17_polish.id, filename="Poder_Notarial_Varsovia.pdf", stored_path="seed/Power_of_Attorney_Poland.pdf", mime_type="application/pdf", uploader="Ana López"))
+    db.add(FileItem(project_id=p18_polish.id, filename="Solicitud_Licencia_Turistica.pdf", stored_path="seed/Tourist_License_App.pdf", mime_type="application/pdf", uploader="Carlos"))
+    db.add(FileItem(project_id=p19_polish.id, filename="Seguro_Caucion_Promotor.pdf", stored_path="seed/Developer_Guarantee.pdf", mime_type="application/pdf", uploader="Lucía"))
+    db.add(FileItem(project_id=p20_polish.id, filename="Certificado_Defuncion_Traducido.pdf", stored_path="seed/Death_Certificate_Translated.pdf", mime_type="application/pdf", uploader="Lucía"))
 
     # Seeded marker events
     for p in projects:
@@ -751,4 +988,50 @@ def normalize_legacy_demo_data(db: Session) -> None:
             text("UPDATE files SET filename = :filename WHERE stored_path = :stored_path"),
             {"filename": filename, "stored_path": stored_path},
         )
+    db.commit()
+
+    # --- Idempotent Polish Data Enrichment (Title-based) ---
+    projects = db.query(Project).all()
+    
+    def ensure_activity(p, actor, verb, detail):
+        exists = db.query(Activity).filter(
+            Activity.project_id == p.id,
+            Activity.verb == verb,
+            Activity.detail == detail
+        ).first()
+        if not exists:
+            db.add(Activity(project_id=p.id, actor=actor, verb=verb, detail=detail))
+
+    def ensure_file(p, filename, stored_path, uploader):
+        exists = db.query(FileItem).filter(
+            FileItem.project_id == p.id,
+            FileItem.filename == filename
+        ).first()
+        if not exists:
+            db.add(FileItem(project_id=p.id, filename=filename, stored_path=stored_path, mime_type="application/pdf", uploader=uploader))
+
+    for p in projects:
+        if "(Polish Buyer)" in p.title:
+            ensure_activity(p, "Ana López", "NIE Tramitado", "Solicitud de NIE coordinada con la policía local.")
+            ensure_activity(p, "Lucía", "Traducido", "Contrato de reserva traducido al polaco para revisión del cliente.")
+            ensure_file(p, "Contrato_Reserva_Polaco.pdf", "seed/Reservation_Contract_Polish.pdf", "Lucía")
+            ensure_file(p, "Solicitud_NIE_Investor.pdf", "seed/NIE_Application.pdf", "Carlos")
+        elif "(Polish Seller)" in p.title:
+            ensure_activity(p, "Javier", "Impuestos", "Cálculo de impuesto de sucesiones (no residentes) completado.")
+            ensure_activity(p, "Lucía", "Documentación", "Traducción jurada de certificado de defunción polaco obtenida.")
+            ensure_file(p, "Certificado_Defuncion_Traducido.pdf", "seed/Death_Certificate_Translated.pdf", "Lucía")
+            ensure_file(p, "Poder_Notarial_Varsovia.pdf", "seed/Power_of_Attorney_Poland.pdf", "Ana López")
+        elif "(Polish Investment)" in p.title:
+            ensure_activity(p, "Carlos", "Licencia", "Solicitud de licencia turística para 3 unidades presentada.")
+            ensure_activity(p, "System", "Alerta", "Inspección técnica de la propiedad programada.")
+            ensure_file(p, "Solicitud_Licencia_Turistica.pdf", "seed/Tourist_License_App.pdf", "Carlos")
+        elif "(Polish Investor)" in p.title:
+            ensure_activity(p, "Lucía", "Aval", "Seguro de caución del promotor verificado.")
+            ensure_activity(p, "Carlos", "Visita", "Reporte de progreso de obra enviado con fotos.")
+            ensure_file(p, "Seguro_Caucion_Promotor.pdf", "seed/Developer_Guarantee.pdf", "Lucía")
+        elif "(Polish Retiree)" in p.title:
+            ensure_activity(p, "Javier", "Impuestos", "Cálculo de impuesto de sucesiones (no residentes) completado.")
+            ensure_activity(p, "Lucía", "Documentación", "Traducción jurada de certificado de defunción polaco obtenida.")
+            ensure_file(p, "Certificado_Defuncion_Traducido.pdf", "seed/Death_Certificate_Translated.pdf", "Lucía")
+
     db.commit()

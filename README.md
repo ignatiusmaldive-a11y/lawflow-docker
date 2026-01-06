@@ -13,8 +13,14 @@ It combines a modern **Vite + React + TypeScript frontend** with a lightweight *
 - **Interactive Charts**: Recharts integration for visual data analysis
 - **2025 Market News**: Regulatory updates and golden visa impact reports
 
-### Polish Agency Directory
-- Specialized directory for agencies working with Polish investors in the Costa del Sol
+### Polish Market Integration
+- **Polish Agency Directory**: Specialized directory for agencies working with Polish investors.
+- **High-Fidelity Scenarios**: Enriched demo matters for Polish buyers, sellers, and investors, including NIE tracking and bilingual documentation.
+
+### Enhanced Timeline (Gantt)
+- **Holiday Integration**: Automatic detection of Spanish public holidays based on project location (Marbella, Mijas, Estepona).
+- **Fiscal & Recurring Monitoring**: Direct visualization of quarterly taxes and monthly rental maintenance tasks on the timeline.
+- **Deadline Alerts**: Automated categorization of imminent and overdue tasks with dedicated alert tables.
 
 ---
 
@@ -107,8 +113,9 @@ See `config/database/README.md` for detailed database configuration.
    - drag & drop a PDF → click the row → preview drawer opens.
 5. Open **Templates**:
    - switch municipality (Marbella/Mijas/Estepona) and compare rules.
-6. Open **Closing pack**:
-   - click through the wizard steps and see readiness gating.
+6. Open **Timeline**:
+   - See how **public holidays** and **fiscal obligations** are integrated into the Gantt chart.
+   - Check the **Alertas de plazos** table for imminent deadlines.
 7. Press **Ctrl+K** and search for: “NIE”, “Registry”, “Notary”.
 8. Toggle **EN/ES** in the header.
 9. Open **Settings** and change the project background colors.

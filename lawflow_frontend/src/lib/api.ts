@@ -1,4 +1,13 @@
-export type Client = { id: number; name: string; email?: string | null; phone?: string | null; notes?: string | null };
+export type Client = {
+  id: number;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  notes?: string | null;
+  nationality?: string | null;
+  tax_residency?: string | null;
+  preferred_language?: string | null;
+};
 
 export type Project = {
   bg_color?: string;
@@ -14,6 +23,47 @@ export type Project = {
   target_close_date?: string | null;
   client_id?: number | null;
   client?: Client | null;
+
+  // New related data from ProjectDetail
+  fiscal_obligations?: FiscalObligation[];
+  recurring_tasks?: RecurringTask[];
+  rental_management?: RentalManagement | null;
+};
+
+export type FiscalObligation = {
+  id: number;
+  project_id: number;
+  obligation_type: string;
+  amount?: number | null;
+  due_date?: string | null;
+  filing_deadline?: string | null;
+  status: string;
+  reference_number?: string | null;
+  notes?: string | null;
+};
+
+export type RecurringTask = {
+  id: number;
+  project_id: number;
+  title: string;
+  frequency: string;
+  next_due_date?: string | null;
+  category?: string | null;
+  is_active: boolean;
+  description?: string | null;
+};
+
+export type RentalManagement = {
+  id: number;
+  project_id: number;
+  rental_status: string;
+  rental_type?: string | null;
+  monthly_income?: number | null;
+  tenant_name?: string | null;
+  lease_start?: string | null;
+  lease_end?: string | null;
+  tourist_license?: string | null;
+  notes?: string | null;
 };
 
 export type Task = {
@@ -68,6 +118,7 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   projects: () => http<Project[]>(`/projects`),
+  projectDetail: (projectId: number) => http<Project>(`/projects/${projectId}`),
   tasks: (projectId: number) => http<Task[]>(`/tasks?project_id=${projectId}`),
   updateTask: (id: number, patch: Partial<Task>) =>
     http<Task>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
@@ -76,6 +127,12 @@ export const api = {
     http<ChecklistItem>(`/checklists/${id}`, { method: "PATCH", body: JSON.stringify({ is_done }) }),
   timeline: (projectId: number) => http<TimelineItem[]>(`/timeline?project_id=${projectId}`),
   activity: (projectId: number) => http<Activity[]>(`/activity?project_id=${projectId}`),
+
+  // New API domain methods
+  fiscal: (projectId: number) => http<FiscalObligation[]>(`/fiscal?project_id=${projectId}`),
+  recurringTasks: (projectId: number) => http<RecurringTask[]>(`/recurring-tasks?project_id=${projectId}`),
+  rental: (projectId: number) => http<RentalManagement[]>(`/rental?project_id=${projectId}`),
+  holidays: (location: string, year = 2026) => http<string[]>(`/calendar/holidays?location=${location}&year=${year}`),
 };
 
 export type FileItem = {
@@ -125,6 +182,7 @@ export type ProjectCreate = {
   risk?: string;
   bg_color?: string;
   client_id: number;
+  is_rental?: boolean;
 };
 
 export type ProjectUpdate = Partial<Pick<Project, "title" | "status" | "risk" | "target_close_date" | "bg_color" | "dropbox_folder">>;

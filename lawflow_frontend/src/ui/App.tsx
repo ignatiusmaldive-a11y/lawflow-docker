@@ -1,11 +1,12 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../lib/i18n";
-import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem } from "../lib/api";
+import { api, Project, Task, ChecklistItem, TimelineItem, Activity, FileItem, FiscalObligation, RecurringTask } from "../lib/api";
 import { api2, api3 } from "../lib/api";
 import { formatProjectLabel, PROJECT_ID_OFFSET, daysUntil, formatTransactionType } from "../lib/formatting";
 import { Board } from "./Board";
 import { TasksTable } from "./TasksTable";
 import { Timeline } from "./Cronograma";
+import { RentalDashboard } from "./RentalDashboard";
 import { Checklist } from "./Checklist";
 import { ActivityFeed } from "./ActivityFeed";
 
@@ -31,18 +32,19 @@ import { Callout } from "./components/Callout";
 import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
 
 type View =
+  | "General Overview"
   | "Tasks"
   | "Timeline"
   | "Files"
   | "Closing Pack"
   | "Matter Settings"
-  | "General Overview"
   | "Informes Sectoriales"
-  | "Agencias Polacas"
   | "Puerto Banus Report"
-  | "Chat"
   | "Sectorial Report"
-  | "News Report";
+  | "News Report"
+  | "Agencias Polacas"
+  | "Rental Management"
+  | "Chat";
 
 const LS_RECENTS = "lawflow.recents.v1";
 const LS_PINS = "lawflow.pins.v1";
@@ -187,6 +189,8 @@ export function App() {
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
   const [activity, setActivity] = useState<Activity[]>([]);
+  const [fiscal, setFiscal] = useState<FiscalObligation[]>([]);
+  const [recurring, setRecurring] = useState<RecurringTask[]>([]);
   const [files, setFiles] = useState<any[]>([]);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [newProjectOpen, setNewProjectOpen] = useState(false);
@@ -250,18 +254,22 @@ export function App() {
   );
 
   async function refreshAll(projectId: number) {
-    const [t, c, tl, a, f] = await Promise.all([
+    const [t, c, tl, a, f, fs, rs] = await Promise.all([
       api.tasks(projectId),
       api.checklist(projectId),
       api.timeline(projectId),
       api.activity(projectId),
       api2.files(projectId),
+      api.fiscal(projectId),
+      api.recurringTasks(projectId),
     ]);
     setTasks(t);
     setChecklist(c);
     setTimeline(tl);
     setActivity(a);
     setFiles(f as any);
+    setFiscal(fs);
+    setRecurring(rs);
   }
 
   // Load projects and handle initial URL route
@@ -600,130 +608,141 @@ export function App() {
         </aside>
       </div>
 
-        <header
-          ref={topbarRef}
-          className={
-            "topbar" +
-            (view === "General Overview" ||
+      <header
+        ref={topbarRef}
+        className={
+          "topbar" +
+          (view === "General Overview" ||
             view === "Informes Sectoriales" ||
             view === "Agencias Polacas" ||
             view === "Puerto Banus Report" ||
             view === "Sectorial Report" ||
             view === "News Report"
-              ? " landingTopbar"
-              : "")
-          }
-        >
-          <div className="topbar-container">
-            <div
-              className="titleRow"
-              style={
-                view === "General Overview" ||
+            ? " landingTopbar"
+            : "")
+        }
+      >
+        <div className="topbar-container">
+          <div
+            className="titleRow"
+            style={
+              view === "General Overview" ||
                 view === "Informes Sectoriales" ||
                 view === "Agencias Polacas" ||
                 view === "Puerto Banus Report" ||
                 view === "Sectorial Report" ||
                 view === "News Report"
-                  ? { minHeight: "80px", justifyContent: "center" }
-                  : undefined
-              }
-            >
-              {view === "Puerto Banus Report" ||
+                ? { minHeight: "80px", justifyContent: "center" }
+                : undefined
+            }
+          >
+            {view === "Puerto Banus Report" ||
               (view === "Sectorial Report" && selectedReportSlug) ||
               (view === "News Report" && selectedNewsSlug) ? (
-                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div className="brandName">
-                      {view === "Puerto Banus Report"
-                        ? "Estudio Puerto Banús 2025"
-                        : view === "News Report"
-                          ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.title
-                          : REPORTS_DATA[selectedReportSlug!]?.title}
+              <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                <div style={{ textAlign: "left" }}>
+                  <div className="brandName">
+                    {view === "Puerto Banus Report"
+                      ? "Estudio Puerto Banús 2025"
+                      : view === "News Report"
+                        ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.title
+                        : REPORTS_DATA[selectedReportSlug!]?.title}
+                  </div>
+                  <div className="small">
+                    {view === "Puerto Banus Report"
+                      ? "Análisis detallado del mercado de lujo"
+                      : view === "News Report"
+                        ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.subtitle
+                        : REPORTS_DATA[selectedReportSlug!]?.subtitle}
+                  </div>
+                </div>
+                <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setView("Informes Sectoriales")}
+                  >
+                    Informes Sectoriales
+                  </span>
+                  <span style={{ opacity: 0.5 }}>/</span>
+                  <span style={{ color: "var(--text)" }}>
+                    {view === "Puerto Banus Report"
+                      ? "Puerto Banús 2025"
+                      : view === "News Report"
+                        ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.location
+                        : REPORTS_DATA[selectedReportSlug!]?.location}
+                  </span>
+                </nav>
+              </div>
+            ) : view === "Informes Sectoriales" ? (
+              <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                <div style={{ textAlign: "left" }}>
+                  <div className="brandName">Informes Sectoriales</div>
+                  <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
+                </div>
+                <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setView("General Overview")}
+                  >
+                    AMA-CRM
+                  </span>
+                  <span style={{ opacity: 0.5 }}>/</span>
+                  <span style={{ color: "var(--text)" }}>Informes Sectoriales</span>
+                </nav>
+              </div>
+            ) : view === "Agencias Polacas" ? (
+              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                <div style={{ textAlign: "left" }}>
+                  <div className="brandName">Agencias Polacas</div>
+                  <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
+                </div>
+              </div>
+            ) : view === "Chat" ? (
+              <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
+                <div style={{ textAlign: "left" }}>
+                  <div className="brandName">{t("aiAssistant")}</div>
+                  <div className="small">Tu compañero inteligente para la gestión legal e inmobiliaria</div>
+                </div>
+                <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setView("General Overview")}
+                  >
+                    AMA-CRM
+                  </span>
+                  <span style={{ opacity: 0.5 }}>/</span>
+                  <span style={{ color: "var(--text)" }}>{t("aiAssistant")}</span>
+                </nav>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
+                <div className="h1">
+                  {view === "General Overview" ? (
+                    <span style={{ fontSize: "1.5em" }}>Listado General</span>
+                  ) : (activeProject ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {formatProjectLabel(activeProject, { lang })}
+                      {activeProject.client?.nationality && (
+                        <span className="pill neutral" style={{ fontWeight: 800, verticalAlign: 'middle', textTransform: 'uppercase' }}>
+                          {activeProject.client.nationality === "Polish" ? "🇵🇱 PL" :
+                            activeProject.client.nationality === "Spanish" ? "🇪🇸 ES" :
+                              `📍 ${activeProject.client.nationality}`}
+                        </span>
+                      )}
                     </div>
+                  ) : "LawFlow")}
+                </div>
+                {view !== "General Overview" && activeProject && (
+                  <div className="projectMetaInline">
                     <div className="small">
-                      {view === "Puerto Banus Report"
-                        ? "Análisis detallado del mercado de lujo"
-                        : view === "News Report"
-                          ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.subtitle
-                          : REPORTS_DATA[selectedReportSlug!]?.subtitle}
+                      {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
                     </div>
+                    {riskPill(activeProject.risk, t)}
                   </div>
-                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
-                    <span
-                      style={{ cursor: "pointer" }}
-                      onClick={() => setView("Informes Sectoriales")}
-                    >
-                      Informes Sectoriales
-                    </span>
-                    <span style={{ opacity: 0.5 }}>/</span>
-                    <span style={{ color: "var(--text)" }}>
-                      {view === "Puerto Banus Report"
-                        ? "Puerto Banús 2025"
-                        : view === "News Report"
-                          ? NEWS_REPORTS_DATA[selectedNewsSlug!]?.location
-                          : REPORTS_DATA[selectedReportSlug!]?.location}
-                    </span>
-                  </nav>
-                </div>
-              ) : view === "Informes Sectoriales" ? (
-                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div className="brandName">Informes Sectoriales</div>
-                    <div className="small">Análisis de inteligencia de negocio para el sector inmobiliario español</div>
-                  </div>
-                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
-                    <span
-                      style={{ cursor: "pointer" }}
-                      onClick={() => setView("General Overview")}
-                    >
-                      AMA-CRM
-                    </span>
-                    <span style={{ opacity: 0.5 }}>/</span>
-                    <span style={{ color: "var(--text)" }}>Informes Sectoriales</span>
-                  </nav>
-                </div>
-              ) : view === "Agencias Polacas" ? (
-                <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div className="brandName">Agencias Polacas</div>
-                    <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
-                  </div>
-                </div>
-              ) : view === "Chat" ? (
-                <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div className="brandName">{t("aiAssistant")}</div>
-                    <div className="small">Tu compañero inteligente para la gestión legal e inmobiliaria</div>
-                  </div>
-                  <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--muted)", fontWeight: 800, marginTop: 2 }}>
-                    <span
-                      style={{ cursor: "pointer" }}
-                      onClick={() => setView("General Overview")}
-                    >
-                      AMA-CRM
-                    </span>
-                    <span style={{ opacity: 0.5 }}>/</span>
-                    <span style={{ color: "var(--text)" }}>{t("aiAssistant")}</span>
-                  </nav>
-                </div>
-              ) : (
-                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%" }}>
-                  <div className="h1">
-                    {view === "General Overview" ? (
-                      <span style={{ fontSize: "1.5em" }}>Listado General</span>
-                    ) : (activeProject ? formatProjectLabel(activeProject, { lang }) : "LawFlow")}
-                  </div>
-                  {view !== "General Overview" && activeProject && (
-                    <div className="projectMetaInline">
-                      <div className="small">
-                        {t("statusTableCol")}: {projectStatusLabel(activeProject?.status, t)}
-                      </div>
-                      {riskPill(activeProject.risk, t)}
-                    </div>
-                  )}
-                </div>
-              )}
-              {/* <p className="subtitle">
+                )}
+              </div>
+            )}
+            {/* <p className="subtitle">
 	              <span className="crumbs">
 	  {view === "General Overview" ? (
      <span className="crumb">Portfolio Overview</span>
@@ -734,50 +753,53 @@ export function App() {
   )}
 	</span>
 	            </p> */}
-              <div
-                className="topNav"
-                style={{
-                  minHeight: 42,
-                  display:
-                    view === "General Overview" ||
-                      view === "Informes Sectoriales" ||
-                      view === "Agencias Polacas" ||
-                      view === "Puerto Banus Report" ||
-                      view === "Sectorial Report" ||
-                      view === "News Report" ||
-                      view === "Chat"
-                      ? "none"
-                      : "block",
-                }}
-              >
-                {activeProjectId &&
-                  view !== "General Overview" &&
-                  view !== "Informes Sectoriales" &&
-                  view !== "Agencias Polacas" &&
-                  view !== "Puerto Banus Report" &&
-                  view !== "Sectorial Report" &&
-                  view !== "News Report" && (
+            <div
+              className="topNav"
+              style={{
+                minHeight: 42,
+                display:
+                  view === "General Overview" ||
+                    view === "Informes Sectoriales" ||
+                    view === "Agencias Polacas" ||
+                    view === "Puerto Banus Report" ||
+                    view === "Sectorial Report" ||
+                    view === "News Report" ||
+                    view === "Chat"
+                    ? "none"
+                    : "block",
+              }}
+            >
+              {activeProjectId &&
+                view !== "General Overview" &&
+                view !== "Informes Sectoriales" &&
+                view !== "Agencias Polacas" &&
+                view !== "Puerto Banus Report" &&
+                view !== "Sectorial Report" &&
+                view !== "News Report" && (
                   <>
                     <button className={"topNavItem" + (view === "Tasks" ? " active" : "")} onClick={() => setView("Tasks")}>{t("tasks")}</button>
                     <button className={"topNavItem" + (view === "Timeline" ? " active" : "")} onClick={() => setView("Timeline")}>{t("timeline")}</button>
+                    {activeProject?.rental_management && (
+                      <button className={"topNavItem" + (view === "Rental Management" ? " active" : "")} onClick={() => setView("Rental Management")}>Gestión Alquiler</button>
+                    )}
                     <button className={"topNavItem" + (view === "Files" ? " active" : "")} onClick={() => setView("Files")}>{t("files")}</button>
                     <button className={"topNavItem" + (view === "Closing Pack" ? " active" : "")} onClick={() => setView("Closing Pack")}>{t("closingPack")}</button>
                   </>
                 )}
-              </div>
-              {view !== "General Overview" && null}
             </div>
-            <div className="actions">
-              <div className="projectHeaderActions">
-                {/* Action Button: Only on matter views (never on landing/report pages) */}
-                {activeProjectId &&
-                  view !== "Chat" &&
-                  view !== "General Overview" &&
-                  view !== "Agencias Polacas" &&
-                  view !== "Informes Sectoriales" &&
-                  view !== "Puerto Banus Report" &&
-                  view !== "Sectorial Report" &&
-                  view !== "News Report" && (
+            {view !== "General Overview" && null}
+          </div>
+          <div className="actions">
+            <div className="projectHeaderActions">
+              {/* Action Button: Only on matter views (never on landing/report pages) */}
+              {activeProjectId &&
+                view !== "Chat" &&
+                view !== "General Overview" &&
+                view !== "Agencias Polacas" &&
+                view !== "Informes Sectoriales" &&
+                view !== "Puerto Banus Report" &&
+                view !== "Sectorial Report" &&
+                view !== "News Report" && (
                   <button
                     className="btn quickAddBtn"
                     onClick={() => {
@@ -789,38 +811,38 @@ export function App() {
                   </button>
                 )}
 
-                <div className="headerIconRow">
+              <div className="headerIconRow">
+                <button
+                  className="hamburger headerIconBtn"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  title={t("toggleSidebar")}
+                >
+                  ☰
+                </button>
+
+                {view !== "General Overview" && (
                   <button
-                    className="hamburger headerIconBtn"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    title={t("toggleSidebar")}
+                    className="iconSquare homeBtn headerIconBtn"
+                    onClick={() => {
+                      setActiveProjectId(null);
+                      setView("General Overview");
+                      setSidebarOpen(false);
+                      window.scrollTo(0, 0);
+                    }}
+                    title={t("home")}
                   >
-                    ☰
+                    <span className="iconSquareGlyph">⌂</span>
                   </button>
+                )}
 
-                  {view !== "General Overview" && (
-                    <button
-                      className="iconSquare homeBtn headerIconBtn"
-                      onClick={() => {
-                        setActiveProjectId(null);
-                        setView("General Overview");
-                        setSidebarOpen(false);
-                        window.scrollTo(0, 0);
-                      }}
-                      title={t("home")}
-                    >
-                      <span className="iconSquareGlyph">⌂</span>
-                    </button>
-                  )}
-
-                  {view !== "General Overview" &&
-                    view !== "Informes Sectoriales" &&
-                    view !== "Agencias Polacas" &&
-                    view !== "Puerto Banus Report" &&
-                    view !== "Sectorial Report" &&
-                    view !== "News Report" &&
-                    view !== "Chat" &&
-                    activeProject && (
+                {view !== "General Overview" &&
+                  view !== "Informes Sectoriales" &&
+                  view !== "Agencias Polacas" &&
+                  view !== "Puerto Banus Report" &&
+                  view !== "Sectorial Report" &&
+                  view !== "News Report" &&
+                  view !== "Chat" &&
+                  activeProject && (
                     <button
                       className="iconSquare headerIconBtn"
                       onClick={(e) => {
@@ -834,12 +856,12 @@ export function App() {
                       {pinnedIds.includes(activeProject?.id ?? -1) ? "★" : "☆"}
                     </button>
                   )}
-                </div>
               </div>
-
             </div>
+
           </div>
-        </header>
+        </div>
+      </header>
 
       <main className="main">
         <div className="content" ref={contentRef}>
@@ -978,7 +1000,13 @@ export function App() {
                   )}
 
                   {activeProjectId && view === "Timeline" && (
-                    <Timeline projectId={activeProjectId} items={timeline} tasks={filteredTasks} />
+                    <Timeline
+                      items={timeline}
+                      tasks={filteredTasks}
+                      location={activeProject?.location}
+                      fiscal={fiscal}
+                      recurring={recurring}
+                    />
                   )}
 
                   {activeProjectId && view === "Files" && (
@@ -1055,6 +1083,10 @@ export function App() {
                     />
                   )}
 
+                  {activeProjectId && view === "Rental Management" && (
+                    <RentalDashboard project={activeProject} />
+                  )}
+
                   {activeProjectId && view === "Closing Pack" && (
                     <ClosingPackWizard projectId={activeProjectId} project={activeProject} tasks={tasks} checklist={checklist} />
                   )}
@@ -1070,13 +1102,15 @@ export function App() {
                       <span className="pill">{checklist.filter(c => c.is_done).length}/{checklist.length}</span>
                     </div>
                     {activeProjectId && (
-                      <Checklist
-                        items={checklist}
-                        onToggle={async (itemId, is_done) => {
-                          await api.toggleChecklist(itemId, is_done);
-                          await refreshAll(activeProjectId);
-                        }}
-                      />
+                      <>
+                        <Checklist
+                          items={checklist}
+                          onToggle={async (itemId, is_done) => {
+                            await api.toggleChecklist(itemId, is_done);
+                            await refreshAll(activeProjectId);
+                          }}
+                        />
+                      </>
                     )}
                   </div>
                 )}

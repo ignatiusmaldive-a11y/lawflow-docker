@@ -97,7 +97,7 @@ select {
   gap: 12px;
 }
 
-.sidebarScroll > .card:first-child {
+.sidebarScroll>.card:first-child {
   margin-top: 12px;
 }
 
@@ -400,7 +400,7 @@ select {
   align-content: start;
 }
 
-.rightColumn > .card:first-child {
+.rightColumn>.card:first-child {
   margin-top: 12px;
 }
 
@@ -430,23 +430,23 @@ select {
   padding: 12px 0;
 }
 
-.cardSections > .cardSection:first-child {
+.cardSections>.cardSection:first-child {
   padding-top: 0;
 }
 
-.cardSections > .cardSection:last-child {
+.cardSections>.cardSection:last-child {
   padding-bottom: 0;
 }
 
-.cardSections > .cardSection + .cardSection {
+.cardSections>.cardSection+.cardSection {
   border-top: 1px solid var(--line);
 }
 
-.cardSections > .filesRoomTableSection {
+.cardSections>.filesRoomTableSection {
   padding-bottom: 22px;
 }
 
-.cardSections > .filesRoomWidgetsSection {
+.cardSections>.filesRoomWidgetsSection {
   padding-top: 14px;
 }
 
@@ -1291,6 +1291,42 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transform: translateY(-50%);
 }
 
+.bar.fiscal {
+  background: linear-gradient(135deg, rgba(245, 158, 11, .85), rgba(245, 158, 11, .55));
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.bar.recurring {
+  background: linear-gradient(135deg, rgba(34, 197, 94, .85), rgba(34, 197, 94, .55));
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.holidayGridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 15px;
+  /* Fixed width for a holiday day */
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 1px dashed rgba(245, 158, 11, 0.2);
+  border-right: 1px dashed rgba(245, 158, 11, 0.2);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.holidayLabel {
+  position: absolute;
+  bottom: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--warn);
+  transform: rotate(-90deg);
+  transform-origin: left bottom;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 .timelineLabelItem {
   display: flex;
   align-items: center;
@@ -1459,6 +1495,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Medium screens - hide sidebar by default, show hamburger */
 @media (max-width: 1400px) {
+
   .sidebarTop,
   .sidebar {
     display: none;
@@ -1549,8 +1586,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .shell {
     grid-template-columns: 1fr;
   }
-
-  .titleRow {}
 
   .h1 {
     font-size: 16px;
