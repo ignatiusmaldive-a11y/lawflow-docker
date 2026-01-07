@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, TooltipProps } from "recharts";
 import { Footer } from "./components/Footer";
 import { Agency, AgencyFacet, AgenciesMeta, AgenciesPage, apiAgencies } from "../lib/api";
 
@@ -62,6 +62,53 @@ function measureTextWidth(text: string, font: string) {
 
 function clampNumber(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
+}
+
+type ChartDataItem = {
+  key: string;
+  label: string;
+  value: number;
+  color: string;
+};
+
+const AGENCY_TYPE_BASE_COLORS: Record<string, string> = {
+  polish: "#007bff",
+  "Spain and Poland": "#6f42c1",
+  marbella: "#28a745",
+  gemini_discovered: "#fd7e14",
+};
+
+function colorMix(base: string, percentage: number, mixTarget: string) {
+  return `color-mix(in oklab, ${base} ${percentage}%, ${mixTarget})`;
+}
+
+function getAgencyTypeAccentColor(type?: string | null) {
+  const base = type ? AGENCY_TYPE_BASE_COLORS[type] : undefined;
+  return base ? colorMix(base, 82, "white") : "var(--muted)";
+}
+
+function getAgencyTypeChartColor(type?: string | null) {
+  const base = type ? AGENCY_TYPE_BASE_COLORS[type] : undefined;
+  return base ? colorMix(base, 45, "var(--panel2)") : "var(--line)";
+}
+
+function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (!active || !payload?.length) return null;
+  const data = payload[0].payload as ChartDataItem;
+  return (
+    <div
+      style={{
+        background: "var(--panel2)",
+        border: "1px solid var(--line)",
+        borderRadius: 10,
+        padding: "8px 12px",
+        boxShadow: "0 10px 25px rgba(0, 0, 0, .45)",
+      }}
+    >
+      <div style={{ color: data.color, fontSize: 12, fontWeight: 600 }}>{data.label}</div>
+      <div style={{ color: "var(--text)", fontSize: 14, fontWeight: 800 }}>{data.value} agencias</div>
+    </div>
+  );
 }
 
 const interactionPlaceholders = [
@@ -463,21 +510,30 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
 
   const totalPages = Math.max(1, Math.ceil((page?.total ?? 0) / limit));
   const currentPage = Math.min(totalPages, Math.floor(offset / limit) + 1);
+  const canGoPreviousPage = offset > 0;
+  const canGoNextPage = offset + limit < totalCount;
 
-  const chartData = useMemo(() => {
-    const palette: Record<string, string> = {
-      polish: "#007bff",
-      "Spain and Poland": "#6f42c1",
-      marbella: "#28a745",
-      gemini_discovered: "#fd7e14",
-    };
+  const goToPreviousPage = () => {
+    setOffset(Math.max(0, offset - limit));
+  };
+
+  const goToNextPage = () => {
+    const maxOffset = Math.max(0, (totalPages - 1) * limit);
+    setOffset(Math.min(maxOffset, offset + limit));
+  };
+
+  const showingStart = totalCount === 0 ? 0 : offset + 1;
+  const showingEnd = Math.min(offset + limit, totalCount);
+  const paginationSummary = `Mostrando ${showingStart}-${showingEnd} de ${totalCount}`;
+
+  const chartData: ChartDataItem[] = useMemo(() => {
     return (types ?? [])
       .filter((t) => t.value)
       .map((t) => ({
         key: t.value as string,
         label: agencyTypeLabel(t.value),
         value: t.count,
-        color: palette[String(t.value)] ?? "#64748b",
+        color: getAgencyTypeChartColor(t.value),
       }))
       .sort((a, b) => b.value - a.value);
   }, [types]);
@@ -489,13 +545,7 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
     return Number.isFinite(d.getTime()) ? d.toLocaleString("es-ES") : String(raw);
   }, [meta?.db_mtime]);
 
-  const typeColor = (t?: string | null) => {
-    if (t === "polish") return "#007bff";
-    if (t === "Spain and Poland") return "#6f42c1";
-    if (t === "marbella") return "#28a745";
-    if (t === "gemini_discovered") return "#fd7e14";
-    return "var(--muted)";
-  };
+  const typeColor = (t?: string | null) => getAgencyTypeAccentColor(t);
 
   const handleTypeSelection = useCallback(
     (type: string) => {
@@ -552,16 +602,9 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
                         />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip content={<ChartTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-                {chartData.map((d) => (
-                  <span key={d.key} className="pill neutral" style={{ maxWidth: "unset" }}>
-                    {d.label}: {d.value}
-                  </span>
-                ))}
               </div>
             </div>
 
@@ -625,9 +668,44 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
 
       <div className="table-container">
         <div className="card cardPad">
-          <div style={{ fontWeight: 900, color: "var(--text)", marginBottom: 2 }}>Directorio</div>
-          <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, marginBottom: 14 }}>
-            Haz click en una fila para abrir la ficha de la agencia
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: 12,
+              marginBottom: 14,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+              <div style={{ fontWeight: 900, color: "var(--text)", marginBottom: 0 }}>Directorio</div>
+              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Haz click en una fila para abrir la ficha de la agencia</div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>{paginationSummary}</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btnSm paginationIconBtn"
+                  disabled={loading || !canGoPreviousPage}
+                  onClick={goToPreviousPage}
+                  title="Página anterior"
+                  aria-label="Página anterior"
+                >
+                  <span aria-hidden="true">&lt;</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btnSm paginationIconBtn"
+                  disabled={loading || !canGoNextPage}
+                  onClick={goToNextPage}
+                  title="Página siguiente"
+                  aria-label="Página siguiente"
+                >
+                  <span aria-hidden="true">&gt;</span>
+                </button>
+              </div>
+            </div>
           </div>
           {error ? (
             <div style={{ padding: 16, borderRadius: 12, border: "1px solid var(--line)", background: "rgba(255,0,0,0.05)", color: "var(--text)" }}>

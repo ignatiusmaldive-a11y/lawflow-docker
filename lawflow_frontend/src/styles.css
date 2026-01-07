@@ -380,6 +380,30 @@ select {
   font-size: 12px;
 }
 
+.paginationIconBtn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: color-mix(in oklab, var(--panel) 75%, transparent);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.paginationIconBtn:hover {
+  background: color-mix(in oklab, var(--panel2) 60%, transparent);
+  border-color: color-mix(in oklab, var(--brand2) 40%, var(--line));
+}
+
+.paginationIconBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: var(--line);
+}
+
 .content {
   padding: 16px 18px;
   overflow: visible;
