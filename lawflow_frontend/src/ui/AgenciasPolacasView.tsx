@@ -44,6 +44,13 @@ function stripMarkdown(text: string) {
     .trim();
 }
 
+function formatAgencyDate(value?: string | null) {
+  if (!value) return "Pendiente";
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return "Pendiente";
+  return parsed.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 let _measureCanvas: HTMLCanvasElement | null = null;
 function measureTextWidth(text: string, font: string) {
   if (!_measureCanvas) _measureCanvas = document.createElement("canvas");
@@ -133,25 +140,40 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
   const websiteLabel = agency?.website ? agency.website.replace(/^https?:\/\//, "") : null;
   const descriptionText = agency?.description?.trim() ? stripMarkdown(agency.description) : "";
   const additionalInfoText = agency?.additional_info?.trim() ? stripMarkdown(agency.additional_info) : "";
+  const contactKeys = ["phone", "address", "polish_city"] as const;
+  const contactCompleteCount = contactKeys.reduce(
+    (acc, key) => (agency?.[key] ? acc + 1 : acc),
+    0
+  );
+  const contactCompleteness = Math.round((contactCompleteCount / contactKeys.length) * 100);
+  const coverageLabel =
+    contactCompleteness >= 80 ? "Cobertura completa" : contactCompleteness >= 50 ? "Cobertura parcial" : "Cobertura limitada";
+  const pieData = [
+    { name: "Campos completos", value: contactCompleteCount, color: "#7c3aed" },
+    { name: "Pendientes", value: Math.max(0, contactKeys.length - contactCompleteCount), color: "rgba(255, 255, 255, 0.08)" },
+  ];
+  const validationLabel = formatAgencyDate(agency?.url_validation_date);
+  const statusLabel = agency?.website_status ? agency.website_status : "Sin validar";
+  const kpiCards = [
+    {
+      label: "Cobertura de datos",
+      value: `${contactCompleteness}%`,
+      detail: `${coverageLabel} · ${contactCompleteCount}/${contactKeys.length} campos`,
+    },
+    {
+      label: "Sitio web",
+      value: agency?.website ? "Detectado" : "No disponible",
+      detail: websiteLabel ?? "Pendiente",
+    },
+    {
+      label: "Validación digital",
+      value: statusLabel,
+      detail: `Revisado: ${validationLabel}`,
+    },
+  ];
 
   return (
     <div className="agency-detail-root">
-      <div className="table-container">
-        <div className="card cardPad agency-header">
-          <div className="agency-header-top">
-            <div className="agency-header-title">
-              <div className="agency-header-name">{agency?.name ?? (loading ? "Cargando..." : "—")}</div>
-              <div className="agency-header-subtitle">Ficha de agencia</div>
-            </div>
-            <div className="agency-header-tags">
-              {agency?.type ? <span className={agencyTipoTagClass(agency.type)}>{agencyTypeLabel(agency.type)}</span> : null}
-              {agency?.website_status ? <span className="pill ok">{agency.website_status}</span> : null}
-              {agency?.cleanup_status ? <span className="pill neutral">{agency.cleanup_status}</span> : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="table-container">
         <div className="card cardPad agency-detail-card">
           {error ? (
@@ -160,52 +182,113 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
             </div>
           ) : loading || !agency ? (
             <div className="agency-card-loading">Cargando...</div>
-          ) : (
-            <div className="agency-detail-grid">
-              <section className="agency-section">
-                <div className="sectionTitle">
-                  <h2>Contacto y ubicación</h2>
+          ) : agency ? (
+            <div className="agency-report">
+              <header className="agency-report-header">
+                <div>
+                  <div className="agency-report-name">{agency.name || "Agencia sin nombre"}</div>
+                  <div className="agency-report-subtitle">Ficha de agencia</div>
                 </div>
-                <div className="agency-contact-list">
-                  <div>
-                    <span className="agency-contact-label">Teléfono</span>
-                    <span className="agency-contact-value">{agency.phone ?? "—"}</span>
-                  </div>
-                  <div>
-                    <span className="agency-contact-label">Dirección</span>
-                    <span className="agency-contact-value">{agency.address ?? "—"}</span>
-                  </div>
-                  <div>
-                    <span className="agency-contact-label">Ciudad / Región</span>
-                    <span className="agency-contact-value">{agency.polish_city ?? "—"}</span>
-                  </div>
+                <div className="agency-report-header-tags">
+                  {agency.type ? <span className={agencyTipoTagClass(agency.type)}>{agencyTypeLabel(agency.type)}</span> : null}
+                  {agency.website_status ? <span className="pill ok">{agency.website_status}</span> : null}
+                  {agency.cleanup_status ? <span className="pill neutral">{agency.cleanup_status}</span> : null}
                 </div>
-              </section>
+              </header>
+              <div className="agency-report-gradient" />
+              <div className="agency-report-main">
+                <div className="agency-report-main-column">
+                  <div className="agency-report-section agency-report-summary">
+                    <div className="agency-report-section-heading">
+                      <h3>Contacto y presencia</h3>
+                      <span className="agency-report-updated">Última validación: {validationLabel}</span>
+                    </div>
+                    <div className="agency-report-contact-grid">
+                      <div>
+                        <div className="agency-report-label">Teléfono</div>
+                        <div className="agency-report-value">{agency.phone ?? "—"}</div>
+                      </div>
+                      <div>
+                        <div className="agency-report-label">Dirección</div>
+                        <div className="agency-report-value">{agency.address ?? "—"}</div>
+                      </div>
+                      <div>
+                        <div className="agency-report-label">Ciudad / Región</div>
+                        <div className="agency-report-value">{agency.polish_city ?? "—"}</div>
+                      </div>
+                    </div>
+                  </div>
 
-              <section className="agency-section agency-description-section">
-                <div className="sectionTitle">
-                  <h2>Descripción</h2>
-                </div>
-                <p className="agency-description-text">
-                  {descriptionText || "Aún no se ha documentado una descripción oficial de la agencia."}
-                </p>
-                {additionalInfoText ? (
-                  <div>
-                    <div className="agency-description-heading">Información adicional</div>
-                    <p className="agency-description-text">{additionalInfoText}</p>
+                  <div className="agency-report-section">
+                    <h3>Descripción oficial</h3>
+                    <p className="agency-report-text">
+                      {descriptionText || "Aún no se ha documentado una descripción oficial de la agencia."}
+                    </p>
                   </div>
-                ) : (
-                  <p className="agency-description-hint">
-                    Se espera un resumen contextual adicional sobre el negocio y los protocolos locales.
-                  </p>
-                )}
-              </section>
 
-              <section className="agency-section agency-website-section">
-                <div className="sectionTitle">
-                  <h2>Sitio web oficial</h2>
+                  <div className="agency-report-section agency-report-additional">
+                    <h3>Información adicional</h3>
+                    <p className="agency-report-text">
+                      {additionalInfoText ||
+                        "Se espera un resumen contextual adicional sobre el negocio, protocolos y alcance de servicio."}
+                    </p>
+                  </div>
                 </div>
-                <div className="agency-website-link">
+
+                <div className="agency-report-side-column">
+                  <div className="agency-report-chart-card">
+                    <div className="agency-report-chart-heading">
+                      <span>Integridad de campos</span>
+                      <strong>
+                        {contactCompleteCount}/{contactKeys.length}
+                      </strong>
+                    </div>
+                    <div className="agency-report-chart">
+                      <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={48}
+                            outerRadius={86}
+                            paddingAngle={6}
+                          >
+                            {pieData.map((segment) => (
+                              <Cell key={segment.name} fill={segment.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10 }}
+                            itemStyle={{ color: "white" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="agency-report-chart-footer">
+                      <span>{coverageLabel}</span>
+                      <span className="agency-report-chart-value">{contactCompleteness}% completos</span>
+                    </div>
+                  </div>
+
+                  <div className="agency-report-kpi-grid">
+                    {kpiCards.map((kpi) => (
+                      <div className="agency-report-kpi" key={kpi.label}>
+                        <div className="agency-report-kpi-label">{kpi.label}</div>
+                        <div className="agency-report-kpi-value">{kpi.value}</div>
+                        <div className="agency-report-kpi-detail">{kpi.detail}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <section className="agency-report-section agency-report-website">
+                <div className="agency-report-section-heading">
+                  <h3>Sitio web oficial</h3>
+                  <span className="agency-report-updated">Validado: {validationLabel}</span>
+                </div>
+                <div className="agency-report-website-link">
                   {agency.website ? (
                     <a href={agency.website} target="_blank" rel="noreferrer">
                       {websiteLabel}
@@ -214,16 +297,16 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
                     <span className="agency-muted-note">Aún no se ha detectado una URL pública.</span>
                   )}
                 </div>
-                <p className="agency-website-note">
+                <p className="agency-report-note">
                   {agency.website
-                    ? "El enlace abrirá en una nueva ventana y se revalidará automáticamente en el próximo chequeo."
-                    : "Se generará un recordatorio para volver a confirmar la dirección digital cuando se actualice el directorio."}
+                    ? "Este enlace se abre en una nueva pestaña y el sistema revalidará el dominio automáticamente."
+                    : "Se generará un recordatorio para reenfocar la búsqueda cuando se actualicen los lotes de datos."}
                 </p>
               </section>
 
-              <section className="agency-section agency-interactions">
-                <div className="sectionTitle">
-                  <h2>Registro de interacciones</h2>
+              <section className="agency-report-section agency-report-interactions">
+                <div className="agency-report-section-heading">
+                  <h3>Registro de interacciones</h3>
                 </div>
                 <div className="interactions-grid">
                   {interactionPlaceholders.map((block) => (
@@ -248,7 +331,7 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
                 </div>
               </section>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
