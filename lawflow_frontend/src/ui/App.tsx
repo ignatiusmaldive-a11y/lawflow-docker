@@ -209,6 +209,7 @@ export function App() {
   const [view, setView] = useState<View>("General Overview");
   const [pinnedIds, setPinnedIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_PINS) : []));
   const [recentIds, setRecentIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_RECENTS) : []));
+  const [agenciasDetailActive, setAgenciasDetailActive] = useState(false);
 
   const [q, setQ] = useState("");
   const [municipality, setMunicipality] = useState<string>("Marbella");
@@ -353,6 +354,12 @@ export function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  useEffect(() => {
+    if (view !== "Agencias Polacas" && agenciasDetailActive) {
+      setAgenciasDetailActive(false);
+    }
+  }, [view, agenciasDetailActive]);
+
   // Update URL on view change
   useEffect(() => {
     if (view === "General Overview") {
@@ -480,16 +487,13 @@ export function App() {
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
-  const isFullWidthLandingView =
-    view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas";
-
   return (
     <div
-      className={`shell${isFullWidthLandingView ? " shellFull" : ""}`}
+      className="shell"
       ref={shellRef}
       style={{
         background:
-          isFullWidthLandingView
+          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
             ? defaultBg
             : (activeProject?.bg_color ?? defaultBg),
       }}
@@ -813,13 +817,13 @@ export function App() {
                 )}
 
               <div className="headerIconRow">
-                {view === "Agencias Polacas" && (
+                {view === "Agencias Polacas" && agenciasDetailActive && (
                   <button
                     className="btn btnSm ghost headerIconBtn"
-                    onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-reset"))}
-                    title="Reset filtros"
+                    onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-back"))}
+                    title="Volver al directorio"
                   >
-                    Reset
+                    ← Volver
                   </button>
                 )}
                 <button
@@ -888,7 +892,7 @@ export function App() {
           ) : view === "Informes Sectoriales" ? (
             <InformesSectorialesView />
           ) : view === "Agencias Polacas" ? (
-            <AgenciasPolacasView />
+            <AgenciasPolacasView onDetailChange={setAgenciasDetailActive} />
           ) : view === "Puerto Banus Report" ? (
             <React.Suspense fallback={<div className="card cardPad">Loading…</div>}>
               <PuertoBanusReportView />

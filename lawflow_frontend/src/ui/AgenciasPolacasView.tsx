@@ -153,9 +153,16 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
   );
 }
 
-export function AgenciasPolacasView() {
+interface AgenciasPolacasViewProps {
+  onDetailChange?: (detailMode: boolean) => void;
+}
+
+export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps = {}) {
   const [pathname, setPathname] = useState(() => window.location.pathname);
   const selectedAgencyId = useMemo(() => parseAgencyIdFromPath(pathname), [pathname]);
+  useEffect(() => {
+    onDetailChange?.(selectedAgencyId != null);
+  }, [onDetailChange, selectedAgencyId]);
 
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -209,25 +216,16 @@ export function AgenciasPolacasView() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const navigateTo = (path: string) => {
+  const navigateTo = useCallback((path: string) => {
     window.history.pushState(null, "", path);
     setPathname(path);
-  };
-
-  const resetFilters = useCallback(() => {
-    setFilter("");
-    setTypeFilter("polish");
-    setSortField("name");
-    setSortDirection("asc");
-    setLimit(25);
-    setOffset(0);
   }, []);
 
   useEffect(() => {
-    const onReset = () => resetFilters();
-    window.addEventListener("agencias-polacas-reset", onReset);
-    return () => window.removeEventListener("agencias-polacas-reset", onReset);
-  }, [resetFilters]);
+    const onBack = () => navigateTo("/agencias-polacas");
+    window.addEventListener("agencias-polacas-back", onBack);
+    return () => window.removeEventListener("agencias-polacas-back", onBack);
+  }, [navigateTo]);
 
   const updateSelectWidths = useCallback(() => {
     const updateOne = (
