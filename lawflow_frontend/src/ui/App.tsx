@@ -183,6 +183,29 @@ function QColorSafe(parts: string[]) {
   return parts.map((s) => String(s ?? "").trim()).filter(Boolean);
 }
 
+type LandingMenuItem = { label: string; hint?: string };
+type LandingMenuSection = { title: string; items: LandingMenuItem[] };
+
+const AGENCIAS_LANDING_MENU: LandingMenuSection[] = [
+  {
+    title: "Informes de marketing",
+    items: [
+      { label: "Canales principales" },
+      { label: "Tendencias de conversión" },
+    ],
+  },
+  {
+    title: "Generación de leads",
+    items: [
+      { label: "Compradores polacos" },
+      { label: "Referencias UE" },
+    ],
+  },
+  {
+    title: "Actividad de agentes",
+    items: [{ label: "Interacciones recientes" }],
+  },
+];
 
 
 export function App() {
@@ -566,44 +589,66 @@ export function App() {
                 </div>
               </div>
 
-              <div className="pinned-recent-group">
-                {pinnedProjects.length > 0 && (
-                  <div style={{ marginTop: 12 }}>
-                    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
-                      {pinnedProjects.slice(0, 4).map((p) => (
-                        <button
-                          key={p.id}
-                          className="chipRow"
-                          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-                          title={p.title}
-                        >
-                          <span className="chipDot" />
-                          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-                        </button>
-                      ))}
+              {view === "Agencias Polacas" ? (
+                <div className="agenciasLandingMenu">
+                  {AGENCIAS_LANDING_MENU.map((section) => (
+                    <div key={section.title} className="landingMenuSection">
+                      <div className="landingMenuSectionTitle">{section.title}</div>
+                      <div className="landingMenuSectionItems">
+                        {section.items.map((item) => (
+                          <button
+                            key={`${section.title}-${item.label}`}
+                            type="button"
+                            className="landingMenuItem"
+                          >
+                            <span className="landingMenuItemLabel">{item.label}</span>
+                            {item.hint && <span className="landingMenuItemHint">{item.hint}</span>}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
+              ) : (
+                <div className="pinned-recent-group">
+                  {pinnedProjects.length > 0 && (
+                    <div style={{ marginTop: 12 }}>
+                      <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Fijados</div>    <div style={{ display: "grid", gap: 6 }}>
+                        {pinnedProjects.slice(0, 4).map((p) => (
+                          <button
+                            key={p.id}
+                            className="chipRow"
+                            onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                            title={p.title}
+                          >
+                            <span className="chipDot" />
+                            <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                {recentProjects.length > 0 && (
-                  <div style={{ marginTop: 12 }}>
-                    <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
-                    <div style={{ display: "grid", gap: 6 }}>
-                      {recentProjects.slice(0, 5).map((p) => (
-                        <button
-                          key={p.id}
-                          className="chipRow"
-                          onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
-                          title={p.title}
-                        >
-                          <span className="chipDot muted" />
-                          <span className="chipText">{formatProjectLabel(p, { lang })}</span>
-                        </button>
-                      ))}
+                  {recentProjects.length > 0 && (
+                    <div style={{ marginTop: 12 }}>
+                      <div className="small" style={{ fontWeight: 950, marginBottom: 6 }}>Recientes</div>
+                      <div style={{ display: "grid", gap: 6 }}>
+                        {recentProjects.slice(0, 5).map((p) => (
+                          <button
+                            key={p.id}
+                            className="chipRow"
+                            onClick={() => { setActiveProjectId(p.id); setView("Tasks"); if (sidebarOpen) setSidebarOpen(false); }}
+                            title={p.title}
+                          >
+                            <span className="chipDot muted" />
+                            <span className="chipText">{formatProjectLabel(p, { lang })}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
