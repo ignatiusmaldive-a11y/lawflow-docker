@@ -85,13 +85,12 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div className="table-container">
         <div className="card cardPad" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button className="btn" onClick={onBack}>← Volver</button>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontWeight: 950, fontSize: 16, overflowWrap: "anywhere" }}>{agency?.name ?? (loading ? "Cargando..." : "—")}</div>
-              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Ficha de agencia</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 950, fontSize: 16, overflowWrap: "anywhere" }}>{agency?.name ?? (loading ? "Cargando..." : "—")}</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Ficha de agencia</div>
+              </div>
             </div>
-          </div>
           {agency?.website ? (
             <a href={agency.website} target="_blank" rel="noreferrer" style={{ color: "var(--muted)", textDecoration: "none", fontSize: 13, fontWeight: 850, overflowWrap: "anywhere" }}>
               {websiteLabel}
