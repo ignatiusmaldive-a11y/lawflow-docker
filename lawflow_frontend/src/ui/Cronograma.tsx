@@ -17,6 +17,13 @@ function parseDate(dateStr?: string | null) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+function formatLongEsDate(dateStr?: string | null) {
+  const d = parseDate(dateStr);
+  if (!d) return dateStr || "";
+  const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 function addDays(d: Date, days: number) {
   const next = new Date(d);
   next.setDate(next.getDate() + days);
@@ -118,7 +125,7 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
     const minDate = new Date(Math.min(...allDates.map((d) => d.getTime())));
     const maxDate = new Date(Math.max(...allDates.map((d) => d.getTime())));
     const spanDays = Math.max(1, daysBetween(minDate, maxDate) + 1);
-    const padDays = clamp(Math.round(spanDays * 0.12), 7, 60);
+    const padDays = clamp(Math.round(spanDays * 0.06), 3, 21);
 
     let start = addDays(minDate, -padDays);
     let end = addDays(maxDate, padDays);
@@ -152,7 +159,8 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
     const dayMs = 24 * 60 * 60 * 1000;
     const dayWidthPct = (dayMs / rangeMs) * 100;
     const spanDaysTotal = daysBetween(start, end) + 1;
-    const dayStep = spanDaysTotal > 120 ? 7 : spanDaysTotal > 90 ? 5 : spanDaysTotal > 60 ? 3 : spanDaysTotal > 35 ? 2 : 1;
+    const minLabelSpacingPct = 1.6;
+    const dayStep = clamp(Math.ceil(minLabelSpacingPct / Math.max(0.001, dayWidthPct)), 1, 14);
     const today = new Date();
     const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     let dayIndex = 0;
@@ -213,7 +221,6 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
         </div>
         <div className="timelineWrap">
           <div className="timeline">
-            <div className="timelineLabels" style={{ visibility: "hidden" }}></div>
             <div className="timelineHeader">
               {showToday && rangeMs > 0 && (
                 <>
@@ -235,19 +242,6 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
                   style={{ left: `${header.leftPct}%`, width: `${header.widthPct}%` }}
                 >
                   {header.label}
-                </div>
-              ))}
-            </div>
-
-            <div className="timelineLabels">
-              {rows.map((r: any) => (
-                <div key={r.id} className="card timelineLabelItem" style={{
-                  paddingLeft: r.kind === 'Milestone' ? 24 : 10,
-                  fontWeight: r.kind === 'Phase' ? 800 : 500,
-                  fontSize: '13px',
-                  color: r.type === 'fiscal' ? 'var(--warn)' : r.type === 'recurring' ? 'var(--brand2)' : 'inherit'
-                }}>
-                  {r.label}
                 </div>
               ))}
             </div>
@@ -277,24 +271,34 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
                 const endPct = clamp(((eInc.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
                 const widthPct = Math.max(0, endPct - startPct);
 
+                const barClassName = `bar${r.type === "fiscal" ? " fiscal" : r.type === "recurring" ? " recurring" : ""}`;
+
                 return (
                   <div key={r.id} className="barRow">
                     {r.kind === 'Milestone' ? (
-                      <div
-                        className="milestoneDiamond"
-                        style={{
-                          ["--x" as any]: `${endPct}%`,
-                          backgroundColor: r.type === 'fiscal' ? 'var(--warn)' : r.type === 'recurring' ? 'var(--brand2)' : 'var(--warn)'
-                        }}
-                      />
+                      <>
+                        <div
+                          className="milestoneDiamond"
+                          style={{
+                            ["--x" as any]: `${endPct}%`,
+                            backgroundColor: r.type === 'fiscal' ? 'var(--warn)' : r.type === 'recurring' ? 'var(--brand2)' : 'var(--warn)'
+                          }}
+                        />
+                        <div className="milestoneLabel" style={{ left: `${endPct}%` }}>
+                          {r.label}
+                        </div>
+                      </>
                     ) : (
                       <div
-                        className="bar"
+                        className={barClassName}
                         style={{
                           ["--start" as any]: `${startPct}%`,
                           ["--width" as any]: `${widthPct}%`,
                         }}
-                      />
+                        title={r.label}
+                      >
+                        <div className="barText">{r.label}</div>
+                      </div>
                     )}
                   </div>
                 );
@@ -311,7 +315,7 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
             <span className="pill warn">{fiscal.filter(f => f.status !== 'Paid').length} Pendientes</span>
           </div>
 	          <div style={{ overflowX: "auto" }}>
-	            <table className="table">
+	            <table className="table timelineTable">
 	              <thead>
 	                <tr>
 	                  <th>Concepto</th>
@@ -322,8 +326,8 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
 	              <tbody>
 	                {fiscal.map(f => (
 	                  <tr key={f.id}>
-	                    <td style={{ fontWeight: 950 }}>{f.obligation_type}</td>
-	                    <td>{f.due_date || f.filing_deadline}</td>
+	                    <td className="timelinePrimaryCell">{f.obligation_type}</td>
+	                    <td>{formatLongEsDate(f.due_date || f.filing_deadline)}</td>
 	                    <td>
 	                      <span className={`pill ${f.status === 'Paid' ? 'ok' : 'warn'}`}>
 	                        {f.status}
@@ -346,7 +350,7 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
           </span>
         </div>
         <div style={{ overflowX: "auto" }}>
-          <table className="table">
+          <table className="table timelineTable">
             <thead>
               <tr>
                 <th>{t("taskTableCol")}</th>
@@ -358,9 +362,9 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
             <tbody>
               {upcoming.map((t) => (
                 <tr key={t.id}>
-                  <td style={{ fontWeight: 950, whiteSpace: "normal", minWidth: "160px" }}>{t.title}</td>
+                  <td className="timelinePrimaryCell" style={{ minWidth: "160px" }}>{t.title}</td>
                   <td>{t.assignee}</td>
-                  <td>{t.due_date}</td>
+                  <td>{formatLongEsDate(t.due_date)}</td>
                   <td>{t.status}</td>
                 </tr>
               ))}

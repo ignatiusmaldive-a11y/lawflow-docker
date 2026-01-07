@@ -1088,7 +1088,7 @@ export function App() {
               </div>
 
               <div className="rightColumn">
-                {!["Timeline", "Files", "Closing Pack"].includes(view) && (
+                {!["Files", "Closing Pack"].includes(view) && (
                   <div className="card cardPad">
                     <div className="sectionTitle">
                       <h2>{t("spanishChecklist")}</h2>

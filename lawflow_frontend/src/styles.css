@@ -762,6 +762,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: color-mix(in oklab, var(--panel2) 55%, transparent);
 }
 
+.timelineTable td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.timelineTable td.timelinePrimaryCell {
+  white-space: normal;
+}
+
 .table .matterText {
   display: block;
   max-width: min(46vw, 360px);
@@ -1250,6 +1259,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   overflow-y: auto;
   scrollbar-width: none;
   /* Firefox */
+  padding: 2px 0;
 }
 
 .timelineWrap::-webkit-scrollbar {
@@ -1259,13 +1269,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .timeline {
   display: grid;
-  grid-template-columns: clamp(160px, 18vw, 210px) 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .timelineLabels {
   display: grid;
-  grid-auto-rows: 28px;
+  grid-auto-rows: 32px;
   gap: 2px;
 }
 
@@ -1274,7 +1284,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding-left: 0;
   /* Remove padding to align grid exactly with dates */
   display: grid;
-  grid-auto-rows: 28px;
+  grid-auto-rows: 32px;
   gap: 2px;
   position: relative;
   overflow: visible;
@@ -1283,13 +1293,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .timelineHeader {
   position: relative;
   border-bottom: 1px solid var(--line);
-  height: 64px;
+  border-left: 1px solid var(--line);
+  height: 72px;
   overflow: hidden;
 }
 
 .timelineHeaderItem {
   position: absolute;
-  top: 22px;
+  top: 24px;
   text-align: left;
   font-weight: 900;
   font-size: 12px;
@@ -1302,12 +1313,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .timelineDayItem {
   position: absolute;
-  top: 44px;
+  top: 50px;
   transform: translateX(-50%);
   font-size: 10px;
   font-weight: 900;
   color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.2px;
+  letter-spacing: 0px;
   pointer-events: none;
   z-index: 2;
 }
@@ -1325,7 +1336,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .todayHeaderBadge {
   position: absolute;
-  top: 0px;
+  top: 2px;
   left: 0;
   transform: translateX(-50%);
   font-size: 10px;
@@ -1350,14 +1361,30 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   position: absolute;
   left: var(--start);
   width: var(--width);
-  height: 20px;
+  height: 22px;
   min-width: 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(135deg, rgba(124, 58, 237, .85), rgba(124, 58, 237, .55));
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+.barText {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.1px;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 
 .bar.fiscal {
@@ -1365,9 +1392,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-color: rgba(245, 158, 11, 0.3);
 }
 
+.bar.fiscal .barText {
+  color: rgba(0, 0, 0, 0.9);
+  text-shadow: none;
+}
+
 .bar.recurring {
   background: linear-gradient(135deg, rgba(34, 197, 94, .85), rgba(34, 197, 94, .55));
   border-color: rgba(34, 197, 94, 0.3);
+}
+
+.bar.recurring .barText {
+  color: rgba(0, 0, 0, 0.9);
+  text-shadow: none;
 }
 
 .weekendBand {
@@ -1446,6 +1483,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transform: translate(-50%, -50%) rotate(45deg);
   border: 2px solid var(--panel);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.milestoneLabel {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(16px, -50%);
+  max-width: min(420px, 70%);
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.1px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 .checklist {
