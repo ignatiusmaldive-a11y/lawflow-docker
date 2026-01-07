@@ -945,9 +945,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .agenciasTable th:nth-child(2),
-.agenciasTable td:nth-child(2),
+.agenciasTable td:nth-child(2) {
+  padding-left: 4px;
+  padding-right: 1px;
+  font-weight: 500;
+}
+
 .agenciasTable th:nth-child(3),
-.agenciasTable td:nth-child(3),
+.agenciasTable td:nth-child(3) {
+  padding-left: 1px;
+  padding-right: 4px;
+  font-weight: 500;
+}
+
 .agenciasTable th:nth-child(4),
 .agenciasTable td:nth-child(4) {
   padding-left: 4px;
@@ -2305,24 +2315,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   margin: 0 -14px -14px -14px;
 }
 
-/* Full-width landing pages (no permanent sidebar on large screens) */
-@media (min-width: 1401px) {
-  .shell.shellFull {
-    grid-template-columns: 1fr;
-  }
-
-  .shell.shellFull .topbar,
-  .shell.shellFull .main {
-    grid-column: 1;
-  }
-
-  .shell.shellFull .sidebarWrap,
-  .shell.shellFull .sidebarTop,
-  .shell.shellFull .sidebar {
-    display: none;
-  }
-}
-
 /* Large screens - constrain main table width */
 @media (min-width: 1200px) {
   .table-container {
@@ -2333,16 +2325,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .topbar.landingTopbar .topbar-container {
     max-width: 1200px;
     margin: 0 auto;
-  }
-
-  .shell.shellFull .table-container {
-    max-width: none;
-    margin: 0;
-  }
-
-  .shell.shellFull .topbar.landingTopbar .topbar-container {
-    max-width: none;
-    margin: 0;
   }
 }
 

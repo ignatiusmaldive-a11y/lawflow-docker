@@ -361,60 +361,64 @@ export function AgenciasPolacasView() {
     );
   }
 
+  const showStats = offset === 0;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div className="table-container">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 12 }}>
-          <div className="card cardPad" style={{ minHeight: 240 }}>
-            <div style={{ fontWeight: 950, marginBottom: 2 }}>Distribución por tipo</div>
-            <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, marginBottom: 10 }}>
-              Total: {meta?.total_agencies ?? "—"} · Actualizado: {lastUpdatedLabel}
+      {showStats && (
+        <div className="table-container">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 12 }}>
+            <div className="card cardPad" style={{ minHeight: 240 }}>
+              <div style={{ fontWeight: 950, marginBottom: 2 }}>Distribución por tipo</div>
+              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, marginBottom: 10 }}>
+                Total: {meta?.total_agencies ?? "—"} · Actualizado: {lastUpdatedLabel}
+              </div>
+              <div style={{ height: 180 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={chartData} dataKey="value" nameKey="label" innerRadius={45} outerRadius={72}>
+                      {chartData.map((d) => (
+                        <Cell key={d.key} fill={d.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                {chartData.map((d) => (
+                  <span key={d.key} className="pill neutral" style={{ maxWidth: "unset" }}>
+                    {d.label}: {d.value}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div style={{ height: 180 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={chartData} dataKey="value" nameKey="label" innerRadius={45} outerRadius={72}>
-                    {chartData.map((d) => (
-                      <Cell key={d.key} fill={d.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-              {chartData.map((d) => (
-                <span key={d.key} className="pill neutral" style={{ maxWidth: "unset" }}>
-                  {d.label}: {d.value}
-                </span>
-              ))}
-            </div>
-          </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-            <div className="card cardPad">
-              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 900 }}>Total agencias</div>
-              <div style={{ fontSize: 28, fontWeight: 950 }}>{meta?.total_agencies ?? "—"}</div>
-              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Última actualización: {lastUpdatedLabel}</div>
-            </div>
-            <div className="card cardPad">
-              <div style={{ fontSize: 12, color: typeColor("polish"), fontWeight: 950 }}>Polonia</div>
-              <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("polish") }}>{typeCounts.get("polish") ?? "—"}</div>
-              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `polish`</div>
-            </div>
-            <div className="card cardPad">
-              <div style={{ fontSize: 12, color: typeColor("marbella"), fontWeight: 950 }}>Marbella</div>
-              <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("marbella") }}>{typeCounts.get("marbella") ?? "—"}</div>
-              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `marbella`</div>
-            </div>
-            <div className="card cardPad">
-              <div style={{ fontSize: 12, color: typeColor("Spain and Poland"), fontWeight: 950 }}>España + Polonia</div>
-              <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("Spain and Poland") }}>{typeCounts.get("Spain and Poland") ?? "—"}</div>
-              <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `Spain and Poland`</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+              <div className="card cardPad">
+                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 900 }}>Total agencias</div>
+                <div style={{ fontSize: 28, fontWeight: 950 }}>{meta?.total_agencies ?? "—"}</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Última actualización: {lastUpdatedLabel}</div>
+              </div>
+              <div className="card cardPad">
+                <div style={{ fontSize: 12, color: typeColor("polish"), fontWeight: 950 }}>Polonia</div>
+                <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("polish") }}>{typeCounts.get("polish") ?? "—"}</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `polish`</div>
+              </div>
+              <div className="card cardPad">
+                <div style={{ fontSize: 12, color: typeColor("marbella"), fontWeight: 950 }}>Marbella</div>
+                <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("marbella") }}>{typeCounts.get("marbella") ?? "—"}</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `marbella`</div>
+              </div>
+              <div className="card cardPad">
+                <div style={{ fontSize: 12, color: typeColor("Spain and Poland"), fontWeight: 950 }}>España + Polonia</div>
+                <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("Spain and Poland") }}>{typeCounts.get("Spain and Poland") ?? "—"}</div>
+                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `Spain and Poland`</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="table-container">
         <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -530,7 +534,7 @@ export function AgenciasPolacasView() {
                           style={{ cursor: "pointer" }}
                           className="agenciasRow"
                         >
-                          <td style={{ fontWeight: 950 }} className="agenciasCellEllipsis" title={a.name ?? ""}>{a.name ?? "—"}</td>
+                          <td className="agenciasCellEllipsis" title={a.name ?? ""}>{a.name ?? "—"}</td>
                           <td>
                             <span className={agencyTipoTagClass(a.type)}>{agencyTypeLabel(a.type)}</span>
                           </td>

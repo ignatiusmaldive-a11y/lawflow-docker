@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated prerequisites to require Python 3.11+ and Node.js 18+
 - Consolidated deployment information across multiple documents
 - Improved README structure and clarity
+- Refined the **Agencias Polacas** view: dashboard widgets now stay on the main page and the table spacing/text weight were tuned for a tighter directory layout.
 
 ### Fixed
 - Database column handling in `main.py` - added error handling for `bg_color` column creation
