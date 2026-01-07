@@ -92,9 +92,17 @@ function getAgencyTypeChartColor(type?: string | null) {
   return base ? colorMix(base, 45, "var(--panel2)") : "var(--line)";
 }
 
-function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
+type ChartTooltipPayload = {
+  payload: ChartDataItem;
+};
+
+type ChartTooltipProps = TooltipProps<number, string> & {
+  payload?: ChartTooltipPayload[];
+};
+
+function ChartTooltip({ active, payload }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
-  const data = payload[0].payload as ChartDataItem;
+  const data = payload[0].payload;
   return (
     <div
       style={{
@@ -195,34 +203,37 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
   const contactCompleteness = Math.round((contactCompleteCount / contactKeys.length) * 100);
   const coverageLabel =
     contactCompleteness >= 80 ? "Cobertura completa" : contactCompleteness >= 50 ? "Cobertura parcial" : "Cobertura limitada";
-  const pieData = [
-    { name: "Campos completos", value: contactCompleteCount, color: "#7c3aed" },
-    { name: "Pendientes", value: Math.max(0, contactKeys.length - contactCompleteCount), color: "rgba(255, 255, 255, 0.08)" },
-  ];
   const validationLabel = formatAgencyDate(agency?.url_validation_date);
   const statusLabel = agency?.website_status ? agency.website_status : "Sin validar";
-  const kpiCards = [
+
+  const summaryCards = [
     {
       label: "Cobertura de datos",
       value: `${contactCompleteness}%`,
-      detail: `${coverageLabel} · ${contactCompleteCount}/${contactKeys.length} campos`,
+      detail: `${coverageLabel} · ${contactCompleteCount}/${contactKeys.length} campos confirmados`,
     },
     {
-      label: "Sitio web",
-      value: agency?.website ? "Detectado" : "No disponible",
-      detail: websiteLabel ?? "Pendiente",
+      label: "Titular",
+      value: agency?.name || "Agencia sin nombre",
+      detail: agency?.polish_city ? `Base: ${agency.polish_city}` : "Ciudad por definir",
     },
     {
-      label: "Validación digital",
+      label: "Estado digital",
       value: statusLabel,
-      detail: `Revisado: ${validationLabel}`,
+      detail: `Última validación: ${validationLabel}`,
     },
+  ];
+
+  const contactRows = [
+    { label: "Teléfono", value: agency?.phone ?? "Pendiente" },
+    { label: "Dirección", value: agency?.address ? stripMarkdown(agency.address) : "Pendiente" },
+    { label: "Ciudad / Región", value: agency?.polish_city ?? "Pendiente" },
   ];
 
   return (
     <div className="agency-detail-root">
       <div className="table-container">
-        <div className="card cardPad agency-detail-card">
+        <div className="card cardPad agency-detail-panel">
           {error ? (
             <div className="agency-card-error">
               Error cargando la agencia: <span className="agency-card-error__muted">{error}</span>
@@ -230,154 +241,123 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
           ) : loading || !agency ? (
             <div className="agency-card-loading">Cargando...</div>
           ) : agency ? (
-            <div className="agency-report">
-              <header className="agency-report-header">
-                <div>
-                  <div className="agency-report-name">{agency.name || "Agencia sin nombre"}</div>
-                  <div className="agency-report-subtitle">Ficha de agencia</div>
-                </div>
-                <div className="agency-report-header-tags">
+            <article className="agency-detail-article">
+              <header className="agency-detail-hero">
+                <button
+                  type="button"
+                  className="agency-detail-back"
+                  onClick={onBack}
+                >
+                  ← Volver al directorio
+                </button>
+                <div className="agency-detail-hero-main">
+                  <div>
+                    <p className="agency-detail-hero-overline">Ficha de agencia</p>
+                    <h1 className="agency-detail-hero-title">{agency.name || "Agencia sin nombre"}</h1>
+                    <p className="agency-detail-hero-subtitle">
+                      {agency.polish_city ? `${agency.polish_city} · ` : ""}
+                      {agency.type ? agencyTypeLabel(agency.type) : "Sin categoría"}
+                    </p>
+                  </div>
                   {agency.type ? <span className={agencyTipoTagClass(agency.type)}>{agencyTypeLabel(agency.type)}</span> : null}
-                  {agency.website_status ? <span className="pill ok">{agency.website_status}</span> : null}
-                  {agency.cleanup_status ? <span className="pill neutral">{agency.cleanup_status}</span> : null}
+                </div>
+                <div className="agency-detail-hero-meta">
+                  <span className={`pill ${agency.website_status ? "ok" : "neutral"}`}>{statusLabel}</span>
+                  <span className="agency-detail-meta-text">Validado: {validationLabel}</span>
                 </div>
               </header>
-              <div className="agency-report-gradient" />
-              <div className="agency-report-main">
-                <div className="agency-report-main-column">
-                  <div className="agency-report-section agency-report-summary">
-                    <div className="agency-report-section-heading">
-                      <h3>Contacto y presencia</h3>
-                      <span className="agency-report-updated">Última validación: {validationLabel}</span>
-                    </div>
-                    <div className="agency-report-contact-grid">
-                      <div>
-                        <div className="agency-report-label">Teléfono</div>
-                        <div className="agency-report-value">{agency.phone ?? "—"}</div>
-                      </div>
-                      <div>
-                        <div className="agency-report-label">Dirección</div>
-                        <div className="agency-report-value">{agency.address ?? "—"}</div>
-                      </div>
-                      <div>
-                        <div className="agency-report-label">Ciudad / Región</div>
-                        <div className="agency-report-value">{agency.polish_city ?? "—"}</div>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="agency-report-section">
-                    <h3>Descripción oficial</h3>
-                    <p className="agency-report-text">
-                      {descriptionText || "Aún no se ha documentado una descripción oficial de la agencia."}
-                    </p>
+              <section className="agency-detail-summary">
+                {summaryCards.map((card) => (
+                  <div key={card.label} className="agency-detail-summary-card">
+                    <div className="agency-detail-summary-label">{card.label}</div>
+                    <div className="agency-detail-summary-value">{card.value}</div>
+                    <div className="agency-detail-summary-detail">{card.detail}</div>
                   </div>
-
-                  <div className="agency-report-section agency-report-additional">
-                    <h3>Información adicional</h3>
-                    <p className="agency-report-text">
-                      {additionalInfoText ||
-                        "Se espera un resumen contextual adicional sobre el negocio, protocolos y alcance de servicio."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="agency-report-side-column">
-                  <div className="agency-report-chart-card">
-                    <div className="agency-report-chart-heading">
-                      <span>Integridad de campos</span>
-                      <strong>
-                        {contactCompleteCount}/{contactKeys.length}
-                      </strong>
-                    </div>
-                    <div className="agency-report-chart">
-                      <ResponsiveContainer width="100%" height={180}>
-                        <PieChart>
-                          <Pie
-                            data={pieData}
-                            dataKey="value"
-                            nameKey="name"
-                            innerRadius={48}
-                            outerRadius={86}
-                            paddingAngle={6}
-                          >
-                            {pieData.map((segment) => (
-                              <Cell key={segment.name} fill={segment.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{ background: "var(--panel2)", border: "1px solid var(--line)", borderRadius: 10 }}
-                            itemStyle={{ color: "white" }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="agency-report-chart-footer">
-                      <span>{coverageLabel}</span>
-                      <span className="agency-report-chart-value">{contactCompleteness}% completos</span>
-                    </div>
-                  </div>
-
-                  <div className="agency-report-kpi-grid">
-                    {kpiCards.map((kpi) => (
-                      <div className="agency-report-kpi" key={kpi.label}>
-                        <div className="agency-report-kpi-label">{kpi.label}</div>
-                        <div className="agency-report-kpi-value">{kpi.value}</div>
-                        <div className="agency-report-kpi-detail">{kpi.detail}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <section className="agency-report-section agency-report-website">
-                <div className="agency-report-section-heading">
-                  <h3>Sitio web oficial</h3>
-                  <span className="agency-report-updated">Validado: {validationLabel}</span>
-                </div>
-                <div className="agency-report-website-link">
-                  {agency.website ? (
-                    <a href={agency.website} target="_blank" rel="noreferrer">
-                      {websiteLabel}
-                    </a>
-                  ) : (
-                    <span className="agency-muted-note">Aún no se ha detectado una URL pública.</span>
-                  )}
-                </div>
-                <p className="agency-report-note">
-                  {agency.website
-                    ? "Este enlace se abre en una nueva pestaña y el sistema revalidará el dominio automáticamente."
-                    : "Se generará un recordatorio para reenfocar la búsqueda cuando se actualicen los lotes de datos."}
-                </p>
+                ))}
               </section>
 
-              <section className="agency-report-section agency-report-interactions">
-                <div className="agency-report-section-heading">
-                  <h3>Registro de interacciones</h3>
+              <section className="agency-detail-section">
+                <div className="agency-detail-section-heading">
+                  <h3>Contacto y presencia</h3>
+                  <span className="agency-detail-updated">Información sincronizada · {validationLabel}</span>
                 </div>
-                <div className="interactions-grid">
-                  {interactionPlaceholders.map((block) => (
-                    <div className="interaction-block" key={block.channel}>
-                      <div className="interaction-block__header">
-                        <span className="interaction-block__title">{block.channel}</span>
-                        <span className="interaction-block__meta">{block.meta}</span>
-                      </div>
-                      <div className="interaction-block__entries">
-                        {block.entries.map((entry) => (
-                          <div className="interaction-entry" key={entry.title}>
-                            <div className="interaction-entry__row">
-                              <span className="interaction-entry__title">{entry.title}</span>
-                              {entry.tag ? <span className="interaction-entry__tag">{entry.tag}</span> : null}
-                            </div>
-                            <div className="interaction-entry__body">{entry.body}</div>
-                          </div>
-                        ))}
-                      </div>
+                <div className="agency-detail-contact-grid">
+                  {contactRows.map((row) => (
+                    <div key={row.label}>
+                      <div className="agency-detail-contact-label">{row.label}</div>
+                      <div className="agency-detail-contact-value">{row.value}</div>
                     </div>
                   ))}
                 </div>
               </section>
-            </div>
+
+              <section className="agency-detail-section">
+                <div className="agency-detail-section-heading">
+                  <h3>Descripción oficial</h3>
+                </div>
+                <p className="agency-detail-text">
+                  {descriptionText || "Aún no se ha documentado una descripción oficial de la agencia."}
+                </p>
+              </section>
+
+              <section className="agency-detail-section">
+                <div className="agency-detail-section-heading">
+                  <h3>Información adicional</h3>
+                </div>
+                <p className="agency-detail-text">
+                  {additionalInfoText ||
+                    "Se espera un resumen contextual adicional sobre el negocio, protocolos y alcance de servicio."}
+                </p>
+              </section>
+
+              <section className="agency-detail-section">
+                <div className="agency-detail-section-heading">
+                  <h3>Sitio web oficial</h3>
+                </div>
+                <div className="agency-detail-website-row">
+                  {agency.website ? (
+                    <a className="agency-detail-website-link" href={agency.website} target="_blank" rel="noreferrer">
+                      {websiteLabel}
+                    </a>
+                  ) : (
+                    <span className="agency-detail-muted">Aún no se ha detectado una URL pública.</span>
+                  )}
+                  <span className="agency-detail-meta-text">
+                    {agency.website
+                      ? "Enlace válido, se abrirá en una pestaña nueva."
+                      : "Se generará un recordatorio para reenfocar la búsqueda cuando se actualicen los lotes de datos."}
+                  </span>
+                </div>
+              </section>
+
+              <section className="agency-detail-section">
+                <div className="agency-detail-section-heading">
+                  <h3>Interacciones recientes</h3>
+                </div>
+                <div className="agency-detail-interactions">
+                  {interactionPlaceholders.map((block) => (
+                    <article className="interaction-card" key={block.channel}>
+                      <header className="interaction-card-header">
+                        <strong>{block.channel}</strong>
+                        <span>{block.meta}</span>
+                      </header>
+                      <div className="interaction-card-entries">
+                        {block.entries.map((entry) => (
+                          <div className="interaction-card-entry" key={entry.title}>
+                            <div className="interaction-card-entry-row">
+                              <span className="interaction-card-entry-title">{entry.title}</span>
+                              {entry.tag ? <span className="interaction-card-entry-tag">{entry.tag}</span> : null}
+                            </div>
+                            <p className="interaction-card-entry-body">{entry.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </article>
           ) : null}
         </div>
       </div>
