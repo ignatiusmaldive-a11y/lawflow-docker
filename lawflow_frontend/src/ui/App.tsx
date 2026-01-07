@@ -819,7 +819,7 @@ export function App() {
               <div className="headerIconRow">
                 {view === "Agencias Polacas" && agenciasDetailActive && (
                   <button
-                    className="btn btnSm ghost headerIconBtn"
+                    className="btn btnSm headerIconBtn"
                     onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-back"))}
                     title="Volver al directorio"
                   >
