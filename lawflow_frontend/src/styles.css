@@ -1259,14 +1259,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .timeline {
   display: grid;
-  grid-template-columns: min(250px, 25vw) 1fr;
+  grid-template-columns: clamp(160px, 18vw, 210px) 1fr;
   gap: 12px;
 }
 
 .timelineLabels {
   display: grid;
-  grid-auto-rows: 36px;
-  gap: 4px;
+  grid-auto-rows: 28px;
+  gap: 2px;
 }
 
 .timelineGrid {
@@ -1274,8 +1274,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding-left: 0;
   /* Remove padding to align grid exactly with dates */
   display: grid;
-  grid-auto-rows: 36px;
-  gap: 4px;
+  grid-auto-rows: 28px;
+  gap: 2px;
   position: relative;
   overflow: visible;
 }
@@ -1283,13 +1283,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .timelineHeader {
   position: relative;
   border-bottom: 1px solid var(--line);
-  height: 24px;
+  height: 64px;
   overflow: hidden;
 }
 
 .timelineHeaderItem {
   position: absolute;
-  top: 4px;
+  top: 22px;
   text-align: left;
   font-weight: 900;
   font-size: 12px;
@@ -1298,6 +1298,44 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   overflow: hidden;
   text-overflow: ellipsis;
   padding-right: 8px;
+}
+
+.timelineDayItem {
+  position: absolute;
+  top: 44px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.2px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.todayHeaderLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--brand2);
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.todayHeaderBadge {
+  position: absolute;
+  top: 0px;
+  left: 0;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 900;
+  background: var(--brand2);
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 21;
+  pointer-events: none;
 }
 
 .barRow {
@@ -1367,6 +1405,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.6;
 }
 
+.monthGridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 10px rgba(255, 255, 255, 0.12);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .timelineLabelItem {
   display: flex;
   align-items: center;
@@ -1378,22 +1427,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   bottom: 0;
   width: 2px;
   background: var(--brand2);
-  z-index: 5;
+  transform: translateX(-50%);
+  z-index: 20;
   pointer-events: none;
 }
 
 .todayLine::after {
-  content: "TODAY";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -110%);
-  font-size: 10px;
-  font-weight: 900;
-  background: var(--brand2);
-  color: #000;
-  padding: 2px 6px;
-  border-radius: 4px;
+  content: "";
 }
 
 .milestoneDiamond {

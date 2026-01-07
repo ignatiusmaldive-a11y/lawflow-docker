@@ -34,6 +34,7 @@ function daysUntil(dateStr?: string | null) {
 export function Timeline({ items, tasks, location, fiscal, recurring }: { items: TimelineItem[]; tasks: Task[]; location?: string; fiscal?: FiscalObligation[]; recurring?: RecurringTask[] }) {
   const { t } = useI18n();
   const [holidays, setHolidays] = React.useState<string[]>([]);
+  const todayLabel = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 
   const upcoming = useMemo(() => {
     return [...tasks]
@@ -84,7 +85,7 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
     return raw;
   }, [items, fiscal, recurring]);
 
-  const { start, end, rows, showToday, todayPct, dateHeaders, rangeMs, holidayMarkers, weekendBands } = useMemo(() => {
+  const { start, end, rows, showToday, todayPct, dateHeaders, dayHeaders, monthStarts, rangeMs, holidayMarkers, weekendBands } = useMemo(() => {
     if (allItems.length === 0) {
       const now = new Date();
       return {
@@ -94,6 +95,8 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
         showToday: true,
         todayPct: 0,
         dateHeaders: [] as any[],
+        dayHeaders: [] as any[],
+        monthStarts: [] as any[],
         rangeMs: 1,
         holidayMarkers: [] as any[],
         weekendBands: [] as any[]
@@ -144,6 +147,37 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
       cursor.setMonth(cursor.getMonth() + 1);
     }
 
+    // Day-of-month labels under the month header (downsampled so they don't jam)
+    const dayHeaders: { label: string; leftPct: number }[] = [];
+    const dayMs = 24 * 60 * 60 * 1000;
+    const dayWidthPct = (dayMs / rangeMs) * 100;
+    const spanDaysTotal = daysBetween(start, end) + 1;
+    const dayStep = spanDaysTotal > 120 ? 7 : spanDaysTotal > 90 ? 5 : spanDaysTotal > 60 ? 3 : spanDaysTotal > 35 ? 2 : 1;
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+    let dayIndex = 0;
+    for (let d = new Date(start.getFullYear(), start.getMonth(), start.getDate()); d <= end; d = addDays(d, 1)) {
+      const dayStartPct = clamp(((d.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
+      const centerPct = clamp(dayStartPct + dayWidthPct / 2, 0, 100);
+      const dKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const isMonthStart = d.getDate() === 1;
+      const isToday = dKey === todayKey;
+      if (dayIndex % dayStep === 0 || isMonthStart || isToday) {
+        dayHeaders.push({ label: String(d.getDate()), leftPct: centerPct });
+      }
+      dayIndex += 1;
+    }
+
+    // Month start lines (to help spot boundaries in the grid)
+    const monthStarts: { leftPct: number }[] = [];
+    let monthCursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    if (monthCursor < start) monthCursor = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+    while (monthCursor <= end) {
+      const leftPct = clamp(((monthCursor.getTime() - start.getTime()) / rangeMs) * 100, 0, 100);
+      if (leftPct > 0 && leftPct < 100) monthStarts.push({ leftPct });
+      monthCursor = new Date(monthCursor.getFullYear(), monthCursor.getMonth() + 1, 1);
+    }
+
     // Weekend background bands
     const weekendBands = [] as { leftPct: number; widthPct: number }[];
     const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
@@ -168,19 +202,32 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
       };
     }).filter(Boolean);
 
-    return { start, end, rows: allItems, showToday, todayPct, dateHeaders: headers, rangeMs, holidayMarkers: markers, weekendBands };
+    return { start, end, rows: allItems, showToday, todayPct, dateHeaders: headers, dayHeaders, monthStarts, rangeMs, holidayMarkers: markers, weekendBands };
   }, [allItems, tasks, holidays]);
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
       <div className="card cardPad">
         <div className="sectionTitle">
-          <h2>{t("cronograma")}</h2>
+          <h2>{t("timeline")}</h2>
         </div>
         <div className="timelineWrap">
           <div className="timeline">
             <div className="timelineLabels" style={{ visibility: "hidden" }}></div>
             <div className="timelineHeader">
+              {showToday && rangeMs > 0 && (
+                <>
+                  <div className="todayHeaderLine" style={{ left: `${todayPct}%` }} />
+                  <div className="todayHeaderBadge" style={{ left: `${todayPct}%` }}>
+                    {todayLabel}
+                  </div>
+                </>
+              )}
+              {dayHeaders.map((d: any, idx: number) => (
+                <div key={idx} className="timelineDayItem" style={{ left: `${d.leftPct}%` }}>
+                  {d.label}
+                </div>
+              ))}
               {dateHeaders.map((header, idx: number) => (
                 <div
                   key={idx}
@@ -212,6 +259,10 @@ export function Timeline({ items, tasks, location, fiscal, recurring }: { items:
 
               {holidayMarkers.map((m: any, idx: number) => (
                 <div key={idx} className="holidayGridLine" style={{ left: `${m.leftPct}%` }} />
+              ))}
+
+              {monthStarts.map((m: any, idx: number) => (
+                <div key={idx} className="monthGridLine" style={{ left: `${m.leftPct}%` }} />
               ))}
 
               {showToday && rangeMs > 0 && (
