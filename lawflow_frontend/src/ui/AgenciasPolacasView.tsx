@@ -57,6 +57,57 @@ function clampNumber(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
 }
 
+const interactionPlaceholders = [
+  {
+    channel: "Email · buzón core",
+    meta: "12 comunicaciones sincronizadas · último 07 ene 2026 · 10:12",
+    entries: [
+      {
+        title: "Ana López · 07 ene 2026 · 10:12",
+        body: "Confirmado: enviar itinerario de visita guiada a Płock antes del viernes y recopilar fotos de la oficina en Marbella para el dossier.",
+        tag: "Seguimiento"
+      },
+      {
+        title: "Aleksander Wiśniewski · 05 ene 2026 · 16:24",
+        body: "Respuesta automática señalando que el dominio actual no responde y solicitando alternativa mientras el equipo IT valida.",
+        tag: "Auto"
+      }
+    ]
+  },
+  {
+    channel: "SMS / WhatsApp · línea de campo",
+    meta: "2 hilos activos · integrado con la brigada polaca",
+    entries: [
+      {
+        title: "WhatsApp · 06 ene 2026 · 18:30",
+        body: "Mensaje recordatorio: ¿Nos podemos reunir el viernes para revisar la documentación definitiva? (Respuesta esperada antes del mediodía).",
+        tag: "Enviado"
+      },
+      {
+        title: "SMS · 04 ene 2026 · 13:11",
+        body: "Confirmación automática de recepción de expediente 732 y solicitud de referencias adicionales para la ciudad de Gdańsk.",
+        tag: "Confirmado"
+      }
+    ]
+  },
+  {
+    channel: "Notas internas y próximos pasos",
+    meta: "Registro diseñado para acciones futuras y contextos de conversación",
+    entries: [
+      {
+        title: "Revisión de ruta de legalización · 03 ene 2026 · 09:40",
+        body: "Pendiente: generar ficha comparativa entre políticas de la oficina y protocolos AMA · CRM para firma con cliente final.",
+        tag: "Urgente"
+      },
+      {
+        title: "Checklist · 02 ene 2026 · 12:22",
+        body: "Registrar estado de certificados de propiedad y enviar plantilla de due diligence antes del cierre de mes.",
+        tag: "Checklist"
+      }
+    ]
+  }
+];
+
 function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () => void }) {
   const [agency, setAgency] = useState<Agency | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,66 +131,122 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
   }, [agencyId]);
 
   const websiteLabel = agency?.website ? agency.website.replace(/^https?:\/\//, "") : null;
+  const descriptionText = agency?.description?.trim() ? stripMarkdown(agency.description) : "";
+  const additionalInfoText = agency?.additional_info?.trim() ? stripMarkdown(agency.additional_info) : "";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="agency-detail-root">
       <div className="table-container">
-        <div className="card cardPad" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 950, fontSize: 16, overflowWrap: "anywhere" }}>{agency?.name ?? (loading ? "Cargando..." : "—")}</div>
-                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Ficha de agencia</div>
-              </div>
+        <div className="card cardPad agency-header">
+          <div className="agency-header-top">
+            <div className="agency-header-title">
+              <div className="agency-header-name">{agency?.name ?? (loading ? "Cargando..." : "—")}</div>
+              <div className="agency-header-subtitle">Ficha de agencia</div>
             </div>
-          {agency?.website ? (
-            <a href={agency.website} target="_blank" rel="noreferrer" style={{ color: "var(--muted)", textDecoration: "none", fontSize: 13, fontWeight: 850, overflowWrap: "anywhere" }}>
-              {websiteLabel}
-            </a>
-          ) : null}
+            <div className="agency-header-tags">
+              {agency?.type ? <span className={agencyTipoTagClass(agency.type)}>{agencyTypeLabel(agency.type)}</span> : null}
+              {agency?.website_status ? <span className="pill ok">{agency.website_status}</span> : null}
+              {agency?.cleanup_status ? <span className="pill neutral">{agency.cleanup_status}</span> : null}
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="table-container">
-        <div className="card cardPad">
+        <div className="card cardPad agency-detail-card">
           {error ? (
-            <div style={{ padding: 16, borderRadius: 12, border: "1px solid var(--line)", background: "rgba(255,0,0,0.05)", color: "var(--text)" }}>
-              Error cargando la agencia: <span style={{ color: "var(--muted)" }}>{error}</span>
+            <div className="agency-card-error">
+              Error cargando la agencia: <span className="agency-card-error__muted">{error}</span>
             </div>
           ) : loading || !agency ? (
-            <div style={{ padding: 28, textAlign: "center", color: "var(--muted)" }}>Cargando...</div>
+            <div className="agency-card-loading">Cargando...</div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
-              <div className="card" style={{ padding: 14, border: "1px solid var(--line)", background: "var(--panel2)", borderRadius: 14 }}>
-                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 900, marginBottom: 6 }}>Contacto</div>
-                <div style={{ display: "grid", gap: 6, color: "var(--text)" }}>
-                  <div><span style={{ color: "var(--muted)", fontWeight: 800 }}>Tel:</span> {agency.phone ?? "—"}</div>
-                  <div style={{ overflowWrap: "anywhere" }}><span style={{ color: "var(--muted)", fontWeight: 800 }}>Dirección:</span> {agency.address ?? "—"}</div>
-                  <div><span style={{ color: "var(--muted)", fontWeight: 800 }}>Ciudad (PL):</span> {agency.polish_city ?? "—"}</div>
+            <div className="agency-detail-grid">
+              <section className="agency-section">
+                <div className="sectionTitle">
+                  <h2>Contacto y ubicación</h2>
                 </div>
-              </div>
+                <div className="agency-contact-list">
+                  <div>
+                    <span className="agency-contact-label">Teléfono</span>
+                    <span className="agency-contact-value">{agency.phone ?? "—"}</span>
+                  </div>
+                  <div>
+                    <span className="agency-contact-label">Dirección</span>
+                    <span className="agency-contact-value">{agency.address ?? "—"}</span>
+                  </div>
+                  <div>
+                    <span className="agency-contact-label">Ciudad / Región</span>
+                    <span className="agency-contact-value">{agency.polish_city ?? "—"}</span>
+                  </div>
+                </div>
+              </section>
 
-              <div className="card" style={{ padding: 14, border: "1px solid var(--line)", background: "var(--panel2)", borderRadius: 14 }}>
-                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 900, marginBottom: 6 }}>Estado</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                  {agency.type ? <span className={agencyTipoTagClass(agency.type)}>{agencyTypeLabel(agency.type)}</span> : null}
-                  {agency.website_status ? <span className="pill ok" style={{ maxWidth: "unset" }}>{agency.website_status}</span> : null}
-                  {agency.cleanup_status ? <span className="pill neutral" style={{ maxWidth: "unset" }}>{agency.cleanup_status}</span> : null}
+              <section className="agency-section agency-description-section">
+                <div className="sectionTitle">
+                  <h2>Descripción</h2>
                 </div>
-                <div style={{ marginTop: 10, fontSize: 12, color: "var(--muted)", fontWeight: 800, overflowWrap: "anywhere" }}>
-                  Validación URL: {agency.url_validation_date ?? "—"}
-                </div>
-              </div>
+                <p className="agency-description-text">
+                  {descriptionText || "Aún no se ha documentado una descripción oficial de la agencia."}
+                </p>
+                {additionalInfoText ? (
+                  <div>
+                    <div className="agency-description-heading">Información adicional</div>
+                    <p className="agency-description-text">{additionalInfoText}</p>
+                  </div>
+                ) : (
+                  <p className="agency-description-hint">
+                    Se espera un resumen contextual adicional sobre el negocio y los protocolos locales.
+                  </p>
+                )}
+              </section>
 
-              <div className="card" style={{ padding: 14, border: "1px solid var(--line)", background: "var(--panel2)", borderRadius: 14, gridColumn: "1 / -1" }}>
-                <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 900, marginBottom: 6 }}>Descripción</div>
-                <div style={{ color: "var(--muted)", fontSize: 13, lineHeight: "1.45", whiteSpace: "pre-wrap" }}>{agency.description?.trim() || "—"}</div>
-                {agency.additional_info?.trim() ? (
-                  <>
-                    <div style={{ marginTop: 12, fontSize: 12, color: "var(--muted)", fontWeight: 900, marginBottom: 6 }}>Información adicional</div>
-                    <div style={{ color: "var(--muted)", fontSize: 13, lineHeight: "1.45", whiteSpace: "pre-wrap" }}>{agency.additional_info}</div>
-                  </>
-                ) : null}
-              </div>
+              <section className="agency-section agency-website-section">
+                <div className="sectionTitle">
+                  <h2>Sitio web oficial</h2>
+                </div>
+                <div className="agency-website-link">
+                  {agency.website ? (
+                    <a href={agency.website} target="_blank" rel="noreferrer">
+                      {websiteLabel}
+                    </a>
+                  ) : (
+                    <span className="agency-muted-note">Aún no se ha detectado una URL pública.</span>
+                  )}
+                </div>
+                <p className="agency-website-note">
+                  {agency.website
+                    ? "El enlace abrirá en una nueva ventana y se revalidará automáticamente en el próximo chequeo."
+                    : "Se generará un recordatorio para volver a confirmar la dirección digital cuando se actualice el directorio."}
+                </p>
+              </section>
+
+              <section className="agency-section agency-interactions">
+                <div className="sectionTitle">
+                  <h2>Registro de interacciones</h2>
+                </div>
+                <div className="interactions-grid">
+                  {interactionPlaceholders.map((block) => (
+                    <div className="interaction-block" key={block.channel}>
+                      <div className="interaction-block__header">
+                        <span className="interaction-block__title">{block.channel}</span>
+                        <span className="interaction-block__meta">{block.meta}</span>
+                      </div>
+                      <div className="interaction-block__entries">
+                        {block.entries.map((entry) => (
+                          <div className="interaction-entry" key={entry.title}>
+                            <div className="interaction-entry__row">
+                              <span className="interaction-entry__title">{entry.title}</span>
+                              {entry.tag ? <span className="interaction-entry__tag">{entry.tag}</span> : null}
+                            </div>
+                            <div className="interaction-entry__body">{entry.body}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           )}
         </div>
@@ -364,13 +471,20 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {showStats && (
         <div className="table-container">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 12 }}>
-            <div className="card cardPad" style={{ minHeight: 240 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gap: 12,
+              minWidth: 0,
+            }}
+          >
+            <div className="card cardPad" style={{ minHeight: 240, minWidth: 0 }}>
               <div style={{ fontWeight: 950, marginBottom: 2 }}>Distribución por tipo</div>
               <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, marginBottom: 10 }}>
                 Total: {meta?.total_agencies ?? "—"} · Actualizado: {lastUpdatedLabel}
               </div>
-              <div style={{ height: 180 }}>
+              <div style={{ height: 180, minWidth: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={chartData} dataKey="value" nameKey="label" innerRadius={45} outerRadius={72}>
