@@ -344,9 +344,10 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
 
 interface AgenciasPolacasViewProps {
   onDetailChange?: (detailMode: boolean) => void;
+  searchValue?: string;
 }
 
-export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps = {}) {
+export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPolacasViewProps = {}) {
   const [pathname, setPathname] = useState(() => window.location.pathname);
   const selectedAgencyId = useMemo(() => parseAgencyIdFromPath(pathname), [pathname]);
   useEffect(() => {
@@ -355,15 +356,9 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
 
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [filter, setFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("polish");
+  const filterValue = searchValue ?? "";
+  const [typeFilter, setTypeFilter] = useState<string>("All");
 
-  const typeSelectRef = useRef<HTMLSelectElement>(null);
-  const sortSelectRef = useRef<HTMLSelectElement>(null);
-  const limitSelectRef = useRef<HTMLSelectElement>(null);
-  const [typeSelectWidth, setTypeSelectWidth] = useState<number | null>(null);
-  const [sortSelectWidth, setSortSelectWidth] = useState<number | null>(null);
-  const [limitSelectWidth, setLimitSelectWidth] = useState<number | null>(null);
   const paginationBarRef = useRef<HTMLDivElement>(null);
   const [paginationBarWidth, setPaginationBarWidth] = useState<number | null>(null);
 
@@ -416,39 +411,6 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
     return () => window.removeEventListener("agencias-polacas-back", onBack);
   }, [navigateTo]);
 
-  const updateSelectWidths = useCallback(() => {
-    const updateOne = (
-      el: HTMLSelectElement | null,
-      setWidth: React.Dispatch<React.SetStateAction<number | null>>,
-      { min, max }: { min: number; max: number },
-    ) => {
-      if (!el) return;
-      const text = el.selectedOptions?.[0]?.text ?? "";
-      const cs = window.getComputedStyle(el);
-      const font = cs.font || `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-      const paddingLeft = Number.parseFloat(cs.paddingLeft || "0");
-      const paddingRight = Number.parseFloat(cs.paddingRight || "0");
-      const borderLeft = Number.parseFloat(cs.borderLeftWidth || "0");
-      const borderRight = Number.parseFloat(cs.borderRightWidth || "0");
-      const measured = measureTextWidth(text, font);
-      const next = clampNumber(Math.ceil(measured + paddingLeft + paddingRight + borderLeft + borderRight + 2), min, max);
-      setWidth((prev) => (prev === next ? prev : next));
-    };
-
-    updateOne(typeSelectRef.current, setTypeSelectWidth, { min: 160, max: 520 });
-    updateOne(sortSelectRef.current, setSortSelectWidth, { min: 160, max: 520 });
-    updateOne(limitSelectRef.current, setLimitSelectWidth, { min: 120, max: 220 });
-  }, []);
-
-  useLayoutEffect(() => {
-    updateSelectWidths();
-  }, [updateSelectWidths, typeFilter, sortField, types, limit]);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateSelectWidths);
-    return () => window.removeEventListener("resize", updateSelectWidths);
-  }, [updateSelectWidths]);
-
   useLayoutEffect(() => {
     const el = paginationBarRef.current;
     if (!el) return;
@@ -468,7 +430,7 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
 
   useEffect(() => {
     setOffset(0);
-  }, [filter, typeFilter, sortField, sortDirection, limit]);
+  }, [filterValue, typeFilter, sortField, sortDirection, limit]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -476,7 +438,7 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
     setError(null);
     apiAgencies
       .list({
-        q: filter.trim() || undefined,
+        q: filterValue.trim() || undefined,
         type: typeFilter === "All" ? undefined : [typeFilter],
         sort: sortField,
         dir: sortDirection,
@@ -493,15 +455,11 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [filter, typeFilter, sortField, sortDirection, limit, offset]);
+  }, [filterValue, typeFilter, sortField, sortDirection, limit, offset]);
 
   const agencies: Agency[] = page?.items ?? [];
   const totalCount = page?.total ?? 0;
 
-  const typeOptionLabel = (t: string, fallback: string) => {
-    const n = typeCounts.get(t);
-    return n != null ? `${fallback} (${n})` : fallback;
-  };
 
   const totalPages = Math.max(1, Math.ceil((page?.total ?? 0) / limit));
   const currentPage = Math.min(totalPages, Math.floor(offset / limit) + 1);
@@ -539,6 +497,20 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
     return "var(--muted)";
   };
 
+  const handleTypeSelection = useCallback(
+    (type: string) => {
+      setTypeFilter(type);
+    },
+    [setTypeFilter],
+  );
+
+  const handleTypeCardKeyDown = (type: string) => (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleTypeSelection(type);
+    }
+  };
+
   if (selectedAgencyId != null) {
     return (
       <AgencyDetailView
@@ -572,7 +544,12 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
                   <PieChart>
                     <Pie data={chartData} dataKey="value" nameKey="label" innerRadius={45} outerRadius={72}>
                       {chartData.map((d) => (
-                        <Cell key={d.key} fill={d.color} />
+                        <Cell
+                          key={d.key}
+                          fill={d.color}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleTypeSelection(d.key)}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -589,22 +566,54 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
-              <div className="card cardPad">
+              <div
+                className="card cardPad"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleTypeSelection("All")}
+                onKeyDown={handleTypeCardKeyDown("All")}
+                aria-pressed={typeFilter === "All"}
+                style={{ cursor: "pointer" }}
+              >
                 <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 900 }}>Total agencias</div>
                 <div style={{ fontSize: 28, fontWeight: 950 }}>{meta?.total_agencies ?? "—"}</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Última actualización: {lastUpdatedLabel}</div>
               </div>
-              <div className="card cardPad">
+              <div
+                className="card cardPad"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleTypeSelection("polish")}
+                onKeyDown={handleTypeCardKeyDown("polish")}
+                aria-pressed={typeFilter === "polish"}
+                style={{ cursor: "pointer" }}
+              >
                 <div style={{ fontSize: 12, color: typeColor("polish"), fontWeight: 950 }}>Polonia</div>
                 <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("polish") }}>{typeCounts.get("polish") ?? "—"}</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `polish`</div>
               </div>
-              <div className="card cardPad">
+              <div
+                className="card cardPad"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleTypeSelection("marbella")}
+                onKeyDown={handleTypeCardKeyDown("marbella")}
+                aria-pressed={typeFilter === "marbella"}
+                style={{ cursor: "pointer" }}
+              >
                 <div style={{ fontSize: 12, color: typeColor("marbella"), fontWeight: 950 }}>Marbella</div>
                 <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("marbella") }}>{typeCounts.get("marbella") ?? "—"}</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `marbella`</div>
               </div>
-              <div className="card cardPad">
+              <div
+                className="card cardPad"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleTypeSelection("Spain and Poland")}
+                onKeyDown={handleTypeCardKeyDown("Spain and Poland")}
+                aria-pressed={typeFilter === "Spain and Poland"}
+                style={{ cursor: "pointer" }}
+              >
                 <div style={{ fontSize: 12, color: typeColor("Spain and Poland"), fontWeight: 950 }}>España + Polonia</div>
                 <div style={{ fontSize: 28, fontWeight: 950, color: typeColor("Spain and Poland") }}>{typeCounts.get("Spain and Poland") ?? "—"}</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>Tipo `Spain and Poland`</div>
@@ -615,71 +624,11 @@ export function AgenciasPolacasView({ onDetailChange }: AgenciasPolacasViewProps
       )}
 
       <div className="table-container">
-        <div className="card cardPad" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          <input
-            className="search"
-            placeholder="Buscar agencias..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            style={{ flex: "0 1 272px", minWidth: 240 }}
-          />
-
-          <select
-            ref={typeSelectRef}
-            className="select selectFit"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            style={{ flex: "0 0 auto", width: typeSelectWidth ? `${typeSelectWidth}px` : undefined, maxWidth: "100%" }}
-          >
-            <option value="polish">{typeOptionLabel("polish", "Tipo: Polonia")}</option>
-            <option value="Spain and Poland">{typeOptionLabel("Spain and Poland", "Tipo: España + Polonia")}</option>
-            <option value="All">Tipo: Todos</option>
-          </select>
-
-          <select
-            ref={sortSelectRef}
-            className="select selectFit"
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value as SortField)}
-            style={{ flex: "0 0 auto", width: sortSelectWidth ? `${sortSelectWidth}px` : undefined, maxWidth: "100%" }}
-            aria-label="Ordenar por"
-          >
-            <option value="name">Orden: Agencia</option>
-            <option value="type">Orden: Tipo</option>
-            <option value="polish_city">Orden: Ciudad (PL)</option>
-            <option value="website_status">Orden: Web</option>
-            <option value="cleanup_status">Orden: Limpieza</option>
-          </select>
-
-          <select
-            value={String(limit)}
-            onChange={(e) => setLimit(Number(e.target.value))}
-            ref={limitSelectRef}
-            className="select selectFit"
-            style={{ flex: "0 0 auto", width: limitSelectWidth ? `${limitSelectWidth}px` : undefined, maxWidth: "100%" }}
-            aria-label="Filas por página"
-          >
-            <option value="10">10 / pág</option>
-            <option value="25">25 / pág</option>
-            <option value="50">50 / pág</option>
-            <option value="100">100 / pág</option>
-          </select>
-
-          <div className="overview-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div className="project-count-label" style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800 }}>
-              {loading ? "Cargando..." : `${totalCount} agencias · Página ${currentPage}/${totalPages}`}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="table-container">
         <div className="card cardPad">
           <div style={{ fontWeight: 900, color: "var(--text)", marginBottom: 2 }}>Directorio</div>
           <div style={{ fontSize: 12, color: "var(--muted)", fontWeight: 800, marginBottom: 14 }}>
             Haz click en una fila para abrir la ficha de la agencia
           </div>
-
           {error ? (
             <div style={{ padding: 16, borderRadius: 12, border: "1px solid var(--line)", background: "rgba(255,0,0,0.05)", color: "var(--text)" }}>
               Error cargando agencias: <span style={{ color: "var(--muted)" }}>{error}</span>

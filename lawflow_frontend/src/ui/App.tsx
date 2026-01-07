@@ -233,6 +233,7 @@ export function App() {
   const [pinnedIds, setPinnedIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_PINS) : []));
   const [recentIds, setRecentIds] = useState<number[]>(() => (typeof window !== 'undefined' ? loadIds(LS_RECENTS) : []));
   const [agenciasDetailActive, setAgenciasDetailActive] = useState(false);
+  const [agenciasFilter, setAgenciasFilter] = useState("");
 
   const [q, setQ] = useState("");
   const [municipality, setMunicipality] = useState<string>("Marbella");
@@ -246,6 +247,12 @@ export function App() {
   const contentRef = useRef<HTMLDivElement>(null);
   const filesRoomRef = useRef<FilesRoomHandle | null>(null);
   const filesDragDepthRef = useRef(0);
+
+  useEffect(() => {
+    if (view !== "Agencias Polacas" && agenciasFilter !== "") {
+      setAgenciasFilter("");
+    }
+  }, [view, agenciasFilter]);
 
   const scrollMainToTop = () => {
     contentRef.current?.scrollTo({ top: 0, left: 0 });
@@ -871,6 +878,16 @@ export function App() {
                     ← Volver
                   </button>
                 )}
+                {view === "Agencias Polacas" && (
+                  <input
+                    className="search headerSearch"
+                    placeholder="Buscar agencias..."
+                    value={agenciasFilter}
+                    onChange={(e) => setAgenciasFilter(e.target.value)}
+                    aria-label="Buscar agencias"
+                    style={{ flex: "0 0 auto", minWidth: 180, maxWidth: 300, marginRight: 6 }}
+                  />
+                )}
                 <button
                   className="hamburger headerIconBtn"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -937,7 +954,7 @@ export function App() {
           ) : view === "Informes Sectoriales" ? (
             <InformesSectorialesView />
           ) : view === "Agencias Polacas" ? (
-            <AgenciasPolacasView onDetailChange={setAgenciasDetailActive} />
+            <AgenciasPolacasView onDetailChange={setAgenciasDetailActive} searchValue={agenciasFilter} />
           ) : view === "Puerto Banus Report" ? (
             <React.Suspense fallback={<div className="card cardPad">Loading…</div>}>
               <PuertoBanusReportView />
