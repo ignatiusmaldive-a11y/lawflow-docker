@@ -19,10 +19,16 @@ SYSTEM_PROMPT = (
     "Sé conciso, profesional y servicial. Responde siempre en el idioma que el usuario utilice."
 )
 
-model = genai.GenerativeModel(
-    model_name="gemini-2.5-flash",
-    system_instruction=SYSTEM_PROMPT
-)
+_INLINE_SYSTEM_PROMPT = False
+try:
+    model = genai.GenerativeModel(
+        model_name="gemini-2.5-flash",
+        system_instruction=SYSTEM_PROMPT,
+    )
+except TypeError:
+    # Older google-generativeai versions don't support `system_instruction`.
+    _INLINE_SYSTEM_PROMPT = True
+    model = genai.GenerativeModel(model_name="gemini-2.5-flash")
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -38,7 +44,10 @@ async def chat(payload: ChatIn):
         return ChatOut(response=res)
 
     try:
-        response = model.generate_content(payload.message)
+        msg = payload.message
+        if _INLINE_SYSTEM_PROMPT:
+            msg = f"{SYSTEM_PROMPT}\n\nUsuario: {payload.message}"
+        response = model.generate_content(msg)
         return ChatOut(response=response.text)
     except Exception as e:
         print(f"Gemini API Error: {e}")

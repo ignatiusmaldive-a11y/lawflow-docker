@@ -46,7 +46,6 @@ export const FilesRoom = React.forwardRef<FilesRoomHandle, {
   const [dragging, setDragging] = useState(false);
   const [selected, setSelected] = useState<FileItem | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [previewObjectUrl, setPreviewObjectUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -91,52 +90,12 @@ export const FilesRoom = React.forwardRef<FilesRoomHandle, {
 
   useEffect(() => {
     setPreviewError(null);
-    setPreviewLoading(false);
-    setPreviewObjectUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
+    const mime = selected?.mime_type ?? "";
+    const isPreviewable = mime.includes("pdf") || mime.startsWith("image/");
+    setPreviewLoading(!!selected && isPreviewable);
   }, [selected?.id]);
 
-  useEffect(() => {
-    if (!selected) return;
-    const sel = selected;
-    const mime = sel.mime_type ?? "";
-    const isPdf = mime.includes("pdf");
-    const isImage = mime.startsWith("image/");
-    if (!isPdf && !isImage) return;
-
-    let cancelled = false;
-    async function load() {
-      setPreviewLoading(true);
-      setPreviewError(null);
-      try {
-        const res = await fetch(api2.downloadFileUrl(sel.id));
-        if (!res.ok) throw new Error("preview fetch failed");
-        const blob = await res.blob();
-        const typedBlob = blob.type ? blob : new Blob([blob], { type: sel.mime_type ?? undefined });
-        const objectUrl = URL.createObjectURL(typedBlob);
-        if (cancelled) {
-          URL.revokeObjectURL(objectUrl);
-          return;
-        }
-        setPreviewObjectUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return objectUrl;
-        });
-      } catch (err) {
-        console.error(err);
-        setPreviewError((sel.mime_type ?? "").includes("pdf") ? t("pdfPreviewError") : t("imagePreviewError"));
-      } finally {
-        if (!cancelled) setPreviewLoading(false);
-      }
-    }
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selected, t]);
+  const previewUrl = selected ? api2.viewFileUrl(selected.id) : null;
 
   useEffect(() => {
     setDropboxFolder((project?.dropbox_folder ?? "").trim());
@@ -163,6 +122,10 @@ export const FilesRoom = React.forwardRef<FilesRoomHandle, {
     if (!qq) return files;
     return files.filter((f) => (f.filename + " " + (f.mime_type ?? "") + " " + f.uploader).toLowerCase().includes(qq));
   }, [files, q]);
+
+  const selectedMime = selected?.mime_type ?? "";
+  const selectedIsPdf = selectedMime.includes("pdf");
+  const selectedIsImage = selectedMime.startsWith("image/");
 
   const Table = (
     <div className="table-container">
@@ -341,7 +304,7 @@ export const FilesRoom = React.forwardRef<FilesRoomHandle, {
 	              <div className="sectionTitle">
 	                <h2 style={{ margin: 0, fontSize: 14 }}>{t("preview")}</h2>
 	                <div style={{ display: "flex", gap: 8 }}>
-	                  <a className="btn" href={previewObjectUrl ?? api2.downloadFileUrl(selected.id)} target="_blank" rel="noreferrer">
+	                  <a className="btn" href={previewUrl ?? api2.viewFileUrl(selected.id)} target="_blank" rel="noreferrer">
 	                    {t("openInNewTab")}
 	                  </a>
 	                  <a className="btn" href={api2.downloadFileUrl(selected.id)} target="_blank" rel="noreferrer">
@@ -353,25 +316,34 @@ export const FilesRoom = React.forwardRef<FilesRoomHandle, {
               {previewLoading ? <div className="small">{t("loading")}</div> : null}
               {previewError ? <div className="small" style={{ color: "rgba(239,68,68,.9)" }}>{previewError}</div> : null}
 
-              {(selected.mime_type ?? "").includes("pdf") && previewObjectUrl ? (
+              {(selected.mime_type ?? "").includes("pdf") && previewUrl ? (
                 <iframe
                   title="pdf"
-                  src={previewObjectUrl}
+                  src={previewUrl}
                   style={{ width: "100%", height: 420, border: "1px solid var(--line)", borderRadius: 14 }}
-                  onError={() => setPreviewError(t("pdfPreviewError"))}
+                  onLoad={() => setPreviewLoading(false)}
+                  onError={() => { setPreviewLoading(false); setPreviewError(t("pdfPreviewError")); }}
                 />
-              ) : (selected.mime_type ?? "").startsWith("image/") && previewObjectUrl ? (
+              ) : (selected.mime_type ?? "").startsWith("image/") && previewUrl ? (
                 <img
-                  src={previewObjectUrl}
+                  src={previewUrl}
                   alt={selected.filename}
                   style={{ width: "100%", borderRadius: 14, border: "1px solid var(--line)" }}
-                  onError={() => setPreviewError(t("imagePreviewError"))}
+                  onLoad={() => setPreviewLoading(false)}
+                  onError={() => { setPreviewLoading(false); setPreviewError(t("imagePreviewError")); }}
                 />
               ) : (
-                <div className="small">
-                  {t("filePreviewNotSupported")}
-                  <div className="small" style={{ marginTop: 8, opacity: .9 }}>{t("filePreviewTip")}</div>
-                </div>
+                selectedIsPdf || selectedIsImage ? (
+                  <div className="small">
+                    {previewError ?? (selectedIsPdf ? t("pdfPreviewError") : t("imagePreviewError"))}
+                    <div className="small" style={{ marginTop: 8, opacity: .9 }}>{t("filePreviewTip")}</div>
+                  </div>
+                ) : (
+                  <div className="small">
+                    {t("filePreviewNotSupported")}
+                    <div className="small" style={{ marginTop: 8, opacity: .9 }}>{t("filePreviewTip")}</div>
+                  </div>
+                )
               )}
             </div>
           </div>

@@ -248,3 +248,81 @@ export const api4 = {
       body: JSON.stringify({ message }),
     }),
 };
+
+// --- Agencies (separate DB-backed API) ---
+
+export type Agency = {
+  id: number;
+  name?: string | null;
+  type?: string | null;
+  website?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  description?: string | null;
+  additional_info?: string | null;
+  website_status?: string | null;
+  polish_city?: string | null;
+  cleanup_status?: string | null;
+  url_validation_date?: string | null;
+};
+
+export type AgenciesPage = {
+  items: Agency[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type AgencyFacet = {
+  value: string | null;
+  count: number;
+};
+
+export type AgenciesMeta = {
+  db_path: string;
+  db_mtime?: string | null;
+  total_agencies: number;
+};
+
+const AGENCIES_API_BASE = (import.meta as any).env?.VITE_AGENCIES_API_BASE ?? API_BASE;
+
+async function httpAgencies<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${AGENCIES_API_BASE}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export const apiAgencies = {
+  list: (args: {
+    q?: string;
+    type?: string[];
+    polish_city?: string;
+    website_status?: string;
+    cleanup_status?: string;
+    sort?: "name" | "type" | "polish_city" | "website_status" | "cleanup_status";
+    dir?: "asc" | "desc";
+    limit?: number;
+    offset?: number;
+    signal?: AbortSignal;
+  }) => {
+    const sp = new URLSearchParams();
+    if (args.q) sp.set("q", args.q);
+    if (args.type) for (const t of args.type) sp.append("type", t);
+    if (args.polish_city) sp.set("polish_city", args.polish_city);
+    if (args.website_status) sp.set("website_status", args.website_status);
+    if (args.cleanup_status) sp.set("cleanup_status", args.cleanup_status);
+    if (args.sort) sp.set("sort", args.sort);
+    if (args.dir) sp.set("dir", args.dir);
+    if (args.limit != null) sp.set("limit", String(args.limit));
+    if (args.offset != null) sp.set("offset", String(args.offset));
+    const qs = sp.toString();
+    return httpAgencies<AgenciesPage>(`/agencies${qs ? `?${qs}` : ""}`, { signal: args.signal });
+  },
+  types: () => httpAgencies<AgencyFacet[]>(`/agencies/types`),
+  polishCities: () => httpAgencies<AgencyFacet[]>(`/agencies/polish-cities`),
+  meta: () => httpAgencies<AgenciesMeta>(`/agencies/meta`),
+  get: (id: number, signal?: AbortSignal) => httpAgencies<Agency>(`/agencies/${id}`, { signal }),
+};

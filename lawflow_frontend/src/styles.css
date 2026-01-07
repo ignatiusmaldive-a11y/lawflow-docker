@@ -927,6 +927,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .agenciasTable {
   table-layout: fixed;
+  width: 100%;
 }
 
 .agenciasTable th,
@@ -936,15 +937,116 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   word-break: break-word;
 }
 
-@media (max-width: 840px) {
-  .agenciasTableWrap {
+/* Reference-like compact agencies table */
+.agenciasTable th,
+.agenciasTable td {
+  padding: 10px 8px;
+  vertical-align: middle;
+}
+
+.agenciasTable th:nth-child(2),
+.agenciasTable td:nth-child(2),
+.agenciasTable th:nth-child(3),
+.agenciasTable td:nth-child(3),
+.agenciasTable th:nth-child(4),
+.agenciasTable td:nth-child(4) {
+  padding-left: 4px;
+  padding-right: 4px;
+  font-weight: 500;
+}
+
+.agenciasTable td:nth-child(2) .agenciasTipoTag {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-weight: 500;
+}
+
+.agenciasTable td:nth-child(3) a {
+  font-weight: 500;
+}
+
+.agenciasCellEllipsis {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.agenciasTipoTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 950;
+  border: 1px solid var(--line);
+  max-width: unset;
+}
+
+.agenciasTipoTag.polish {
+  border-color: color-mix(in oklab, #007bff 45%, var(--line));
+  background: color-mix(in oklab, #007bff 16%, transparent);
+  color: color-mix(in oklab, #007bff 82%, white);
+}
+
+.agenciasTipoTag.marbella {
+  border-color: color-mix(in oklab, #28a745 45%, var(--line));
+  background: color-mix(in oklab, #28a745 16%, transparent);
+  color: color-mix(in oklab, #28a745 82%, white);
+}
+
+.agenciasTipoTag.spainPoland {
+  border-color: color-mix(in oklab, #6f42c1 45%, var(--line));
+  background: color-mix(in oklab, #6f42c1 16%, transparent);
+  color: color-mix(in oklab, #6f42c1 82%, white);
+}
+
+.agenciasTipoTag.gemini {
+  border-color: color-mix(in oklab, #fd7e14 45%, var(--line));
+  background: color-mix(in oklab, #fd7e14 16%, transparent);
+  color: color-mix(in oklab, #fd7e14 82%, white);
+}
+
+.agenciasRow:hover {
+  background: color-mix(in oklab, var(--brand2) 10%, transparent);
+}
+
+.agenciasPaginationNums {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.agenciasPaginationNums::-webkit-scrollbar {
+  height: 0;
+}
+
+.agenciasPaginationBtn {
+  width: 34px;
+  min-width: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Responsive: hide low priority columns on small screens (like DataTables responsive) */
+@media (max-width: 980px) {
+  .agenciasColAddress {
     display: none;
   }
+}
 
-  .agenciasCards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 12px;
+@media (max-width: 840px) {
+  .agenciasColDesc {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .agenciasColWebsite {
+    display: none;
   }
 }
 
@@ -2203,6 +2305,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   margin: 0 -14px -14px -14px;
 }
 
+/* Full-width landing pages (no permanent sidebar on large screens) */
+@media (min-width: 1401px) {
+  .shell.shellFull {
+    grid-template-columns: 1fr;
+  }
+
+  .shell.shellFull .topbar,
+  .shell.shellFull .main {
+    grid-column: 1;
+  }
+
+  .shell.shellFull .sidebarWrap,
+  .shell.shellFull .sidebarTop,
+  .shell.shellFull .sidebar {
+    display: none;
+  }
+}
+
 /* Large screens - constrain main table width */
 @media (min-width: 1200px) {
   .table-container {
@@ -2213,6 +2333,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .topbar.landingTopbar .topbar-container {
     max-width: 1200px;
     margin: 0 auto;
+  }
+
+  .shell.shellFull .table-container {
+    max-width: none;
+    margin: 0;
+  }
+
+  .shell.shellFull .topbar.landingTopbar .topbar-container {
+    max-width: none;
+    margin: 0;
   }
 }
 

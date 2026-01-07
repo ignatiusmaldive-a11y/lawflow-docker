@@ -288,7 +288,7 @@ export function App() {
         setView("General Overview");
       } else if (window.location.pathname === "/informes-sectoriales") {
         setView("Informes Sectoriales");
-      } else if (window.location.pathname === "/agencias-polacas") {
+      } else if (window.location.pathname === "/agencias-polacas" || window.location.pathname.startsWith("/agencias-polacas/")) {
         setView("Agencias Polacas");
       } else if (window.location.pathname === "/chat") {
         setView("Chat");
@@ -323,7 +323,7 @@ export function App() {
         setView("General Overview");
       } else if (window.location.pathname === "/informes-sectoriales") {
         setView("Informes Sectoriales");
-      } else if (window.location.pathname === "/agencias-polacas") {
+      } else if (window.location.pathname === "/agencias-polacas" || window.location.pathname.startsWith("/agencias-polacas/")) {
         setView("Agencias Polacas");
       } else if (window.location.pathname === "/chat") {
         setView("Chat");
@@ -364,7 +364,7 @@ export function App() {
         window.history.pushState(null, "", "/informes-sectoriales");
       }
     } else if (view === "Agencias Polacas") {
-      if (window.location.pathname !== "/agencias-polacas") {
+      if (!window.location.pathname.startsWith("/agencias-polacas")) {
         window.history.pushState(null, "", "/agencias-polacas");
       }
     } else if (view === "Puerto Banus Report") {
@@ -480,13 +480,16 @@ export function App() {
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
+  const isFullWidthLandingView =
+    view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas";
+
   return (
     <div
-      className="shell"
+      className={`shell${isFullWidthLandingView ? " shellFull" : ""}`}
       ref={shellRef}
       style={{
         background:
-          view === "General Overview" || view === "Informes Sectoriales" || view === "Agencias Polacas"
+          isFullWidthLandingView
             ? defaultBg
             : (activeProject?.bg_color ?? defaultBg),
       }}
@@ -699,7 +702,7 @@ export function App() {
               <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
                 <div style={{ textAlign: "left" }}>
                   <div className="brandName">Agencias Polacas</div>
-                  <div className="small">Directorio de ejemplo de agencias que trabajan compradores polacos en Costa del Sol</div>
+                  <div className="small">Directorio de agencias (datos reales) y ficha individual por agencia</div>
                 </div>
               </div>
             ) : view === "Chat" ? (
@@ -810,6 +813,15 @@ export function App() {
                 )}
 
               <div className="headerIconRow">
+                {view === "Agencias Polacas" && (
+                  <button
+                    className="btn btnSm ghost headerIconBtn"
+                    onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-reset"))}
+                    title="Reset filtros"
+                  >
+                    Reset
+                  </button>
+                )}
                 <button
                   className="hamburger headerIconBtn"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
