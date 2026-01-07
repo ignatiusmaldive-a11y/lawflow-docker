@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Agency Finder - Real Estate Agencies Database</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/colreorder/1.5.6/css/colReorder.bootstrap5.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .agency-type-marbella { background-color: #e8f5e8; }
+        .agency-type-polish { background-color: #e3f2fd; }
+        .agency-type-gemini_discovered { background-color: #fff3e0; }
+
+        .stats-card {
+            transition: transform 0.2s;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .website-link {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        .website-link:hover {
+            text-decoration: underline;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+            padding: 0.5rem 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 0.25rem 0.25rem;
+            vertical-align: middle;
+            font-size: 0.875rem;
+        }
+
+        .badge-marbella { background-color: #28a745; }
+        .badge-polish { background-color: #007bff; }
+        .badge-gemini { background-color: #fd7e14; }
+
+        /* Compact table styling */
+        .table-compact {
+            margin-bottom: 0;
+        }
+
+        .table-compact tbody tr {
+            height: 2.5rem;
+            max-height: 2.5rem;
+        }
+
+        .table-compact tbody td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 2.5rem;
+            line-height: 1.2;
+        }
+
+        .table-compact tbody td span,
+        .table-compact tbody td a,
+        .table-compact tbody td strong {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .address-cell {
+            white-space: normal !important;
+            word-break: break-word !important;
+        }
+
+        /* Custom container padding for large screens */
+        @media (min-width: 992px) {
+            .container {
+                padding-left: 35px;
+                padding-right: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-building"></i> Gemini Agency Finder
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    Real Estate Agencies Database - Costa del Sol & Poland
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Combined Statistics Dashboard and Chart -->
+        <div class="row mb-4" id="dashboard-section">
+            <!-- Chart Section -->
+            <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Agency Distribution by Type</h5>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <canvas id="agencyChart" style="max-width: 100%; max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards Section -->
+            <div class="col-12 col-lg-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-primary">Total Agencies</h5>
+                                <h2 class="card-text" id="total-agencies">0</h2>
+                                <p class="text-muted small">Last updated: <span id="last-updated"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-success">Marbella Based</h5>
+                                <h2 class="card-text" id="marbella-count">0</h2>
+                                <p class="text-muted small">Physical locations</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-info">Polish Agencies</h5>
+                                <h2 class="card-text" id="polish-count">0</h2>
+                                <p class="text-muted small">Poland-based</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-secondary">Spain and Poland</h5>
+                                <h2 class="card-text" id="spain-poland-count">0</h2>
+                                <p class="text-muted small">Dual market focus</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="card" id="table-section">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="card-title mb-0">Real Estate Agencies Database</h5>
+                        <small class="text-muted">Click any row to view full details</small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-outline-primary btn-sm me-2" id="export-csv">
+                            <i class="fas fa-download"></i> Export CSV
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="reset-filters">
+                            <i class="fas fa-undo"></i> Reset Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="agencies-table" class="table table-striped table-hover table-compact w-100">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Website</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Description</th>
+                            <th>Discovered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agencies-body">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Agency Detail View -->
+        <div class="card d-none" id="detail-section">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="card-title mb-0" id="detail-title">Agency Details</h5>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-outline-secondary btn-sm" id="back-to-table">
+                            <i class="fas fa-arrow-left"></i> Back to Table
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="detail-content">
+                <!-- Agency details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light mt-5 py-3">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                Gemini Agency Finder - Costa del Sol Real Estate Agencies Database |
+                Data sourced from AI-powered discovery and manual research |
+                <a href="https://github.com/yourusername/gemini-agency-finder" target="_blank">View on GitHub</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/colreorder/1.5.6/js/dataTables.colReorder.min.js"></script>
+    <script src="https://cdn.datatables.net/colreorder/1.5.6/js/colReorder.bootstrap5.min.js"></script>
+
+    <script>
+        let agenciesData = [];
+        let agenciesTable;
+
+        // Function to strip markdown formatting
+        function stripMarkdown(text) {
+            if (!text) return text;
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
+                .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
+                .replace(/__(.*?)__/g, '$1')      // Remove __underline__
+                .replace(/_(.*?)_/g, '$1')        // Remove _italic_
+                .replace(/~~(.*?)~~/g, '$1')      // Remove ~~strikethrough~~
+                .replace(/`(.*?)`/g, '$1')        // Remove `code`
+                .replace(/\<a href=\"([^\"]+)\" target=\"_blank\" class=\"website-link text-truncate d-inline-block\" style=\"max-width: 180px;\" title=\"(.*?)\">(.*?)<\/a>/g, '$2') // Extract title from website links
+                .replace(/<a href=\"([^\"]+)\" target=\"_blank\" class=\"text-decoration-none\">([^<]+)<\/a>/g, '$2') // Extract text from other links
+                .replace(/^#+\s*/gm, '')          // Remove headers
+                .replace(/^\*+\s*/gm, '')         // Remove list markers
+                .replace(/^\d+\.\s*/gm, '')       // Remove numbered list markers
+                .trim();
+        }
+
+        // Function to check if agency has valid website
+        function hasValidWebsite(row) {
+            // Check main website
+            if (row.website_status === 'active' || row.website_status === 'corrected') {
+                return true;
+            }
+            // Check alternatives
+            if (row.alternative_urls && Array.isArray(row.alternative_urls)) {
+                return row.alternative_urls.some(alt => alt.status === 'active' || alt.status === 'corrected');
+            }
+            return false;
+        }
+
+        // Function to get best available website URL
+        function getBestWebsite(row) {
+            // Check main website
+            if ((row.website_status === 'active' || row.website_status === 'corrected') && row.website && row.website.trim()) {
+                return row.website;
+            }
+            // Check alternatives
+            if (row.alternative_urls && Array.isArray(row.alternative_urls)) {
+                const activeAlt = row.alternative_urls.find(alt => alt.status === 'active' || alt.status === 'corrected');
+                if (activeAlt) {
+                    return activeAlt.url;
+                }
+            }
+            return null;
+        }
+
+        // Load data from JSON file
+        async function loadAgenciesData() {
+            try {
+                const response = await fetch('./agencies.json');
+                agenciesData = await response.json();
+                initializeDashboard();
+                initializeTable();
+
+                // Make statistics cards clickable (added after table initialization)
+                document.getElementById('total-agencies').closest('.stats-card').addEventListener('click', () => {
+                    agenciesTable.search('').columns().search('').draw();
+                    updateActiveFilter(null);
+                });
+                document.getElementById('marbella-count').closest('.stats-card').addEventListener('click', () => filterTableByType('marbella'));
+                document.getElementById('polish-count').closest('.stats-card').addEventListener('click', () => filterTableByType('polish'));
+                document.getElementById('spain-poland-count').closest('.stats-card').addEventListener('click', () => filterTableByType('Spain and Poland'));
+            } catch (error) {
+                console.error('Error loading agencies data:', error);
+                document.getElementById('agencies-body').innerHTML =
+                    '<tr><td colspan="7" class="text-center text-danger">Error loading data. Please check console for details.</td></tr>';
+            }
+        }
+
+        function initializeDashboard() {
+            // Calculate statistics
+            const totalAgencies = agenciesData.length;
+            const marbellaCount = agenciesData.filter(a => a.type === 'marbella').length;
+            const polishCount = agenciesData.filter(a => a.type === 'polish').length;
+            const spainPolandCount = agenciesData.filter(a =>
+                (a.type || '').toLowerCase() === 'spain and poland' ||
+                (a.type || '').toLowerCase() === 'spain&poland' ||
+                (a.type || '').toLowerCase() === 'both' ||
+                ((a.type || '').toLowerCase().includes('spain') && (a.type || '').toLowerCase().includes('poland'))
+            ).length;
+            const inactiveCount = agenciesData.filter(a => a.type === 'inactive').length;
+            const geminiCount = agenciesData.filter(a => a.type === 'gemini_discovered').length;
+
+            // Update stats cards
+            document.getElementById('total-agencies').textContent = totalAgencies.toLocaleString();
+            document.getElementById('marbella-count').textContent = marbellaCount.toLocaleString();
+            document.getElementById('polish-count').textContent = polishCount.toLocaleString();
+            document.getElementById('spain-poland-count').textContent = spainPolandCount.toLocaleString();
+
+            // Set last updated date
+            const latestDate = agenciesData
+                .map(a => new Date(a.additional_info?.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || '2025-01-01'))
+                .sort((a, b) => b - a)[0];
+            document.getElementById('last-updated').textContent = latestDate.toLocaleDateString();
+
+            // Create chart (excluding AI Discovered)
+            const ctx = document.getElementById('agencyChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Marbella Based', 'Polish Agencies', 'Spain and Poland'],
+                    datasets: [{
+                        data: [marbellaCount, polishCount, spainPolandCount],
+                        backgroundColor: ['#28a745', '#007bff', '#17a2b8'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const typeMap = ['marbella', 'polish', 'Spain and Poland'];
+                            const selectedType = typeMap[index];
+                            filterTableByType(selectedType);
+                        }
+                    }
+                }
+            });
+
+            // Make chart canvas clickable with cursor pointer
+            ctx.canvas.style.cursor = 'pointer';
+        }
+
+        function initializeTable() {
+            // Initialize DataTable with improved configuration
+            agenciesTable = $('#agencies-table').DataTable({
+                data: agenciesData,
+                colReorder: true,
+                columns: [
+                    {
+                        data: 'name',
+                        title: 'Agency Name',
+                        width: '20%',
+                        className: 'text-nowrap',
+                        render: function(data, type, row) {
+                            const displayName = data && data.length > 26 ? data.substring(0, 26) + '...' : data;
+                            return `<strong title="${data}">${displayName || 'Unknown'}</strong>`;
+                        }
+                    },
+                    {
+                        data: 'type',
+                        title: 'Type',
+                        width: '6%',
+                        className: 'text-center',
+                        render: function(data, type, row) {
+                            // Show 'inactive' only for listings with a clearly identified main URL that does not work
+                            const hasMainUrl = row.website && row.website.trim();
+                            const mainUrlNotWorking = hasMainUrl && row.website_status && !['active', 'corrected'].includes(row.website_status);
+                            const noWorkingAlternatives = !row.alternative_urls || !Array.isArray(row.alternative_urls) || !row.alternative_urls.some(alt => ['active', 'corrected'].includes(alt.status));
+
+                            let displayType = (hasMainUrl && mainUrlNotWorking && noWorkingAlternatives) ? 'inactive' : data;
+
+                            // Unify 'both' and 'spain&poland' to display as 'Spain & Poland'
+                            if (displayType && (displayType.toLowerCase() === 'both' || displayType.toLowerCase() === 'spain&poland' || displayType.toLowerCase() === 'spain and poland')) {
+                                displayType = 'Spain & Poland';
+                            }
+
+                            const badges = {
+                                'marbella': '<span class="badge bg-success badge-sm">Marbella</span>',
+                                'polish': '<span class="badge bg-primary badge-sm">Polish</span>',
+                                'Spain & Poland': '<span class="badge bg-info badge-sm">Spain & Poland</span>',
+                                'inactive': '<span class="badge bg-danger badge-sm">Inactive</span>',
+                                'gemini_discovered': '<span class="badge bg-warning badge-sm">AI</span>'
+                            };
+                            return badges[displayType] || `<span class="badge bg-secondary badge-sm">${displayType}</span>`;
+                        }
+                    },
+                    {
+                        data: 'website',
+                        title: 'Website',
+                        width: '18%',
+                        className: 'text-truncate',
+                        render: function(data, type, row) {
+                            const bestWebsite = getBestWebsite(row);
+                            if (bestWebsite && bestWebsite.trim()) {
+                                const url = bestWebsite.startsWith('http') ? bestWebsite : `https://${bestWebsite}`;
+                                const displayUrl = bestWebsite.length > 23 ? bestWebsite.substring(0, 23) + '...' : bestWebsite;
+                                return `<a href="${url}" target="_blank" class="website-link text-truncate d-inline-block" style="max-width: 180px;" title="${bestWebsite}">${displayUrl}</a>`;
+                            }
+                            return '<span class="text-muted"><em>N/A</em></span>';
+                        }
+                    },
+                    {
+                        data: 'phone',
+                        title: 'Phone',
+                        width: '8%',
+                        className: 'text-nowrap',
+                        render: function(data, type, row) {
+                            if (data && data.trim()) {
+                                // Format phone numbers - keep only essential part
+                                const cleanPhone = data.replace(/[^\d+\-\s()]/g, '');
+                                const displayPhone = data.length > 12 ? data.substring(0, 12) + '...' : data;
+                                return `<a href="tel:${cleanPhone}" class="text-decoration-none" title="${data}">${displayPhone}</a>`;
+                            }
+                            return '<span class="text-muted"><em>N/A</em></span>';
+                        }
+                    },
+                    {
+                        data: 'address',
+                        title: 'Address',
+                        width: '16%',
+                        className: 'address-cell',
+                        render: function(data, type, row) {
+                            if (data && data.trim()) {
+                                const cleanAddress = stripMarkdown(data);
+                                const displayAddress = cleanAddress.length > 28 ? cleanAddress.substring(0, 28) + '...' : cleanAddress;
+                                return `<span title="${cleanAddress}">${displayAddress}</span>`;
+                            }
+                            return '<span class="text-muted"><em>N/A</em></span>';
+                        }
+                    },
+                    {
+                        data: 'description',
+                        title: 'Description',
+                        width: '23%',
+                        render: function(data, type, row) {
+                            if (data && data.trim()) {
+                                // Reasonable truncation for compact layout
+                                const cleanDescription = stripMarkdown(data);
+                                const truncated = cleanDescription.length > 48 ? cleanDescription.substring(0, 48) + '...' : cleanDescription;
+                                return `<span title="${cleanDescription}">${truncated}</span>`;
+                            }
+                            return '<span class="text-muted"><em>N/A</em></span>';
+                        }
+                    },
+                    {
+                        data: 'additional_info',
+                        title: 'Discovered',
+                        width: '9%',
+                        className: 'text-nowrap text-center',
+                        render: function(data, type, row) {
+                            if (data && data.includes('Discovered via Gemini AI on')) {
+                                const dateMatch = data.match(/(\d{4}-\d{2}-\d{2})/);
+                                if (dateMatch) {
+                                    const date = new Date(dateMatch[1]);
+                                    return `<small class="text-muted">${date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</small>`;
+                                }
+                            }
+                            return '<span class="text-muted"><em>—</em></span>';
+                        }
+                    }
+                ],
+                responsive: {
+                    details: {
+                        type: 'column',
+                        target: 'tr'
+                    }
+                },
+                pageLength: 100,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                order: [[0, 'asc']],
+                language: {
+                    search: "🔍 Search agencies:",
+                    lengthMenu: "📊 Show _MENU_ agencies per page",
+                    info: "📄 Showing _START_ to _END_ of _TOTAL_ agencies",
+                    infoEmpty: "❌ No agencies found",
+                    infoFiltered: "(filtered from _MAX_ total agencies)",
+                    paginate: {
+                        first: "⏪ First",
+                        last: "⏩ Last",
+                        next: "▶️ Next",
+                        previous: "◀️ Previous"
+                    }
+                },
+                columnDefs: [
+                    { responsivePriority: 1, targets: 0 }, // Agency name - always visible
+                    { responsivePriority: 2, targets: 1 }, // Type - high priority
+                    { responsivePriority: 3, targets: 2 }, // Website - medium priority
+                    { responsivePriority: 4, targets: 3 }, // Phone - medium priority
+                    { responsivePriority: 5, targets: 4 }, // Address - lower priority
+                    { responsivePriority: 6, targets: 5 }, // Description - lower priority
+                    { responsivePriority: 7, targets: 6 }  // Discovery date - lowest priority
+                ],
+                initComplete: function() {
+                    // Add row styling based on agency type
+                    this.api().rows().every(function() {
+                        const data = this.data();
+                        const row = this.node();
+
+                        // Check if agency should be marked as inactive for styling
+                        const hasMainUrl = data.website && data.website.trim();
+                        const mainUrlNotWorking = hasMainUrl && data.website_status && !['active', 'corrected'].includes(data.website_status);
+                        const noWorkingAlternatives = !data.alternative_urls || !Array.isArray(data.alternative_urls) || !data.alternative_urls.some(alt => ['active', 'corrected'].includes(alt.status));
+                        const shouldBeInactive = hasMainUrl && mainUrlNotWorking && noWorkingAlternatives;
+
+                        if (shouldBeInactive) {
+                            $(row).addClass('table-danger');
+                        } else {
+                            if (data.type === 'marbella') {
+                                $(row).addClass('table-success');
+                            } else if (data.type === 'polish') {
+                                $(row).addClass('table-primary');
+                            } else if (data.type === 'Spain and Poland') {
+                                $(row).addClass('table-info');
+                            } else if (data.type === 'gemini_discovered') {
+                                $(row).addClass('table-warning');
+                            }
+                        }
+
+                        // Make rows clickable
+                        $(row).css('cursor', 'pointer').on('click', function() {
+                            const rowData = agenciesTable.row(this).data();
+                            showAgencyDetail(rowData);
+                        });
+                    });
+                }
+            });
+
+            // Export to CSV functionality
+            $('#export-csv').on('click', function() {
+                const visibleData = agenciesTable.rows({ search: 'applied' }).data().toArray();
+
+                if (visibleData.length === 0) {
+                    alert('No data to export. Please adjust your filters.');
+                    return;
+                }
+
+                const csvContent = [
+                    ['Name', 'Type', 'Website', 'Phone', 'Address', 'Description', 'Discovery Info'],
+                    ...visibleData.map(row => [
+                        row.name,
+                        row.type,
+                        row.website,
+                        row.phone,
+                        row.address,
+                        row.description,
+                        row.additional_info
+                    ])
+                ].map(row => row.map(field => `"${field || ''}"`).join(',')).join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `agencies_export_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            });
+
+            // Reset filters
+            $('#reset-filters').on('click', function() {
+                agenciesTable.search('').columns().search('').draw();
+            });
+        }
+
+        // Show agency detail view
+        function showAgencyDetail(agency) {
+            // Update detail title
+            document.getElementById('detail-title').textContent = agency.name || 'Unknown Agency';
+
+            // Create detailed content with all available information
+            const detailContent = document.getElementById('detail-content');
+
+            // Determine if agency should be marked as inactive
+            const hasMainUrl = agency.website && agency.website.trim();
+            const mainUrlNotWorking = hasMainUrl && agency.website_status && !['active', 'corrected'].includes(agency.website_status);
+            const noWorkingAlternatives = !agency.alternative_urls || !Array.isArray(agency.alternative_urls) || !agency.alternative_urls.some(alt => ['active', 'corrected'].includes(alt.status));
+            const shouldBeInactive = hasMainUrl && mainUrlNotWorking && noWorkingAlternatives;
+
+            // Get type badge class and text
+            const typeBadgeClass = shouldBeInactive ? 'bg-danger' : (
+                agency.type === 'marbella' ? 'bg-success' :
+                agency.type === 'polish' ? 'bg-primary' :
+                agency.type === 'Spain and Poland' ? 'bg-info' : 'bg-warning'
+            );
+            const typeText = shouldBeInactive ? 'Inactive' : (
+                agency.type === 'marbella' ? 'Marbella Based' :
+                agency.type === 'polish' ? 'Polish Agency' :
+                agency.type === 'Spain and Poland' ? 'Spain and Poland' : 'AI Discovered'
+            );
+
+            detailContent.innerHTML = `
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Main Agency Information -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">${agency.name || 'Unknown Agency'}</h4>
+                            </div>
+                            <div class="card-body">
+                                <!-- Type Badge -->
+                                <div class="mb-3">
+                                    <span class="badge ${typeBadgeClass} fs-6 px-3 py-2">${typeText}</span>
+                                </div>
+
+                                <!-- Website Section -->
+                                ${getBestWebsite(agency) ? `
+                                <div class="mb-3">
+                                    <h6 class="text-primary mb-2"><i class="fas fa-globe"></i> Website</h6>
+                                    <a href="${getBestWebsite(agency).startsWith('http') ? getBestWebsite(agency) : 'https://' + getBestWebsite(agency)}"
+                                       target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-external-link-alt"></i> Visit Website
+                                    </a>
+                                    <small class="text-muted ms-2">${getBestWebsite(agency)}</small>
+                                </div>
+                                ` : ''}
+
+                                <!-- Contact Information -->
+                                <div class="row">
+                                    ${agency.phone ? `
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-primary mb-2"><i class="fas fa-phone"></i> Phone</h6>
+                                        <a href="tel:${agency.phone.replace(/[^\d+\-\s()]/g, '')}"
+                                           class="text-decoration-none">
+                                            ${agency.phone}
+                                        </a>
+                                    </div>
+                                    ` : ''}
+
+                                    ${agency.address ? `
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-primary mb-2"><i class="fas fa-map-marker-alt"></i> Address</h6>
+                                        <span>${stripMarkdown(agency.address)}</span>
+                                    </div>
+                                    ` : ''}
+                                </div>
+
+                                <!-- Description -->
+                                ${agency.description ? `
+                                <div class="mb-3">
+                                    <h6 class="text-primary mb-2"><i class="fas fa-info-circle"></i> Description</h6>
+                                    <p class="mb-0">${stripMarkdown(agency.description)}</p>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Technical Details -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0"><i class="fas fa-cogs"></i> Technical Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Database ID:</strong> ${agency.id || 'N/A'}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Cleanup Status:</strong>
+                                        <span class="badge ${agency.cleanup_status === 'cleaned' ? 'bg-success' : 'bg-warning'}">${agency.cleanup_status || 'unknown'}</span>
+                                    </div>
+                                </div>
+
+                                ${agency.website_status ? `
+                                <div class="mt-3">
+                                    <strong>Main Website Status:</strong>
+                                    <span class="badge ${agency.website_status === 'active' ? 'bg-success' :
+                                                       agency.website_status === 'corrected' ? 'bg-info' :
+                                                       'bg-danger'}">${agency.website_status}</span>
+                                </div>
+                                ` : ''}
+
+                                ${agency.polish_city ? `
+                                <div class="mt-2">
+                                    <strong>Polish City:</strong> ${agency.polish_city}
+                                </div>
+                                ` : ''}
+
+                                ${agency.url_validation_date ? `
+                                <div class="mt-2">
+                                    <strong>Last URL Validation:</strong> ${new Date(agency.url_validation_date).toLocaleDateString()}
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Alternative URLs -->
+                        ${agency.alternative_urls && Array.isArray(agency.alternative_urls) && agency.alternative_urls.length > 0 ? `
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0"><i class="fas fa-link"></i> Alternative URLs</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    ${agency.alternative_urls.map(alt => `
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <a href="${alt.url.startsWith('http') ? alt.url : 'https://' + alt.url}"
+                                                   target="_blank" class="text-decoration-none">
+                                                    ${alt.url}
+                                                </a>
+                                                ${alt.reason ? `<br><small class="text-muted">${alt.reason}</small>` : ''}
+                                            </div>
+                                            <span class="badge ${alt.status === 'active' ? 'bg-success' :
+                                                               alt.status === 'corrected' ? 'bg-info' : 'bg-secondary'}">${alt.status}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <!-- Security & Redirect Information -->
+                        ${(agency.security_warnings || agency.redirect_chain) ? `
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0"><i class="fas fa-shield-alt"></i> Security & Redirect Information</h6>
+                            </div>
+                            <div class="card-body">
+                                ${agency.security_warnings ? `
+                                <div class="mb-3">
+                                    <strong>Security Warnings:</strong>
+                                    <ul class="mb-0">
+                                        ${Array.isArray(agency.security_warnings) ?
+                                            agency.security_warnings.map(warning => `<li class="text-danger">${warning}</li>`).join('') :
+                                            `<li class="text-danger">${agency.security_warnings}</li>`}
+                                    </ul>
+                                </div>
+                                ` : ''}
+
+                                ${agency.redirect_chain && Array.isArray(agency.redirect_chain) ? `
+                                <div>
+                                    <strong>Redirect Chain:</strong>
+                                    <ul class="mb-0">
+                                        ${agency.redirect_chain.map(redirect => `
+                                            <li><code>${redirect.from}</code> → <code>${redirect.to}</code>
+                                                <span class="badge bg-info">${redirect.status}</span></li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Sidebar Information -->
+                    <div class="col-lg-4">
+                        <!-- Discovery Information -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0"><i class="fas fa-search"></i> Discovery Information</h6>
+                            </div>
+                            <div class="card-body">
+                                ${agency.additional_info ? `
+                                <div class="mb-2">
+                                    <strong>Source:</strong>
+                                    <span>${agency.additional_info}</span>
+                                </div>
+                                ` : ''}
+
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-database"></i> Data from Gemini Agency Finder database<br>
+                                        <i class="fas fa-clock"></i> Last updated: ${agency.url_validation_date ?
+                                            new Date(agency.url_validation_date).toLocaleDateString() : 'Unknown'}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0"><i class="fas fa-bolt"></i> Quick Actions</h6>
+                            </div>
+                            <div class="card-body">
+                                ${getBestWebsite(agency) ? `
+                                <a href="${getBestWebsite(agency).startsWith('http') ? getBestWebsite(agency) : 'https://' + getBestWebsite(agency)}"
+                                   target="_blank" class="btn btn-primary btn-sm w-100 mb-2">
+                                    <i class="fas fa-external-link-alt"></i> Visit Website
+                                </a>
+                                ` : ''}
+
+                                ${agency.phone ? `
+                                <a href="tel:${agency.phone.replace(/[^\d+\-\s()]/g, '')}"
+                                   class="btn btn-success btn-sm w-100 mb-2">
+                                    <i class="fas fa-phone"></i> Call Now
+                                </a>
+                                ` : ''}
+
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="window.print()">
+                                    <i class="fas fa-print"></i> Print Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Show detail view, hide table and dashboard
+            document.getElementById('table-section').classList.add('d-none');
+            document.getElementById('dashboard-section').classList.add('d-none');
+            document.getElementById('detail-section').classList.remove('d-none');
+
+            // Push new history state for browser navigation
+            history.pushState(
+                { view: 'detail', agencyId: agency.id },
+                `${agency.name} - Agency Details`,
+                `#agency-${agency.id}`
+            );
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Filter table by agency type
+        function filterTableByType(type) {
+            console.log('filterTableByType called with type:', type);
+            if (!agenciesTable) {
+                console.log('agenciesTable not initialized');
+                return;
+            }
+
+            // Clear existing search
+            agenciesTable.search('').columns().search('');
+
+            // Apply type filter
+            agenciesTable.column(1).search(type).draw();
+
+            // Update UI to show active filter
+            updateActiveFilter(type);
+        }
+
+        // Update visual indicators for active filter
+        function updateActiveFilter(activeType) {
+            // Remove active class from all cards
+            document.querySelectorAll('.stats-card').forEach(card => {
+                card.classList.remove('border-primary', 'shadow');
+            });
+
+            // Add active class to corresponding card
+            const cardMap = {
+                'marbella': 'marbella-count',
+                'polish': 'polish-count',
+                'Spain and Poland': 'spain-poland-count'
+            };
+
+            if (cardMap[activeType]) {
+                const cardElement = document.getElementById(cardMap[activeType]).closest('.stats-card');
+                if (cardElement) {
+                    cardElement.classList.add('border-primary', 'shadow');
+                }
+            }
+        }
+
+        // Hide agency detail view
+        function hideAgencyDetail() {
+            // Hide detail view, show table and dashboard
+            document.getElementById('detail-section').classList.add('d-none');
+            document.getElementById('table-section').classList.remove('d-none');
+            document.getElementById('dashboard-section').classList.remove('d-none');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAgenciesData();
+
+            // Add back button event listener
+            document.getElementById('back-to-table').addEventListener('click', hideAgencyDetail);
+
+            // Make statistics cards clickable
+            document.getElementById('total-agencies').closest('.stats-card').addEventListener('click', () => {
+                agenciesTable.search('').columns().search('').draw();
+                updateActiveFilter(null);
+            });
+            document.getElementById('marbella-count').closest('.stats-card').addEventListener('click', () => filterTableByType('marbella'));
+            document.getElementById('polish-count').closest('.stats-card').addEventListener('click', () => filterTableByType('polish'));
+            document.getElementById('spain-poland-count').closest('.stats-card').addEventListener('click', () => filterTableByType('Spain and Poland'));
+
+            // Make cards appear clickable
+            document.querySelectorAll('.stats-card').forEach(card => {
+                card.style.cursor = 'pointer';
+            });
+
+            // Set up browser history navigation
+            setupBrowserNavigation();
+        });
+
+        // Set up browser history navigation
+        function setupBrowserNavigation() {
+            // Check for initial hash navigation (direct links)
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#agency-')) {
+                const agencyId = hash.replace('#agency-', '');
+                // Wait for data to load, then show agency
+                const checkDataLoaded = setInterval(() => {
+                    if (agenciesData.length > 0) {
+                        clearInterval(checkDataLoaded);
+                        const agency = agenciesData.find(a => a.id === agencyId);
+                        if (agency) {
+                            showAgencyDetail(agency);
+                        }
+                    }
+                }, 100);
+            }
+
+            // Set initial state
+            history.replaceState({ view: 'table' }, 'Agency Database', window.location.pathname);
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(event) {
+                if (event.state) {
+                    if (event.state.view === 'table') {
+                        hideAgencyDetail();
+                    } else if (event.state.view === 'detail' && event.state.agencyId) {
+                        // Find agency by ID and show detail
+                        const agency = agenciesData.find(a => a.id === event.state.agencyId);
+                        if (agency) {
+                            showAgencyDetail(agency);
+                        } else {
+                            // Agency not found, go back to table
+                            hideAgencyDetail();
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

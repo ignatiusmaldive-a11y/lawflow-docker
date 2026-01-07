@@ -21,8 +21,6 @@ import { MatterSettingsView } from "./MatterSettingsView"; // New import
 import { GeneralOverviewView } from "./GeneralOverviewView";
 import { InformesSectorialesView } from "./InformesSectorialesView";
 import { AgenciasPolacasView } from "./AgenciasPolacasView";
-import { PuertoBanusReportView } from "./PuertoBanusReportView";
-import { SectorialReportView } from "./SectorialReportView";
 import { REPORTS_DATA } from "../lib/reportData";
 import { NEWS_REPORTS_DATA } from "../lib/newsReportData";
 import { NewsReportView } from "./NewsReportView";
@@ -30,6 +28,13 @@ import { ChatView } from "./ChatView";
 import { CustomReportModal } from "./CustomReportModal";
 import { Callout } from "./components/Callout";
 import { loadUxPrefs, type UxPrefs } from "../lib/uxPrefs";
+
+const PuertoBanusReportView = React.lazy(() =>
+  import("./PuertoBanusReportView").then((m) => ({ default: m.PuertoBanusReportView }))
+);
+const SectorialReportView = React.lazy(() =>
+  import("./SectorialReportView").then((m) => ({ default: m.SectorialReportView }))
+);
 
 type View =
   | "General Overview"
@@ -873,9 +878,13 @@ export function App() {
           ) : view === "Agencias Polacas" ? (
             <AgenciasPolacasView />
           ) : view === "Puerto Banus Report" ? (
-            <PuertoBanusReportView />
+            <React.Suspense fallback={<div className="card cardPad">Loading…</div>}>
+              <PuertoBanusReportView />
+            </React.Suspense>
           ) : view === "Sectorial Report" && selectedReportSlug && REPORTS_DATA[selectedReportSlug] ? (
-            <SectorialReportView data={REPORTS_DATA[selectedReportSlug]} />
+            <React.Suspense fallback={<div className="card cardPad">Loading…</div>}>
+              <SectorialReportView data={REPORTS_DATA[selectedReportSlug]} />
+            </React.Suspense>
           ) : view === "News Report" && selectedNewsSlug && NEWS_REPORTS_DATA[selectedNewsSlug] ? (
             <NewsReportView data={NEWS_REPORTS_DATA[selectedNewsSlug]} />
           ) : view === "Chat" ? (
