@@ -875,10 +875,10 @@ export function App() {
                     onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-back"))}
                     title="Volver al directorio"
                   >
-                    ← Volver
+                    Volver
                   </button>
                 )}
-                {view === "Agencias Polacas" && (
+                {view === "Agencias Polacas" && !agenciasDetailActive && (
                   <input
                     className="search headerSearch"
                     placeholder="Buscar agencias..."
