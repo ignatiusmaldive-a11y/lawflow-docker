@@ -271,13 +271,7 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
           ) : agency ? (
             <article className="agency-detail-article">
               <header className="agency-detail-hero">
-                <button
-                  type="button"
-                  className="agency-detail-back"
-                  onClick={onBack}
-                >
-                  ← Volver al directorio
-                </button>
+
                 <div className="agency-detail-hero-main">
                   <div>
                     <p className="agency-detail-hero-overline">Ficha de agencia</p>
@@ -308,7 +302,7 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
               <section className="agency-detail-section">
                 <div className="agency-detail-section-heading">
                   <h3>Contacto y presencia</h3>
-                  <span className="agency-detail-updated">Información sincronizada · {validationLabel}</span>
+                  <span className="agency-detail-updated">Actualizado · {validationLabel}</span>
                 </div>
                 <div className="agency-detail-contact-grid">
                   {contactRows.map((row) => (

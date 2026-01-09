@@ -755,11 +755,22 @@ export function App() {
                 </nav>
               </div>
             ) : view === "Agencias Polacas" ? (
-              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
-                <div style={{ textAlign: "left" }}>
-                  <div className="brandName">Agencias Polacas</div>
-                  <div className="small">Directorio de agencias (datos reales) y ficha individual por agencia</div>
-                </div>
+              <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", alignItems: "center" }}>
+                {agenciasDetailActive ? (
+                  <button
+                    type="button"
+                    className="agency-detail-back" // Use existing style
+                    onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-back"))}
+                    title="Volver al directorio"
+                  >
+                    ← Volver al directorio
+                  </button>
+                ) : (
+                  <div style={{ textAlign: "left" }}>
+                    <div className="brandName">Agencias Polacas</div>
+                    <div className="small">Directorio de agencias (datos reales)</div>
+                  </div>
+                )}
               </div>
             ) : view === "Chat" ? (
               <div style={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: 4 }}>
@@ -869,15 +880,7 @@ export function App() {
                 )}
 
               <div className="headerIconRow">
-                {view === "Agencias Polacas" && agenciasDetailActive && (
-                  <button
-                    className="btn btnSm headerIconBtn"
-                    onClick={() => window.dispatchEvent(new CustomEvent("agencias-polacas-back"))}
-                    title="Volver al directorio"
-                  >
-                    Volver
-                  </button>
-                )}
+
                 {view === "Agencias Polacas" && !agenciasDetailActive && (
                   <input
                     className="search headerSearch"
