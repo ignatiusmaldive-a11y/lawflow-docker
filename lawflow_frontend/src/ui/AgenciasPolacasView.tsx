@@ -170,6 +170,34 @@ const interactionPlaceholders = [
   }
 ];
 
+function MarketingCell() {
+  const [email, setEmail] = useState(false);
+  const [sms, setSms] = useState(false);
+  
+  return (
+    <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
+      <button 
+        type="button" 
+        className={`btn btnSm ${email ? 'primary' : 'neutral'}`} 
+        onClick={() => setEmail(!email)} 
+        title="Contacted via Email"
+        style={{ padding: '4px 8px' }}
+      >
+        <i className="fas fa-envelope"></i>
+      </button>
+      <button 
+        type="button" 
+        className={`btn btnSm ${sms ? 'ok' : 'neutral'}`} 
+        onClick={() => setSms(!sms)} 
+        title="Contacted via SMS/WhatsApp"
+        style={{ padding: '4px 8px' }}
+      >
+        <i className="fab fa-whatsapp"></i>
+      </button>
+    </div>
+  );
+}
+
 function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () => void }) {
   const [agency, setAgency] = useState<Agency | null>(null);
   const [loading, setLoading] = useState(false);
@@ -696,11 +724,13 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
               <div className="agenciasTableWrap">
                 <table className="agenciasTable" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
                   <colgroup>
-                    <col style={{ width: "34%" }} />
-                    <col style={{ width: "14%" }} />
-                    <col className="agenciasColWebsite" style={{ width: "22%" }} />
-                    <col style={{ width: "14%" }} />
-                    <col className="agenciasColAddress" style={{ width: "16%" }} />
+                    <col style={{ width: "30%" }} />
+                    <col style={{ width: "10%" }} />
+                    <col style={{ width: "5%" }} />
+                    <col style={{ width: "5%" }} />
+                    <col style={{ width: "5%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "10%" }} />
                   </colgroup>
                   <thead>
                     <tr>
@@ -719,15 +749,26 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
                         Agencia{sortField === "name" ? (sortDirection === "asc" ? " ▲" : " ▼") : ""}
                       </th>
                       <th style={{ textAlign: "left" }}>Tipo</th>
-                      <th className="agenciasColWebsite" style={{ textAlign: "left" }}>Web</th>
-                      <th style={{ textAlign: "left" }}>Tel</th>
-                      <th className="agenciasColAddress" style={{ textAlign: "left" }}>Dirección</th>
+                      <th style={{ textAlign: "center" }} title="Website"><i className="fas fa-globe"></i></th>
+                      <th style={{ textAlign: "center" }} title="Phone"><i className="fas fa-phone"></i></th>
+                      <th style={{ textAlign: "center" }} title="Address"><i className="fas fa-map-marker-alt"></i></th>
+                      <th style={{ textAlign: "center" }}>Marketing</th>
+                      <th style={{ textAlign: "center" }}>Rank</th>
                     </tr>
                   </thead>
                   <tbody>
                     {agencies.map((a) => {
-                      const websiteLabel = a.website ? a.website.replace(/^https?:\/\//, "") : "—";
                       const cleanAddress = a.address ? stripMarkdown(a.address) : "";
+                      
+                      let score = 0;
+                      if (a.website) score++;
+                      if (a.phone) score++;
+                      if (a.address) score++;
+                      
+                      const rankStyle = score === 3 ? { backgroundColor: '#d1e7dd', color: '#0f5132' } : 
+                                        score === 2 ? { backgroundColor: '#fff3cd', color: '#664d03' } : 
+                                        { backgroundColor: '#f8d7da', color: '#842029' };
+
                       return (
                         <tr
                           key={a.id}
@@ -739,23 +780,55 @@ export function AgenciasPolacasView({ onDetailChange, searchValue }: AgenciasPol
                           <td>
                             <span className={agencyTipoTagClass(a.type)}>{agencyTypeLabel(a.type)}</span>
                           </td>
-                          <td className="agenciasColWebsite agenciasCellEllipsis" title={a.website ?? ""}>
+                          <td style={{ textAlign: "center", padding: '10px 4px' }}>
                             {a.website ? (
                               <a
                                 href={a.website}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                style={{ color: "var(--muted)", textDecoration: "none" }}
+                                style={{ textDecoration: "none" }}
                               >
-                                {websiteLabel}
+                                <span style={{ border: '1px solid #28a745', borderRadius: '50%', width: '22px', height: '22px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <i className="fas fa-check" style={{ color: '#28a745', fontSize: '12px' }}></i>
+                                </span>
                               </a>
                             ) : (
-                              "—"
+                              <i className="fas fa-times-circle" style={{ color: 'var(--muted)' }}></i>
                             )}
                           </td>
-                          <td className="agenciasCellEllipsis" title={a.phone ?? ""}>{a.phone ?? "—"}</td>
-                          <td className="agenciasColAddress agenciasCellEllipsis" title={cleanAddress}>{cleanAddress || "—"}</td>
+                          <td style={{ textAlign: "center", padding: '10px 4px' }}>
+                             {a.phone ? (
+                                <span style={{ border: '1px solid #28a745', borderRadius: '50%', width: '22px', height: '22px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <i className="fas fa-check" style={{ color: '#28a745', fontSize: '12px' }} title={a.phone ?? ""}></i>
+                                </span>
+                             ) : (
+                                <i className="fas fa-times-circle" style={{ color: 'var(--muted)' }}></i>
+                             )}
+                          </td>
+                          <td style={{ textAlign: "center", padding: '10px 4px' }}>
+                             {a.address ? (
+                                <span style={{ border: '1px solid #28a45', borderRadius: '50%', width: '22px', height: '22px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <i className="fas fa-check" style={{ color: '#28a745', fontSize: '12px' }} title={cleanAddress}></i>
+                                </span>
+                             ) : (
+                                <i className="fas fa-times-circle" style={{ color: 'var(--muted)' }}></i>
+                             )}
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <MarketingCell />
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <span style={{ 
+                              padding: '2px 8px', 
+                              borderRadius: 12, 
+                              fontWeight: 600, 
+                              fontSize: 12,
+                              ...rankStyle
+                            }}>
+                              {score}/3
+                            </span>
+                          </td>
                         </tr>
                       );
                     })}
