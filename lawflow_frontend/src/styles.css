@@ -1115,11 +1115,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: 3px;
 }
 
-.writerReportWrap {
-  width: 100%;
-  max-width: 980px;
-  margin: 0 auto;
-}
+
 
 .writerReportArticle {
   padding: 8px 0 24px;

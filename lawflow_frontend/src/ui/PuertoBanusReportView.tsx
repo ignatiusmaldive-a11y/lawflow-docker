@@ -66,7 +66,7 @@ export function PuertoBanusReportView() {
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
+        <div className="table-container" style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
             {/* Header Actions */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button className="btn ok" onClick={downloadPDF} style={{ display: "flex", alignItems: "center", gap: 8 }}>

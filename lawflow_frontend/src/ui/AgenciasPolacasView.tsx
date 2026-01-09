@@ -271,7 +271,9 @@ function AgencyDetailView({ agencyId, onBack }: { agencyId: number; onBack: () =
           ) : agency ? (
             <article className="agency-detail-article">
               <header className="agency-detail-hero">
-
+                <div style={{ marginBottom: 12, fontWeight: 900, color: "var(--muted)", fontSize: 13 }}>
+                  Directorio de agencias (datos reales)
+                </div>
                 <div className="agency-detail-hero-main">
                   <div>
                     <p className="agency-detail-hero-overline">Ficha de agencia</p>

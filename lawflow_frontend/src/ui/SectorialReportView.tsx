@@ -41,7 +41,7 @@ export function SectorialReportView({ data }: { data: ReportData }) {
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
+        <div className="table-container" style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
             {/* Header Actions */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button className="btn ok" onClick={downloadPDF} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -54,7 +54,7 @@ export function SectorialReportView({ data }: { data: ReportData }) {
                 background: "var(--card-bg)",
                 borderRadius: "16px",
                 border: "1px solid var(--line)",
-                padding: "40px",
+                padding: "24px 0",
                 color: "var(--text)"
             }}>
                 {/* Page 1: Resumen & Contexto */}

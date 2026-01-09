@@ -9,7 +9,7 @@ export function NewsReportView({ data }: { data: NewsReportData }) {
       .filter(Boolean);
 
   return (
-    <div className="writerReportWrap">
+    <div className="table-container">
       <article className="writerReportArticle">
         <div className="writerReportMeta writerReportMetaTight">
           <span className="pill warn">Noticias 2025</span>
@@ -88,3 +88,4 @@ export function NewsReportView({ data }: { data: NewsReportData }) {
     </div>
   );
 }
+
