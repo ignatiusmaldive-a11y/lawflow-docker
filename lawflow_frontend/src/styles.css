@@ -2544,7 +2544,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 @media (max-width: 1040px) {
-.project-count-label {
+  .project-count-label {
     display: none;
   }
 }
